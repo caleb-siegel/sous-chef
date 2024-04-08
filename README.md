@@ -7,9 +7,5 @@ For the frontend
 - Add roboto font to project by typing "npm install @fontsource/roboto"
 - install icons by typing "npm install @mui/icons-material"
 
-For the backend
-- run "pipenv install"
-- activate the local environment by running "pipenv shell"
-
 Link to ERD:
 https://miro.com/app/board/uXjVKZjGWME=/
