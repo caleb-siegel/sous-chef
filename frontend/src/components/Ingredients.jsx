@@ -7,8 +7,7 @@ import FormLabel from '@mui/material/FormLabel';
 import { MenuItem, Paper, TextField } from '@mui/material';
 import Select from '@mui/material/Select';
 
-function Ingredients() {
-    const [ingredients, setIngredients] = useState([])
+function Ingredients({ addIngredient }) {
 
     return (
         <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px'}}>
@@ -17,7 +16,7 @@ function Ingredients() {
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 label="Measurement Unit"
-                value={ingredients}
+                value={addIngredient}
             >
                 <MenuItem value="Tsp">Tsp</MenuItem>
                 <MenuItem value="Tsp">Tbsp</MenuItem>

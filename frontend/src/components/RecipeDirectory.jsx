@@ -13,9 +13,13 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useOutletContext } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import Divider from '@mui/material/Divider';
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-
+import BottomNavigation from "@mui/material/BottomNavigation";
+import BottomNavigationAction from "@mui/material/BottomNavigationAction";
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+import PersonIcon from '@mui/icons-material/Person';
+import UserRecipeTagsPopover from "./UserRecipeTagsPopover";
+import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
@@ -70,7 +74,11 @@ function RecipeDirectory() {
         interestRecipesToggleButtonVariant = "contained"
         notReorderRecipesToggleButtonVariant = "contained"
         recipelist = recipes.filter(recipe => {
-            return recipe.user_recipes.some(userRecipe => userRecipe.user_id === user.id);
+            return (
+                recipe.user_recipes.some(userRecipe => userRecipe.user_id === user.id)
+                &&
+                recipe.user_recipe_tags.every(userRecipe => userRecipe.user_tag.name !== "not a reorder")    
+            )
         })
     } else if (toggleRecipes === "interest") {
         allRecipesToggleButtonVariant = "contained"
@@ -208,7 +216,7 @@ function RecipeDirectory() {
             });
         } else {
             const userRecipeIdToRemove = userRecipes.find(userRecipe => userRecipe.recipe_id === recipeId).id;
-    console.log(userRecipeIdToRemove)
+
             fetch(`/api/userrecipes/${userRecipeIdToRemove}`, {
                 method: "DELETE",
             })
@@ -222,14 +230,52 @@ function RecipeDirectory() {
         }
     };
 
-    const [showAddUserRecipe, setShowAddUserRecipe] = useState(null)
-    const handleAddUserTagsClick = (event) => {
-        setShowAddUserRecipe(event.currentTarget)
+    // const [showAddUserRecipe, setShowAddUserRecipe] = useState(null);
+    // const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+
+    // const handleAddUserTagsClick = (event) => {
+    //     setShowAddUserRecipe(event.currentTarget)
+    //     setSelectedRecipeId(recipeId);
+    // };
+    const [value, setValue] = useState(0);
+
+    // const handleCloseUserRecipeTags = (recipeIdTag, userTagId) => {
+    //     console.log(`this is the recipe id inside the function: ${recipeIdTag}`)
+    //     setShowAddUserRecipe(null);
+    //     if (userTagId !== null) {
+    //         fetch('/api/userrecipetags', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 user_id: user.id,
+    //                 recipe_id: recipeIdTag,
+    //                 user_tag_id: userTagId,
+    //             }),
+    //         })
+    //         .then((response) => response.json())
+    //         .then(response => {
+    //             console.log('User tag posted successfully:', response.data);
+    //         })
+    //         .catch(error => {
+    //             console.error('Error posting user tag:', error);
+    //         });
+    //     };
+    // }
+    
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [tagSelect, setTagSelect] = useState("")
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
     };
 
-    const handleCloseUserRecipeTags = (recipeIdTag, userTagId) => {
-        console.log(`this is the recipe id inside the function: ${recipeIdTag}`)
-        setShowAddUserRecipe(null);
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleTagSelect = (recipeIdTag, userTagId) => {
         if (userTagId !== null) {
             fetch('/api/userrecipetags', {
                 method: 'POST',
@@ -245,24 +291,26 @@ function RecipeDirectory() {
             .then((response) => response.json())
             .then(response => {
                 console.log('User tag posted successfully:', response.data);
-                console.log(`this is the user id: ${user.id}`);
-                console.log(`this is the recipe id: ${recipeIdTag}`);
-                console.log(`this is the user tag id: ${userTagId}`);
             })
             .catch(error => {
                 console.error('Error posting user tag:', error);
             });
-        };
-    }
+        };        handleClose();
+    };
+
+    const open = Boolean(anchorEl);
 
     return (
         <Container>
-            <Button variant={variantAddRecipe} color="primary" size="small" startIcon={startIconAddRecipe} value={addRecipe} onClick={(event) => handleAddRecipe(event)}>{addRecipeButtonText}</Button>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <h1>Recipe Directory</h1>
+                <Button variant={variantAddRecipe} color="primary" size="small" startIcon={startIconAddRecipe} value={addRecipe} onClick={(event) => handleAddRecipe(event)}>{addRecipeButtonText}</Button>
+            </div>
             {addRecipe &&
                 <AddRecipe recipes={recipes} setRecipes={setRecipes} handleAddRecipe={handleAddRecipe} tags={tags}/>
             }
-
-            <h1>Recipe Directory</h1>
+            <br/>
             <Button variant={variantFilter} color="primary" size="small" startIcon={<FilterAltIcon />} value={addFilter} onClick={(event) => handleAddFilter(event)}>{filterButtonText}</Button>
             <br />
             {addFilter &&
@@ -274,6 +322,21 @@ function RecipeDirectory() {
                 { user && <Button variant={yourRecipesToggleButtonVariant} color="primary" size="small" value="yourrecipes" onClick={(event) => handleToggleRecipes(event.target.value)}>Your Recipes</Button>}
                 { user && <Button variant={interestRecipesToggleButtonVariant} color="primary" size="small" value="interest" onClick={(event) => handleToggleRecipes(event.target.value)}>Interest</Button>}
                 { user && <Button variant={notReorderRecipesToggleButtonVariant} color="primary" size="small" value="notreorder" onClick={(event) => handleToggleRecipes(event.target.value)}>Not Reorders</Button>}
+            </Container>
+            <br/>
+            <Container>
+                <BottomNavigation
+                    showLabels
+                    value={value}
+                    onChange={(event, newValue) => {
+                        setValue(newValue);
+                    }}
+                >
+                    <BottomNavigationAction label="All Recipes" icon={<AddIcon />} onClick={(event) => handleToggleRecipes("allrecipes")}/>
+                    <BottomNavigationAction label="Your Recipes" icon={<PersonIcon />} onClick={(event) => handleToggleRecipes("yourrecipes")}/>
+                    <BottomNavigationAction label="Interests" icon={<ThumbUpOffAltIcon />} onClick={(event) => handleToggleRecipes("interest")}/>
+                    <BottomNavigationAction label="Not Reorder" icon={<ThumbDownOffAltIcon />} onClick={(event) => handleToggleRecipes("notreorder")}/>
+                </BottomNavigation>
             </Container>
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {filteredRecipes.map((recipe) => (
@@ -314,22 +377,7 @@ function RecipeDirectory() {
                                 return <Chip key={user_recipe_tag.id} size="small" label={user_recipe_tag.user_tag.name} color="secondary" sx={{ margin: '1px'}}/>
                             }
                         })}
-                        {user && 
-                            <div>
-                                <Chip size="small" label="+" color="secondary" variant="outlined" onClick={handleAddUserTagsClick}/>
-                                {/* <Menu
-                                    anchorEl={showAddUserRecipe}
-                                    open={Boolean(showAddUserRecipe)}
-                                    onClose={handleCloseUserRecipeTags}
-                                >
-                                    {userTags.map(userTag => {
-                                        console.log(`this is the recipe.id inside the chip: ${recipe.id}`)
-                                        return <MenuItem key={userTag.id} onClick={() => handleCloseUserRecipeTags(recipe.id, userTag.id)}>{userTag.name}</MenuItem>
-                                    })}
-                                </Menu> */}
-                            </div>
-                            
-                        }
+                        {user && <UserRecipeTagsPopover recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
                         {/* // <CardContent>
                         // <Typography variant="body2" color="text.secondary">
                         //     This impressive paella is a perfect party dish and a fun meal to cook

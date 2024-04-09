@@ -57,7 +57,7 @@ class User_Recipe(db.Model, SerializerMixin):
 class User_Recipe_Tag(db.Model, SerializerMixin):
     __tablename__ = "user_recipe_tag"
     
-    serialize_rules = ["-user.user_recipe_tags", "-recipe.user_recipe_tags", "-user_tag.user_recipe_tags"]
+    serialize_rules = ["-user", "-recipe.user_recipe_tags", "-user_tag.user_recipe_tags","-recipe.user_recipes"]
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
