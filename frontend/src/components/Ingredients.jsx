@@ -1,32 +1,61 @@
-import React, { useState } from 'react'
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import { MenuItem, Paper, TextField } from '@mui/material';
-import Select from '@mui/material/Select';
+import React from 'react';
+import { Button, MenuItem, Paper, TextField, Select } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
-function Ingredients({ addIngredient }) {
+function Ingredients({ index, ingredients, setIngredients }) {
+    
+    const handleQuantityChange = (event) => {
+        const newIngredients = [...ingredients];
+        newIngredients[index].quantity = event.target.value;
+        setIngredients(newIngredients);
+    };
+
+    const handleUnitChange = (event) => {
+        const newIngredients = [...ingredients];
+        newIngredients[index].unit = event.target.value;
+        setIngredients(newIngredients);
+    };
+
+    const handleIngredientChange = (event) => {
+        const newIngredients = [...ingredients];
+        newIngredients[index].name = event.target.value;
+        setIngredients(newIngredients);
+    };
+    
+    console.log(ingredients)
 
     return (
-        <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px'}}>
-            <TextField id="outlined-basic" label="Quantity" variant="standard" type="number"/>
+        <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px', margin: '10px 0' }}>
+            <TextField
+                id={`quantity-${index}`}
+                label="Quantity"
+                variant="standard"
+                type="number"
+                value={ingredients[index].quantity}
+                onChange={(event) => handleQuantityChange(event, index)}
+            />
             <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+                labelId={`unit-label-${index}`}
+                id={`unit-${index}`}
                 label="Measurement Unit"
-                value={addIngredient}
+                value={ingredients[index].unit}
+                onChange={(event) => handleUnitChange(event, index)}
             >
                 <MenuItem value="Tsp">Tsp</MenuItem>
-                <MenuItem value="Tsp">Tbsp</MenuItem>
-                <MenuItem value="Tsp">Cup</MenuItem>
-                <MenuItem value="Tsp">Oz</MenuItem>
-                <MenuItem value="Tsp">Lb</MenuItem>
+                <MenuItem value="Tbsp">Tbsp</MenuItem>
+                <MenuItem value="Cup">Cup</MenuItem>
+                <MenuItem value="Oz">Oz</MenuItem>
+                <MenuItem value="Lb">Lb</MenuItem>
             </Select>
-            <TextField id="outlined-basic" label="Ingredient" variant="standard"/>
+            <TextField
+                id={`ingredient-${index}`}
+                label="Ingredient"
+                variant="standard"
+                value={ingredients[index].name}
+                onChange={(event) => handleIngredientChange(event, index)}
+            />
         </Paper>
-    )
+    );
 }
 
-export default Ingredients
+export default Ingredients;

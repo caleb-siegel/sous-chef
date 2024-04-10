@@ -18,6 +18,8 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     const [reference, setReference] = useState("");
     const [recipeInstructions, setRecipeInstructions] = useState("");
     const {user} = useOutletContext();
+    const emptyIngredient = { quantity: 0, unit: 'Tsp', name: '' };
+    const [ingredients, setIngredients] = useState([emptyIngredient]);
 
     const [sourceCategories, setSourceCategories] = useState([]);
     useEffect(() => {
@@ -104,24 +106,37 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                     });
                 });
                 
+                ingredients && ingredients.map(ingredient => {
+                    const ingredientData = {
+                        recipe_id: newRecipeData.id,
+                        ingredient_name: ingredient.name,
+                        ingredient_quantity: ingredient.quantity,
+                        ingredient_unit: ingredient.unit
+                    };
+                    fetch("/api/recipeingredients", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "Application/JSON",
+                        },
+                        body: JSON.stringify(ingredientData),
+                    })
+                    .then((response) => response.json())
+                    .then((newIngredientData) => {
+                        // console.log("success")
+                        setIngredients([emptyIngredient]);
+                    });
+                });
+
+
                 setRecipes([newRecipeData, ...recipes]);
                 handleAddRecipe(event);
             });
     };
 
-    const [addIngredient, setAddIngredient] = useState([])
 
-    const handleAddIngredient = (event) => {
-        event.preventDefault();
-        const newIngredient = {
-            recipe_id: '',
-            ingredient_name: '', 
-            ingredient_value: '',
-            ingredient_unit: ''
-        };
-        setAddIngredient([...addIngredient, newIngredient]);
-    };
 
+    
+    
     return (
         <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px'}}>
             <h1> Add New Recipe</h1>
@@ -155,9 +170,9 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         <br />
                         <Tag tags={tags} selectedTags={selectedTags} handleTagChange={handleTagChange}/>
                         <br/>
-                        <Button variant="contained" color="primary" size="small" startIcon={<AddIcon/>} value={addIngredient} onClick={(event) => handleAddIngredient(event)}>Add Ingredient</Button>
-                        {addIngredient && addIngredient.map((ingredient, index) => (
-                            <Ingredients key={index} />
+                        <Button variant="contained" color="primary" size="small" startIcon={<AddIcon/>} onClick={() => setIngredients([...ingredients, emptyIngredient])}>Add Ingredient</Button>
+                        {ingredients && ingredients.map((ingredient, index) => (
+                            <Ingredients key={index} index={index} ingredients={ingredients} setIngredients={setIngredients}/>                        
                         ))}
                     </div>
                 </div>

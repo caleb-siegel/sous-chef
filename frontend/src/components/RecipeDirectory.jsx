@@ -86,7 +86,11 @@ function RecipeDirectory() {
         interestRecipesToggleButtonVariant = "outlined"
         notReorderRecipesToggleButtonVariant = "contained"
         recipelist = recipes.filter(recipe => {
-            return recipe.user_recipe_tags.some(user_recipe_tag => user_recipe_tag.user_tag.name === "interest");
+            return (
+                recipe.user_recipe_tags.some(user_recipe_tag => user_recipe_tag.user_tag.name === "interest")
+                &&
+                recipe.user_recipes.some(userRecipe => userRecipe.user_id === user.id)
+            )
         })
     } else if (toggleRecipes === "notreorder") {
         allRecipesToggleButtonVariant = "contained"
@@ -94,7 +98,11 @@ function RecipeDirectory() {
         interestRecipesToggleButtonVariant = "contained"
         notReorderRecipesToggleButtonVariant = "outlined"
         recipelist = recipes.filter(recipe => {
-            return recipe.user_recipe_tags.some(user_recipe_tag => user_recipe_tag.user_tag.name === "not a reorder");
+            return (
+                recipe.user_recipe_tags.some(user_recipe_tag => user_recipe_tag.user_tag.name === "not a reorder")
+                &&
+                recipe.user_recipes.some(userRecipe => userRecipe.user_id === user.id)
+            )
         })    
     }
 

@@ -256,5 +256,40 @@ def recipe_tags():
 
         return response
     
+@app.route('/api/recipeingredients', methods=['GET', 'POST'])
+def recipe_ingredients():
+    if request.method == 'GET':
+        recipe_ingredients = []
+        for recipe_ingredient in Recipe_Ingredient.query.order_by(Recipe_Ingredient.id.desc()).all():
+            recipe_ingredient_dict = recipe_ingredient.to_dict()
+            recipe_ingredients.append(recipe_ingredient_dict)
+
+        response = make_response(
+            recipe_ingredients,
+            200
+        )
+
+        return response
+
+    elif request.method == 'POST':
+        new_ingredient = Recipe_Ingredient(
+            recipe_id=request.json.get("recipe_id"),
+            ingredient_name=request.json.get("ingredient_name"),
+            ingredient_quantity= request.json.get("ingredient_quantity"),
+            ingredient_unit= request.json.get("ingredient_unit"),
+        )
+
+        db.session.add(new_ingredient)
+        db.session.commit()
+        
+        new_recipe_ingredient_dict = new_ingredient.to_dict()
+
+        response = make_response(
+            new_recipe_ingredient_dict,
+            201
+        )
+
+        return response
+    
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
