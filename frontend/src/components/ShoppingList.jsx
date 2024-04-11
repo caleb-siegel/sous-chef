@@ -8,7 +8,7 @@ function ShoppingList({ mealPrep }) {
         <FormGroup>
                 {mealPrep.map(mealPrep => {
                     return mealPrep.recipe.recipe_ingredients.map(ingredient => {
-                        return <FormControlLabel key={ingredient.id} control={<Checkbox />} label={`${ingredient.ingredient_quantity} ${ingredient.ingredient_unit} ${ingredient.ingredient_name}`} />
+                        return <FormControlLabel key={ingredient.id} control={<Checkbox />} label={`${ingredient.ingredient_quantity} ${ingredient.ingredient_unit} ${ingredient.ingredient_name} ${ingredient.ingredient_note}`} />
                     })
                 })}
         </FormGroup>

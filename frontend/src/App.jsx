@@ -40,7 +40,7 @@ function App() {
             setUser(data);
             // go to the home page if we log in successfully
             console.log(data)
-            navigate("/recipedirectory");
+            navigate("/recipes");
         })
         .catch((e) => {
             alert('incorrect username or password')

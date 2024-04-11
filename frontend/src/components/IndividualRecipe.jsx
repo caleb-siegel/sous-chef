@@ -45,7 +45,7 @@ function IndividualRecipe() {
             <Paper>
                 <Container>Ingredients</Container>
                 {recipe.recipe_ingredients && recipe.recipe_ingredients.map(ingredient => {
-                    return <li>{ingredient.ingredient_quantity} {ingredient.ingredient_unit} {ingredient.ingredient_name} <em>{ingredient.ingredient_note && ingredient.ingredient_note}</em></li>
+                    return <li key={ingredient.id}>{ingredient.ingredient_quantity} {ingredient.ingredient_unit} {ingredient.ingredient_name} <em>{ingredient.ingredient_note && ingredient.ingredient_note}</em></li>
                 })}
             </Paper>
             <br/>

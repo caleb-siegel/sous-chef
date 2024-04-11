@@ -328,7 +328,10 @@ function RecipeDirectory() {
                             title={recipe.name}
                             action={
                                 user && 
-                                    <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => handleFavorites(event, recipe.id)}>
+                                    <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {
+                                        event.preventDefault()
+                                        handleFavorites(event, recipe.id)
+                                    }}>
                                         {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
                                     </IconButton>
                             }

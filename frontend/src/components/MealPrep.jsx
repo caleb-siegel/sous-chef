@@ -39,7 +39,9 @@ function MealPrep() {
                                     <CardHeader title={meal}/>
                                     {mealPrep.map(prep => {
                                         return prep && (prep.meal === meal) && (prep.weekday === weekday) && 
-                                            <Chip key={prep.id} color="primary" label={prep.recipe.name} onDelete={() => handleDelete(prep.id)}></Chip>
+                                        <a href={`/recipes/${prep.recipe.id}`} key={prep.recipe.id} style={{ textDecoration: 'none' }}>
+                                                <Chip key={prep.id} color="primary" label={prep.recipe.name} onDelete={() => handleDelete(prep.id)}></Chip>
+                                        </a>
                                     })}
                                 </Card>
                             )
