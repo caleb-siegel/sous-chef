@@ -10,6 +10,7 @@ import RecipeDirectory from './components/RecipeDirectory';
 import { ThemeProvider } from '@emotion/react';
 import { createTheme } from '@mui/material';
 import Login from './components/Login';
+import MealPrep from './components/MealPrep';
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />,
+      },
+      {
+        path: "mealprep",
+        element: <MealPrep />,
       }
       // {
       //   path: "notreorders",
@@ -42,6 +47,7 @@ const theme = createTheme({
     primary: {
       // main: "#013e87",
       main: "#3FFFC2",
+      // contrastText: "#3FFFC2",
     },
     secondary: {
       // main: '#2e7c9'

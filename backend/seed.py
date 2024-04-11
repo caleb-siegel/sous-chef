@@ -5,7 +5,7 @@ import math
 # from faker import Faker
 
 from app import app
-from models import db, User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe_Tag, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category
+from models import db, User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe_Tag, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category, Recipe
 from flask_bcrypt import Bcrypt
 
 # fake = Faker()
@@ -39,11 +39,20 @@ with app.app_context():
     #     user_tag_instances.append(user_tag_instance)
     # db.session.add_all(user_tag_instances)
 
-    # Recipe.query.delete()
 
     # db.session.add(User(name="a", password_hash=bcrypt.generate_password_hash("a")))
 
-    User_Recipe.query.delete()
+    # Recipe.query.delete()
+    
+    # User_Recipe.query.delete()
+
+    # Recipe_Ingredient.query.delete()
+
+    # Recipe_Tag.query.delete()
+
+    # User_Recipe.query.delete()
+
+    # User_Recipe_Tag.query.delete()
 
     db.session.commit()
 

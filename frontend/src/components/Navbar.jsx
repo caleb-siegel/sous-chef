@@ -14,6 +14,9 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
             <Container>
                 <NavLink to="recipedirectory" className={"nav-link"}>Recipe Directory</NavLink>
             </Container>
+            <Container>
+                <NavLink to="mealprep" className={"nav-link"}>Meal Prep</NavLink>
+            </Container>
             {!user ? 
                 <Container>
                     <NavLink to="login" className={"nav-link"}>Login</NavLink>

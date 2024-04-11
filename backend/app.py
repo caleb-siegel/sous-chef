@@ -290,6 +290,57 @@ def recipe_ingredients():
         )
 
         return response
+
+@app.route('/api/mealprep', methods=['GET', 'POST'])
+def meal_prep():
+    if request.method == 'GET':
+        meal_preps = []
+        for meal_prep in Meal_Prep.query.all():
+            meal_prep_dict = meal_prep.to_dict()
+            meal_preps.append(meal_prep_dict)
+
+        response = make_response(
+            meal_preps,
+            200
+        )
+
+        return response
+
+    elif request.method == 'POST':
+        new_meal_prep = Meal_Prep(
+            user_id=request.json.get("user_id"),
+            recipe_id=request.json.get("recipe_id"),
+            weekday=request.json.get("weekday"),
+            meal=request.json.get("meal"),
+        )
+
+        db.session.add(new_meal_prep)
+        db.session.commit()
+
+        new_meal_prep_dict = new_meal_prep.to_dict()
+
+        response = make_response(
+            new_meal_prep_dict,
+            201
+        )
+
+        return response
     
+@app.route('/api/mealprep/<int:id>', methods=['GET', 'DELETE'])
+def meal_prep_id(id):
+    if request.method == 'GET':
+        meal_prep = db.session.get(Meal_Prep, id)
+        if not meal_prep:
+            return {"error": f"meal prep with id {id} not found"}, 404
+        return meal_prep.to_dict()
+
+    elif request.method == 'DELETE':
+        meal_prep = db.session.get(Meal_Prep, id)
+        if not meal_prep:
+            return {"error": f"Meal prep with id {id} not found"}, 404
+        db.session.delete(meal_prep)
+        db.session.commit()
+        return {}, 202
+
 if __name__ == "__main__":
     app.run(port=5555, debug=True)

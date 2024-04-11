@@ -20,6 +20,7 @@ import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import PersonIcon from '@mui/icons-material/Person';
 import UserRecipeTagsPopover from "./UserRecipeTagsPopover";
 import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
+import AddToMealPrep from "./AddToMealPrep";
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
@@ -50,6 +51,13 @@ function RecipeDirectory() {
         fetch("/api/userrecipes")
         .then((response) => response.json())
         .then((data) => setUserRecipes(data));
+    }, []);
+
+    const [mealPrep, setMealPrep] = useState([]);
+    useEffect(() => {
+        fetch("/api/mealprep")
+        .then((response) => response.json())
+        .then((data) => setMealPrep(data));
     }, []);
 
     const [toggleRecipes, setToggleRecipes] = useState("allrecipes");
@@ -386,6 +394,8 @@ function RecipeDirectory() {
                             }
                         })}
                         {user && <UserRecipeTagsPopover recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
+                        <Divider/>
+                        <AddToMealPrep user={user} recipeId={recipe.id}/>
                         {/* // <CardContent>
                         // <Typography variant="body2" color="text.secondary">
                         //     This impressive paella is a perfect party dish and a fun meal to cook
