@@ -12,7 +12,7 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
                 <NavLink to="/" className={"nav-link"}>Home</NavLink>
             </Container>
             <Container>
-                <NavLink to="recipedirectory" className={"nav-link"}>Recipe Directory</NavLink>
+                <NavLink to="recipes" className={"nav-link"}>Recipes</NavLink>
             </Container>
             <Container>
                 <NavLink to="mealprep" className={"nav-link"}>Meal Prep</NavLink>

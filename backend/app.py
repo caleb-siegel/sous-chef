@@ -105,30 +105,6 @@ def get_user_recipe_tags():
 
         return response
 
-# @app.route('/filterrecipes', methods=['GET'])
-# def filter_recipes():
-#     # Extract filter parameters from the request
-#     filter_type = request.args.get('filterType')
-#     filter_by = request.args.get('filterBy')
-#     filter_text = request.args.get('filterText')
-
-#     # Filter recipes based on the selected options
-#     filtered_recipes = []
-#     for recipe in recipes:
-#         if filter_type == 'include':
-#             if filter_by == 'recipeName' and filter_text.lower() in recipe['name'].lower():
-#                 filtered_recipes.append(recipe)
-#             elif filter_by == 'tag' and filter_text.lower() in [tag.lower() for tag in recipe['tags']]:
-#                 filtered_recipes.append(recipe)
-#             elif filter_by == 'ingredients' and filter_text.lower() in [ingredient.lower() for ingredient in recipe['ingredients']]:
-#                 filtered_recipes.append(recipe)
-#         elif filter_type == 'exclude':
-#             # Implement exclusion logic if needed
-#             pass
-
-#     # Return the filtered recipes as a JSON response
-#     return jsonify(filtered_recipes)
-
 @app.route('/api/recipes', methods=['GET', 'POST'])
 def recipes():
 
@@ -169,6 +145,13 @@ def recipes():
         )
 
         return response
+    
+@app.route('/api/recipes/<int:id>')
+def recipe_id(id):
+    recipe_id = db.session.get(Recipe, id)
+    if not recipe_id:
+        return {"error": f"recipe with id {id} not found"}, 404
+    return recipe_id.to_dict()
 
 @app.route('/api/userrecipes', methods=['GET', 'POST'])
 def user_recipes():

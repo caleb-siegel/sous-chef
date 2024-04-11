@@ -11,6 +11,7 @@ import { ThemeProvider } from '@emotion/react';
 import { createTheme } from '@mui/material';
 import Login from './components/Login';
 import MealPrep from './components/MealPrep';
+import IndividualRecipe from './components/IndividualRecipe';
 
 const router = createBrowserRouter([
   {
@@ -23,7 +24,7 @@ const router = createBrowserRouter([
         element: <Home />
       },
       {
-        path: "recipedirectory",
+        path: "recipes",
         element: <RecipeDirectory />
       },
       {
@@ -33,11 +34,11 @@ const router = createBrowserRouter([
       {
         path: "mealprep",
         element: <MealPrep />,
+      },
+      {
+        path: "recipes/:id",
+        element: <IndividualRecipe />,
       }
-      // {
-      //   path: "notreorders",
-      //   element: <NotReorders />
-      // }
     ]
   }
 ])
