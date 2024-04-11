@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Container, Card, CardHeader, Divider, Chip } from '@mui/material'
+import { Container, Card, CardHeader, Divider, Chip, FormGroup, FormControlLabel, Checkbox } from '@mui/material'
 import MealPrepCalendar from './MealPrepCalendar'
 import DeleteIcon from '@mui/icons-material/Delete';
+import ShoppingList from './ShoppingList';
 
 function MealPrep() {
     const weekdayOptions = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -46,12 +47,8 @@ function MealPrep() {
                     </Card>
                 )
             })}
-            {mealPrep.map(mealPrep => {
-                return <div key={mealPrep.id}>{mealPrep.recipe.recipe_ingredients.map(ingredient => {
-                    return ingredient.ingredient_name
-                })}</div>
-            })}
         </Container>
+        <ShoppingList mealPrep={mealPrep}/>
     </Container>
   )
 }

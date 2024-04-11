@@ -53,13 +53,6 @@ function RecipeDirectory() {
         .then((data) => setUserRecipes(data));
     }, []);
 
-    const [mealPrep, setMealPrep] = useState([]);
-    useEffect(() => {
-        fetch("/api/mealprep")
-        .then((response) => response.json())
-        .then((data) => setMealPrep(data));
-    }, []);
-
     const [toggleRecipes, setToggleRecipes] = useState("allrecipes");
     const handleToggleRecipes = (event) => {
         setToggleRecipes(event)
