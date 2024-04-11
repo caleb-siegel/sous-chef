@@ -18,7 +18,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     const [reference, setReference] = useState("");
     const [recipeInstructions, setRecipeInstructions] = useState("");
     const {user} = useOutletContext();
-    const emptyIngredient = { quantity: 0, unit: 'Tsp', name: '' };
+    const emptyIngredient = { quantity: 0, unit: '', name: '', note: '' };
     const [ingredients, setIngredients] = useState([emptyIngredient]);
 
     const [sourceCategories, setSourceCategories] = useState([]);
@@ -111,7 +111,8 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         recipe_id: newRecipeData.id,
                         ingredient_name: ingredient.name,
                         ingredient_quantity: ingredient.quantity,
-                        ingredient_unit: ingredient.unit
+                        ingredient_unit: ingredient.unit,
+                        ingredient_note: ingredient.note
                     };
                     fetch("/api/recipeingredients", {
                         method: "POST",
@@ -170,10 +171,10 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         <br />
                         <Tag tags={tags} selectedTags={selectedTags} handleTagChange={handleTagChange}/>
                         <br/>
-                        <Button variant="contained" color="primary" size="small" startIcon={<AddIcon/>} onClick={() => setIngredients([...ingredients, emptyIngredient])}>Add Ingredient</Button>
                         {ingredients && ingredients.map((ingredient, index) => (
                             <Ingredients key={index} index={index} ingredients={ingredients} setIngredients={setIngredients}/>                        
                         ))}
+                        <Button variant="contained" color="primary" size="small" startIcon={<AddIcon/>} onClick={() => setIngredients([...ingredients, emptyIngredient])}>Add Ingredient</Button>
                     </div>
                 </div>
                 <br />

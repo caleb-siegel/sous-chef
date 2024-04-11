@@ -112,6 +112,7 @@ class Recipe_Ingredient(db.Model, SerializerMixin):
     ingredient_name = db.Column(db.String)
     ingredient_quantity = db.Column(db.Float)
     ingredient_unit = db.Column(db.String)
+    ingredient_note = db.Column(db.String)
 
     recipe = db.relationship("Recipe", back_populates="recipe_ingredients")
 

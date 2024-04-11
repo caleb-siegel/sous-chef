@@ -26,7 +26,7 @@ function MealPrep() {
 
     return (
     <Container>
-        <MealPrepCalendar/>
+        {/* <MealPrepCalendar/> */}
         <Container style={{ display: 'flex', flexWrap: 'wrap' }}>
             {weekdayOptions.map((weekday) => {
                 return (

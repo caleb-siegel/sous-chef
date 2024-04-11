@@ -21,9 +21,13 @@ function Ingredients({ index, ingredients, setIngredients }) {
         newIngredients[index].name = event.target.value;
         setIngredients(newIngredients);
     };
-    
-    console.log(ingredients)
 
+    const handleIngredientNoteChange = (event) => {
+        const newIngredients = [...ingredients];
+        newIngredients[index].note = event.target.value;
+        setIngredients(newIngredients);
+    };
+    
     return (
         <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px', margin: '10px 0' }}>
             <TextField
@@ -41,6 +45,7 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 value={ingredients[index].unit}
                 onChange={(event) => handleUnitChange(event, index)}
             >
+                <MenuItem value=""></MenuItem>
                 <MenuItem value="Tsp">Tsp</MenuItem>
                 <MenuItem value="Tbsp">Tbsp</MenuItem>
                 <MenuItem value="Cup">Cup</MenuItem>
@@ -53,6 +58,13 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 variant="standard"
                 value={ingredients[index].name}
                 onChange={(event) => handleIngredientChange(event, index)}
+            />
+            <TextField
+                id={`note-${index}`}
+                label="Ingredient Note"
+                variant="standard"
+                value={ingredients[index].note}
+                onChange={(event) => handleIngredientNoteChange(event, index)}
             />
         </Paper>
     );

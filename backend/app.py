@@ -277,6 +277,7 @@ def recipe_ingredients():
             ingredient_name=request.json.get("ingredient_name"),
             ingredient_quantity= request.json.get("ingredient_quantity"),
             ingredient_unit= request.json.get("ingredient_unit"),
+            ingredient_note= request.json.get("ingredient_note"),
         )
 
         db.session.add(new_ingredient)
