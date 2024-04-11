@@ -177,8 +177,13 @@ function RecipeDirectory() {
             } else if (filterBy === "ingredients") {
                 return (
                     recipe && 
-                    recipe.name && 
-                    recipe.recipe_ingredients.some(ingredient => (ingredient.name && ingredient.name.toLowerCase().includes(filterValue.toLowerCase())))
+                    recipe.recipe_ingredients &&
+                    recipe.recipe_ingredients.some(ingredient => {
+                        return (
+                            ingredient &&
+                            ingredient.ingredient_name.toLowerCase().includes(filterValue.toLowerCase())
+                        )
+                    })
                 );
             }
         } else if (filterType === "exclude") {
@@ -192,7 +197,8 @@ function RecipeDirectory() {
                         !recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === filterValue.toLowerCase()))
                 )
             } else if (filterBy === "ingredients") {
-                return !recipe.recipe_ingredients.some(ingredient => (ingredient.name && ingredient.name.toLowerCase().includes(filterValue.toLowerCase())))            }
+                return !recipe.recipe_ingredients.some(ingredient => (ingredient && ingredient.ingredient_name.toLowerCase().includes(filterValue.toLowerCase())))            
+            }
         }    
     });
     
