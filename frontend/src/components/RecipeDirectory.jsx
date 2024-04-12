@@ -358,11 +358,18 @@ function RecipeDirectory() {
                                     return <Chip key={tag.tag.id} size="small" label={tag.tag.name} color="primary" sx={{ margin: '1px'}}/>
                                 }
                             })}
-                            {recipe.user_recipe_tags.map(user_recipe_tag => {
-                                if (user_recipe_tag) {
-                                    return <Chip key={user_recipe_tag.id} size="small" label={user_recipe_tag.user_tag.name} color="secondary" sx={{ margin: '1px'}}/>
-                                }
-                            })}
+                           {recipe.user_recipe_tags
+                                .filter(user_recipe_tag => user_recipe_tag.user_id === user.id)
+                                .map(user_recipe_tag => (
+                                    <Chip
+                                        key={user_recipe_tag.id}
+                                        size="small"
+                                        label={user_recipe_tag.user_tag.name}
+                                        color="secondary"
+                                        sx={{ margin: '1px'}}
+                                    />
+                                ))
+                            }
                             {user && <UserRecipeTagsPopover recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
                             <Divider/>
                             <AddToMealPrep user={user} recipeId={recipe.id}/>

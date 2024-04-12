@@ -3,8 +3,11 @@ import { Container, Card, CardHeader, Divider, Chip, FormGroup, FormControlLabel
 import MealPrepCalendar from './MealPrepCalendar'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingList from './ShoppingList';
+import { useOutletContext } from "react-router-dom";
 
 function MealPrep() {
+    const {user} = useOutletContext();
+
     const weekdayOptions = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     const mealOptions = ['Breakfast', 'Lunch', 'Dinner']
 
@@ -38,7 +41,7 @@ function MealPrep() {
                                 <Card key={meal} size="small" sx={{margin: "5px" }}>
                                     <CardHeader title={meal}/>
                                     {mealPrep.map(prep => {
-                                        return prep && (prep.meal === meal) && (prep.weekday === weekday) && 
+                                        return prep.user_id === user.id && prep && (prep.meal === meal) && (prep.weekday === weekday) && 
                                         <a href={`/recipes/${prep.recipe.id}`} key={prep.recipe.id} style={{ textDecoration: 'none' }}>
                                                 <Chip key={prep.id} color="primary" label={prep.recipe.name} onDelete={() => handleDelete(prep.id)}></Chip>
                                         </a>

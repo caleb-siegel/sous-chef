@@ -18,6 +18,7 @@ function AddToMealPrep({ user, recipeId }) {
     }, []);
 
     const handleShowAddMealPrepForm = () => {
+        event.preventDefault();
         setShowAddMealPrepForm(!showAddMealPrepForm)
     }
 

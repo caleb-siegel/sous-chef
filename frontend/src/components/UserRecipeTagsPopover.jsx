@@ -9,6 +9,7 @@ function UserRecipeTagsPopover({ recipeId, userTags, handleTagSelect }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (event) => {
+    event.preventDefault();
     setAnchorEl(event.currentTarget);
   };
 
