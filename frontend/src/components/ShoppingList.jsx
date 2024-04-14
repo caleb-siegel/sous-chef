@@ -13,7 +13,7 @@ function ShoppingList({ mealPrep, user }) {
                 <FormControlLabel 
                   key={ingredient.id} 
                   control={<Checkbox />} 
-                  label={`${ingredient.ingredient_quantity} ${ingredient.ingredient_unit} ${ingredient.ingredient_name} ${ingredient.ingredient_note}`} 
+                  label={`${ingredient.ingredient_quality > 0 ? ingredient.ingredient_quantity : ""} ${ingredient.ingredient_unit} ${ingredient.ingredient_name}, ${ingredient.ingredient_note}`} 
                 />
               )
           })
