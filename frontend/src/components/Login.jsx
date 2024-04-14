@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useOutletContext } from "react-router-dom";
 import LoginForm from './LoginForm';
-import { Paper, Button } from '@mui/material';
+import { Paper, Button, Typography } from '@mui/material';
 
 
 function Login() {
@@ -11,6 +11,7 @@ function Login() {
     const { attemptLogin } = useOutletContext();
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
+    const [createAccount, setCreateAccount] = useState(false);
 
     function createUser(e) {
         e.preventDefault();
@@ -41,6 +42,11 @@ function Login() {
     const handleChangeNewUsername = (e) => setNewName(e.target.value);
     const handleChangeNewPassword = (e) => setNewPassword(e.target.value);
 
+    const handleCreateAccount = () => {
+        setAccountForm(!accountForm)
+        setCreateAccount(!createAccount)
+    }
+    
     function handleSubmit(e) {
         e.preventDefault();
         attemptLogin({ name: name, password: password });
@@ -48,11 +54,27 @@ function Login() {
 
     return (
     <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px'}}>
-        <LoginForm submitText={"Login"} handleSubmit={handleSubmit} handleChangeUsername={handleChangeUsername} name={name} handleChangePassword={handleChangePassword} password={password}/>
-        <br />
-        <Button variant="outlined" color="secondary" onClick={() => setAccountForm(!accountForm)}>Create Account</Button>
+        {!createAccount && 
+            <div>
+                <Typography variant="h2">Sign In</Typography>
+                <br/>
+                <LoginForm submitText={"Login"} handleSubmit={handleSubmit} handleChangeUsername={handleChangeUsername} name={name} handleChangePassword={handleChangePassword} password={password}/>
+                <br/>
+                <Typography variant="h2">OR</Typography>
+                <br/>
+                <Button variant="outlined" color="secondary" onClick={handleCreateAccount}>Create Account</Button>
+            </div>
+        }
         {accountForm ? (
-            <LoginForm submitText={"Submit"} handleSubmit={createUser} handleChangeUsername={handleChangeNewUsername} name={newName} handleChangePassword={handleChangeNewPassword} password={newPassword}/>
+            <div>
+                <Typography variant="h2">Create Account</Typography>
+                <br/>
+                <LoginForm submitText={"Submit"} handleSubmit={createUser} handleChangeUsername={handleChangeNewUsername} name={newName} handleChangePassword={handleChangeNewPassword} password={newPassword}/>
+                <br/>
+                <Typography variant="h2">OR</Typography>
+                <br/>
+                <Button variant="outlined" color="secondary" onClick={handleCreateAccount}>Login</Button>
+            </div>
             ) : ("")
         }
     </Paper>
