@@ -14,7 +14,7 @@ import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 
 
-function Filter({ filterValue, handleFilterValueChange, filterType, handleFilterTypeChange, filterBy, handleFilterByChange, tags }) {
+function Filter({ filterValue, handleFilterValueChange, filterType, handleFilterTypeChange, filterBy, handleFilterByChange, tags, userTags }) {
   
     const handleAddFilter = () => {
 
@@ -44,24 +44,42 @@ function Filter({ filterValue, handleFilterValueChange, filterType, handleFilter
                     value={filterBy}
                     onChange={handleFilterByChange}
                 >
-                    <FormControlLabel value="recipeName" control={<Radio />} label="Recipe Name" />
-                    <FormControlLabel value="tag" control={<Radio />} label="Tag" />
+                    <FormControlLabel value="recipeName" control={<Radio />} label="Name" />
                     <FormControlLabel value="ingredients" control={<Radio />} label="Ingredients" />
+                    <FormControlLabel value="tag" control={<Radio />} label="Tag" />
+                    <FormControlLabel value="usertag" control={<Radio />} label="User Tag" />
                 </RadioGroup>
                 {(filterBy === "recipeName" || filterBy === "ingredients") && 
                     <TextField id="outlined-basic" label="Filter" variant="standard" value={filterValue} onChange={handleFilterValueChange}/>
                 }
                 {filterBy === "tag" &&
                     <div>
-                        <InputLabel id="demo-simple-select-label">Tag</InputLabel>
+                        <InputLabel id="demo-simple-select-label"></InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             value={filterValue}
-                            label="Source Category"
+                            label="Tag"
                             onChange={handleFilterValueChange}
                         >
                             {tags.map(tag => {
+                                return <MenuItem key={tag.id} value={tag.name}>{tag.name}</MenuItem>
+
+                            })}
+                        </Select>
+                    </div>
+                }
+                {filterBy === "usertag" &&
+                    <div>
+                        <InputLabel id="user-tag"></InputLabel>
+                        <Select
+                            labelId="user-tag-select"
+                            id="demo-simple-select-user-tag"
+                            value={filterValue}
+                            label="userTag"
+                            onChange={handleFilterValueChange}
+                        >
+                            {userTags.map(tag => {
                                 return <MenuItem key={tag.id} value={tag.name}>{tag.name}</MenuItem>
 
                             })}

@@ -179,6 +179,16 @@ function RecipeDirectory() {
                         recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === filterValue.toLowerCase()))
                     )
                 }
+            } else if (filterBy === "usertag") {
+                if (filterValue === "") {
+                    return true
+                } else {
+                    return (
+                        recipe &&
+                        recipe.user_recipe_tags &&
+                        recipe.user_recipe_tags.some(tag => (tag.user_tag && tag.user_tag.name.toLowerCase() === filterValue.toLowerCase()))
+                    )
+                }
             } else if (filterBy === "ingredients") {
                 return (
                     recipe && 
@@ -198,8 +208,14 @@ function RecipeDirectory() {
             } else if (filterBy === "tag") {
                 return (
                         recipe &&
-                        recipe.recipe_tags &&
+                        recipe.user_recipe_tags &&
                         !recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === filterValue.toLowerCase()))
+                )
+            } else if (filterBy === "usertag") {
+                return (
+                        recipe &&
+                        recipe.recipe_tags &&
+                        !recipe.user_recipe_tags.some(tag => (tag.user_tag && tag.user_tag.name.toLowerCase() === filterValue.toLowerCase()))
                 )
             } else if (filterBy === "ingredients") {
                 return !recipe.recipe_ingredients.some(ingredient => (ingredient && ingredient.ingredient_name.toLowerCase().includes(filterValue.toLowerCase())))            
@@ -301,7 +317,7 @@ function RecipeDirectory() {
             <Button variant={variantFilter} color="primary" size="small" startIcon={<FilterAltIcon />} value={addFilter} onClick={(event) => handleAddFilter(event)}>{filterButtonText}</Button>
             <br />
             {addFilter &&
-                <Filter recipes={recipes} setRecipes={setRecipes} handleAddRecipe={handleAddRecipe} filterValue={filterValue} handleFilterValueChange={handleFilterValueChange} filterType={filterType} handleFilterTypeChange={handleFilterTypeChange} filterBy={filterBy} handleFilterByChange={handleFilterByChange} tags={tags}/>
+                <Filter recipes={recipes} setRecipes={setRecipes} handleAddRecipe={handleAddRecipe} filterValue={filterValue} handleFilterValueChange={handleFilterValueChange} filterType={filterType} handleFilterTypeChange={handleFilterTypeChange} filterBy={filterBy} handleFilterByChange={handleFilterByChange} tags={tags} userTags={userTags}/>
             }
             <br/>
             <Container>
