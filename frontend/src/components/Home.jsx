@@ -32,7 +32,6 @@ function Home() {
                         <Button color="secondary" variant="contained">See Recipes</Button>
                     </Link>
                 }
-                    
             </Paper>
         </Container>
     )

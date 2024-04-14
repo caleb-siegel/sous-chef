@@ -47,7 +47,7 @@ function AddToMealPrep({ user, recipeId }) {
     <Container sx={{ paddingTop: '5px' }}>
         {mealPrep && mealPrep.map(prep => {
             return (
-                (prep.recipe_id === recipeId) && 
+                (prep.recipe_id === recipeId) && (user && user.id && prep.user_id && (user.id === prep.user_id)) &&
                 <Chip key={prep.id} size="small" variant="outlined" label={`${prep.weekday} ${prep.meal}`}></Chip> 
             )
         })}

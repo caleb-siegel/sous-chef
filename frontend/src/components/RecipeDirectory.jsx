@@ -359,8 +359,9 @@ function RecipeDirectory() {
                                 }
                             })}
                            {recipe.user_recipe_tags
-                                .filter(user_recipe_tag => user_recipe_tag.user_id === user.id)
+                                .filter(user_recipe_tag => (user && user.id && (user_recipe_tag.user_id === user.id)))
                                 .map(user_recipe_tag => (
+                                    user_recipe_tag && user_recipe_tag.id && user_recipe_tag.user_tag &&
                                     <Chip
                                         key={user_recipe_tag.id}
                                         size="small"

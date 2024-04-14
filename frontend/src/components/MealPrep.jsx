@@ -18,7 +18,8 @@ function MealPrep() {
         .then((data) => setMealPrep(data));
     }, []);
 
-    const handleDelete = (id) => {
+    const handleDelete = (event, id) => {
+        event.preventDefault();
         fetch(`/api/mealprep/${id}`, {
             method: "DELETE",
         })
@@ -30,20 +31,20 @@ function MealPrep() {
     return (
     <Container>
         {/* <MealPrepCalendar/> */}
-        <Container style={{ display: 'flex', flexWrap: 'wrap' }}>
+        <Container style={{ display: 'flex'}}>
             {weekdayOptions.map((weekday) => {
                 return (
-                    <Card key={weekday} sx={{ maxWidth: 345, margin: '10px', padding: '10px' }}>
-                        <CardHeader title={weekday}/>
+                    <Card key={weekday} sx={{ maxWidth: 345, margin: '10px', padding: '10px', border: '1px solid #3FFFC2' }}>
+                        <CardHeader title={weekday} titleTypographyProps={{ sx: { fontSize: 14 } }}/>
                         <Divider/>
                         {mealOptions.map((meal) => {
                             return (
                                 <Card key={meal} size="small" sx={{margin: "5px" }}>
-                                    <CardHeader title={meal}/>
+                                    <CardHeader title={meal} titleTypographyProps={{ sx: { fontSize: 14 } }}/>
                                     {mealPrep.map(prep => {
-                                        return prep.user_id === user.id && prep && (prep.meal === meal) && (prep.weekday === weekday) && 
+                                        return user && user.id && prep.user_id === user.id && prep && (prep.meal === meal) && (prep.weekday === weekday) && 
                                         <a href={`/recipes/${prep.recipe.id}`} key={prep.recipe.id} style={{ textDecoration: 'none' }}>
-                                                <Chip key={prep.id} color="primary" label={prep.recipe.name} onDelete={() => handleDelete(prep.id)}></Chip>
+                                                <Chip key={prep.id} color="primary" label={prep.recipe.name} onDelete={(event) => handleDelete(event, prep.id)}></Chip>
                                         </a>
                                     })}
                                 </Card>
@@ -53,7 +54,7 @@ function MealPrep() {
                 )
             })}
         </Container>
-        <ShoppingList mealPrep={mealPrep}/>
+        <ShoppingList mealPrep={mealPrep} user={user}/>
     </Container>
   )
 }
