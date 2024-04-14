@@ -89,7 +89,7 @@ class Recipe(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    picture = db.Column(db.String)
+    picture = db.Column(db.String, default="/frontend/public/favicon3.jpeg")
     source_category_id = db.Column(db.Integer, db.ForeignKey("source_category.id"))
     source = db.Column(db.String)
     reference = db.Column(db.String)

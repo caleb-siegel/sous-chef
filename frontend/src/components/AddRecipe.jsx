@@ -44,8 +44,8 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                 sourceCategoryId = source_category.id;
             }
             return sourceCategoryId;
-        })
-        
+        })    
+
         const recipeData = {
             name: name,
             picture: picture,

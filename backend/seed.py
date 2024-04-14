@@ -33,7 +33,7 @@ with app.app_context():
 
     # User_Tag.query.delete()
     # user_tag_instances = []
-    # user_tags = ["eaten", "interest", "not a reorder"]
+    # user_tags = ["eaten", "interest", "not a reorder", "shabbos hosting"]
     # for user_tag in user_tags:
     #     user_tag_instance = User_Tag(name=user_tag)
     #     user_tag_instances.append(user_tag_instance)

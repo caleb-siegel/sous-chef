@@ -306,7 +306,7 @@ function RecipeDirectory() {
                 { user && <Button variant={notReorderRecipesToggleButtonVariant} color="primary" size="small" value="notreorder" onClick={(event) => handleToggleRecipes(event.target.value)}>Not Reorders</Button>}
             </Container>
             <br/>
-            <Container>
+            {/* <Container>
                 <BottomNavigation
                     showLabels
                     value={value}
@@ -319,7 +319,7 @@ function RecipeDirectory() {
                     <BottomNavigationAction label="Interests" icon={<ThumbUpOffAltIcon />} onClick={(event) => handleToggleRecipes("interest")}/>
                     <BottomNavigationAction label="Not Reorder" icon={<ThumbDownOffAltIcon />} onClick={(event) => handleToggleRecipes("notreorder")}/>
                 </BottomNavigation>
-            </Container>
+            </Container> */}
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {filteredRecipes.map((recipe) => (
                     <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>

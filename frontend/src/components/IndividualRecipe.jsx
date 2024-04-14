@@ -52,8 +52,8 @@ function IndividualRecipe() {
             <Container>
                 <Container>Instructions</Container>
                 {recipe.instructions && 
-                    recipe.instructions.split(/\d+\./).map((instruction, index) => {
-                        return <div key={index}>{index}.{instruction}</div>;
+                    recipe.instructions.split(/\d+\./).filter(instruction => instruction.trim() !== "").map((instruction, index) => {
+                        return <div key={index}>{index + 1}.{instruction}</div>;
                     })
                 }
             </Container>
