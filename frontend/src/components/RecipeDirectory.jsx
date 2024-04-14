@@ -355,7 +355,7 @@ function RecipeDirectory() {
                                 <CardMedia
                                 component="img"
                                 height="194"
-                                image={recipe.picture}
+                                image={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"}
                                 alt={recipe.name}
                                 />
                                 {/* <Divider /> */}

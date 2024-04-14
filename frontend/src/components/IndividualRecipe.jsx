@@ -40,7 +40,7 @@ function IndividualRecipe() {
                 <AddToMealPrep user={user} recipeId={recipe.id}/>
             </Container>
             <Container>
-                <img src={recipe.picture} style={{ maxWidth: '500px' }}/>
+                <img src={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"} style={{ maxWidth: '500px' }}/>
             </Container>
             <Paper>
                 <Container>Ingredients</Container>
