@@ -16,9 +16,6 @@ import AddIcon from '@mui/icons-material/Add';
 
 function Filter({ filterValue, handleFilterValueChange, filterType, handleFilterTypeChange, filterBy, handleFilterByChange, tags, userTags }) {
   
-    const handleAddFilter = () => {
-
-    }
     return (
         <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px', width: '250px'}}>
             <FormControl>

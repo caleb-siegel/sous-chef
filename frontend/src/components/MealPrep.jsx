@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Container, Card, CardHeader, Divider, Chip, FormGroup, FormControlLabel, Checkbox } from '@mui/material'
+import { Container, Card, CardHeader, Divider, Chip, FormGroup, FormControlLabel, Checkbox, Tooltip } from '@mui/material'
 import MealPrepCalendar from './MealPrepCalendar'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingList from './ShoppingList';
@@ -44,7 +44,9 @@ function MealPrep() {
                                     {mealPrep.map(prep => {
                                         return user && user.id && prep.user_id === user.id && prep && (prep.meal === meal) && (prep.weekday === weekday) && 
                                         <a href={`/recipes/${prep.recipe.id}`} key={prep.recipe.id} style={{ textDecoration: 'none' }}>
+                                            <Tooltip title={prep.recipe.name}>
                                                 <Chip key={prep.id} color="primary" label={prep.recipe.name} onDelete={(event) => handleDelete(event, prep.id)}></Chip>
+                                            </Tooltip>
                                         </a>
                                     })}
                                 </Card>
