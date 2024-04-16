@@ -2,14 +2,24 @@ import { Container, FormGroup, FormControlLabel, Checkbox, Typography } from '@m
 import React from 'react'
 
 function ShoppingList({ mealPrep, user }) {
+  const ingredientsObject = {};
+
   return (
     <Container>
       <Typography variant="h2">Shopping List</Typography>
       <FormGroup>
         {mealPrep.map(mealPrep => {
           return mealPrep.recipe.recipe_ingredients.map(ingredient => {
+              // {
+              //   if ((!(ingredient.ingredient_name in ingredientsObject)) && ingredient.ingredient_name && ingredient.ingredient_quantity) {
+              //     ingredientsObject[ingredient.ingredient_name] = ingredient.ingredient_quantity
+
+              //   } else {
+              //     ingredientsObject[ingredient.ingredient_name] += ingredient.ingredient_quantity
+              //   }
+              // }
               return (
-                user && user.id && (user.id === mealPrep.user_id) && 
+                user && user.id && (user.id === mealPrep.user_id) &&
                 <FormControlLabel 
                   key={ingredient.id} 
                   control={<Checkbox />} 

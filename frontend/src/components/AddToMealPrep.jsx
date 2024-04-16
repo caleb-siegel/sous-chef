@@ -22,7 +22,8 @@ function AddToMealPrep({ user, recipeId }) {
         setShowAddMealPrepForm(!showAddMealPrepForm)
     }
 
-    const handleSubmitMealPrep = () => {
+    const handleSubmitMealPrep = (event) => {
+        event.preventDefault();
         const mealPrepData = {
             user_id: user.id,
             recipe_id: recipeId,
@@ -40,6 +41,7 @@ function AddToMealPrep({ user, recipeId }) {
             .then((newMealPrepData) => {
                 setWeekday("")
                 setMeal("")
+                setShowAddMealPrepForm(!showAddMealPrepForm)
             })
     }
 
@@ -60,7 +62,7 @@ function AddToMealPrep({ user, recipeId }) {
             sx={{ padding: '5px'}}
         />
         {showAddMealPrepForm &&
-            <form onSubmit={handleSubmitMealPrep}>
+            <form onSubmit={(event) => handleSubmitMealPrep(event)}>
                 <Stack direction="row">
                     <InputLabel id="demo-simple-select-label">Weekday</InputLabel>
                     <Select

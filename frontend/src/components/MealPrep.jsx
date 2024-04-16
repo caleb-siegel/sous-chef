@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Container, Card, CardHeader, Divider, Chip, FormGroup, FormControlLabel, Checkbox, Tooltip } from '@mui/material'
-import MealPrepCalendar from './MealPrepCalendar'
+// import MealPrepCalendar from './MealPrepCalendar'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingList from './ShoppingList';
 import { useOutletContext } from "react-router-dom";
@@ -34,7 +34,7 @@ function MealPrep() {
         <Container style={{ display: 'flex'}}>
             {weekdayOptions.map((weekday) => {
                 return (
-                    <Card key={weekday} sx={{ maxWidth: 345, margin: '10px', padding: '10px', border: '1px solid #3FFFC2' }}>
+                    <Card key={weekday} sx={{ maxWidth: 345,  padding: '10px', border: '1px solid #3FFFC2' }}>
                         <CardHeader title={weekday} titleTypographyProps={{ sx: { fontSize: 14 } }}/>
                         <Divider/>
                         {mealOptions.map((meal) => {
@@ -56,6 +56,7 @@ function MealPrep() {
                 )
             })}
         </Container>
+        <br/>
         <ShoppingList mealPrep={mealPrep} user={user}/>
     </Container>
   )

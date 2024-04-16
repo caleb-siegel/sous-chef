@@ -54,7 +54,7 @@ function IndividualRecipe() {
                 <Paper sx={{ marginLeft: '10px' }}>
                     <Container>Ingredients</Container>
                     {recipe.recipe_ingredients && recipe.recipe_ingredients.map(ingredient => {
-                        return <li key={ingredient.id}>{ingredient.ingredient_quantity} {ingredient.ingredient_unit} {ingredient.ingredient_name} <em>{ingredient.ingredient_note && ingredient.ingredient_note}</em></li>
+                        return <li key={ingredient.id}>{ingredient.ingredient_quantity === 0 ? "" : ingredient.ingredient_quantity} {ingredient.ingredient_unit} {ingredient.ingredient_name} <em>{ingredient.ingredient_note && ingredient.ingredient_note}</em></li>
                     })}
                 </Paper>
                 <Paper sx={{ display: 'flex', flexWrap: 'wrap' }}>
