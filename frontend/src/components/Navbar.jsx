@@ -16,6 +16,7 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
                         <NavLink to="/" className="nav-link">Home</NavLink>
                         <NavLink to="recipes" className="nav-link">Recipes</NavLink>
                         <NavLink to="mealprep" className="nav-link">Meal Prep</NavLink>
+                        <NavLink to="random" className="nav-link">Random Recipe</NavLink>
                     </Box>
                 </Grid>
                 <Grid item>

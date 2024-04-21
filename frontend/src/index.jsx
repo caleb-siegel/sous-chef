@@ -12,6 +12,7 @@ import { createTheme } from '@mui/material';
 import Login from './components/Login';
 import MealPrep from './components/MealPrep';
 import IndividualRecipe from './components/IndividualRecipe';
+import RandomizeRecipe from './components/RandomizeRecipe';
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,11 @@ const router = createBrowserRouter([
       {
         path: "recipes/:id",
         element: <IndividualRecipe />,
+      }
+      ,
+      {
+        path: "random",
+        element: <RandomizeRecipe />,
       }
     ]
   }

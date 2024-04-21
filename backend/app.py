@@ -6,6 +6,7 @@ from models import db, User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, 
 from dotenv import dotenv_values
 from flask_bcrypt import Bcrypt
 import json
+import random
 config = dotenv_values(".env")
 
 app = Flask(__name__)
@@ -145,6 +146,20 @@ def recipes():
         )
 
         return response
+    
+@app.route('/api/random_recipe')
+def random_recipe():
+    all_recipes = User_Recipe.query.filter_by(user_id=session.get('user_id')).all()
+    random.shuffle(all_recipes)
+
+    random_recipe_dict = all_recipes[0].to_dict()
+
+    response = make_response(
+        random_recipe_dict,
+        200
+    )
+
+    return response
     
 @app.route('/api/recipes/<int:id>')
 def recipe_id(id):

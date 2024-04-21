@@ -78,17 +78,23 @@ function RecipeDirectory() {
     } else if (toggleRecipes === "interest") {
         recipeList = recipeList.filter(recipe => {
             return (
-                recipe.user_recipe_tags.some(user_recipe_tag => user_recipe_tag.user_tag.name === "interest")
-                &&
-                recipe.user_recipes.some(userRecipe => userRecipe.user_id === user.id)
+                recipe.user_recipe_tags.some(user_recipe_tag => {
+                    return (
+                        user_recipe_tag.user_tag.name === "interest" &&
+                        user_recipe_tag.user_id === user.id
+                    )
+                })
             )
         })
     } else if (toggleRecipes === "notreorder") {
         recipeList = recipeList.filter(recipe => {
             return (
-                recipe.user_recipe_tags.some(user_recipe_tag => user_recipe_tag.user_tag.name === "not a reorder")
-                &&
-                recipe.user_recipes.some(userRecipe => userRecipe.user_id === user.id)
+                recipe.user_recipe_tags.some(user_recipe_tag => {
+                    return (
+                        user_recipe_tag.user_tag.name === "not a reorder" &&
+                        user_recipe_tag.user_id === user.id
+                    )
+                })
             )
         })    
     }
@@ -153,6 +159,7 @@ function RecipeDirectory() {
                         (
                             ingredient.ingredient_name.toLowerCase().includes("salmon") ||
                             ingredient.ingredient_name.toLowerCase().includes("tilapia") ||
+                            ingredient.ingredient_name.toLowerCase().includes("flounder") ||
                             ingredient.ingredient_name.toLowerCase().includes("sea bass") ||
                             ingredient.ingredient_name.toLowerCase().includes("tuna")
                         )
@@ -290,7 +297,13 @@ function RecipeDirectory() {
                     return (
                         recipe &&
                         recipe.user_recipe_tags &&
-                        recipe.user_recipe_tags.some(tag => (tag.user_tag && tag.user_tag.name.toLowerCase() === filterValue.toLowerCase()))
+                        recipe.user_recipe_tags.some(tag => {
+                            return (
+                                tag.user_tag && 
+                                tag.user_tag.name.toLowerCase() === filterValue.toLowerCase() &&
+                                tag.user_id === user.id
+                            )
+                        })
                     )
                 }
             } else if (filterBy === "ingredients") {
@@ -328,7 +341,7 @@ function RecipeDirectory() {
     });
     
     const handleFavorites = (event, recipeId) => {
-
+        event.preventDefault();
         const isFavorite = userRecipes.some(userRecipe => userRecipe.recipe_id === recipeId);
 
         if (!isFavorite) {
@@ -469,10 +482,7 @@ function RecipeDirectory() {
                                 title={recipe.name}
                                 action={
                                     user && 
-                                        <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {
-                                            event.preventDefault()
-                                            handleFavorites(event, recipe.id)
-                                        }}>
+                                        <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {handleFavorites(event, recipe.id)}}>
                                             {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
                                         </IconButton>
                                 }
