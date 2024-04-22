@@ -85,7 +85,7 @@ class Meal_Prep(db.Model, SerializerMixin):
 class Recipe(db.Model, SerializerMixin):
     __tablename__ = "recipe"
     
-    serialize_rules = ["-user_recipes.recipe", "-user_recipe_tags.recipe", "meal_preps", "-source_category.recipes", "-recipe_ingredients.recipe", "-recipe_tags.recipe"]
+    serialize_rules = ["-user_recipes.recipe", "-user_recipes.user.user_recipe_tags", "-user_recipe_tags.recipe", "meal_preps", "-source_category.recipes", "-recipe_ingredients.recipe", "-recipe_tags.recipe"]
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)

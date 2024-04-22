@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
-import { Card, CardHeader, CardMedia, Chip, Container, Divider, Box, Paper, Badge, IconButton, Typography } from '@mui/material';
+import { Card, CardHeader, CardMedia, Chip, Container, Divider, Box, Paper, Badge, IconButton, Typography, Select, MenuItem, InputLabel } from '@mui/material';
 import UserRecipeTagsPopover from './UserRecipeTagsPopover';
 import AddToMealPrep from './AddToMealPrep';
 import { useOutletContext } from "react-router-dom";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 function RecipePage({ recipe, user, id }) {
+    const [dimensions, setDimensions] = useState(1)
+    
+    const handleDimensions = (event) => {
+        setDimensions(event.target.value)
+    }
+
     return (
         <Box key={recipe.id} >
             <Container>
@@ -41,9 +47,24 @@ function RecipePage({ recipe, user, id }) {
                     <img src={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"} style={{ maxWidth: '500px' }}/>
                 </Paper>
                 <Paper sx={{ marginLeft: '10px' }}>
+                    <InputLabel id="dimensions-input-label">Dimensions</InputLabel>
+                    <Select
+                        labelId={`${recipe.id}`}
+                        id={`${recipe.id}`}
+                        label="Dimensions"
+                        value={dimensions}
+                        onChange={(event) => handleDimensions(event)}
+                    >
+                        <MenuItem value=""></MenuItem>
+                        <MenuItem value="0.5">0.5x</MenuItem>
+                        <MenuItem value="1">1x</MenuItem>
+                        <MenuItem value="2">2x</MenuItem>
+                        <MenuItem value="5">5x</MenuItem>
+                        <MenuItem value="10">10x</MenuItem>
+                    </Select>
                     <Container>Ingredients</Container>
                     {recipe.recipe_ingredients && recipe.recipe_ingredients.map(ingredient => {
-                        return <li key={ingredient.id}>{ingredient.ingredient_quantity === 0 ? "" : ingredient.ingredient_quantity} {ingredient.ingredient_unit} {ingredient.ingredient_name} <em>{ingredient.ingredient_note && ingredient.ingredient_note}</em></li>
+                        return <li key={ingredient.id}>{ingredient.ingredient_quantity === 0 ? "" : (ingredient.ingredient_quantity * dimensions)} {ingredient.ingredient_unit} {ingredient.ingredient_name} <em>{ingredient.ingredient_note && ingredient.ingredient_note}</em></li>
                     })}
                 </Paper>
                 <Paper sx={{ display: 'flex', flexWrap: 'wrap' }}>

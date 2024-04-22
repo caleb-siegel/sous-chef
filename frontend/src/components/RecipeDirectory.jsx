@@ -422,7 +422,7 @@ function RecipeDirectory() {
     const open = Boolean(anchorEl);
 
     return (
-        <Container>
+        <Container sx={{ paddingBottom: '50px'}}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <h1>Recipe Directory</h1>
                 <Button variant={variantAddRecipe} color="primary" size="small" startIcon={startIconAddRecipe} value={addRecipe} onClick={(event) => handleAddRecipe(event)}>{addRecipeButtonText}</Button>
@@ -457,12 +457,11 @@ function RecipeDirectory() {
                 left: '50%',
                 transform: 'translateX(-50%)',
                 width: '100%',
-                zIndex: 1000, // Adjust this value as needed
+                zIndex: 1000,
             }}>
                 <BottomNavigation
                     showLabels
                     value={value}
-                    // sx={{ backgroundColor: '#D4D7D5'}}
                     onChange={(event, newValue) => {
                         setValue(newValue);
                     }}
@@ -581,6 +580,7 @@ function RecipeDirectory() {
                         </a>
                     ))}
                 </div>
+                
             ): (
                 <Container>
                     <RecipeSkeleton />

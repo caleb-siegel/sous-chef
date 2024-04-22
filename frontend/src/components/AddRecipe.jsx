@@ -150,17 +150,17 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         <br />
                         <br />
                         <InputLabel id="demo-simple-select-label">Source Category</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={sourceCategoryInput}
-                                label="Source Category"
-                                onChange={(event) => setSourceCategoryInput(event.target.value)}
-                            >
-                                {sourceCategories.map(sourceCategory => {
-                                    return <MenuItem key={sourceCategory.id} value={sourceCategory.name}>{sourceCategory.name}</MenuItem>
-                                })}
-                            </Select>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={sourceCategoryInput}
+                            label="Source Category"
+                            onChange={(event) => setSourceCategoryInput(event.target.value)}
+                        >
+                            {sourceCategories.map(sourceCategory => {
+                                return <MenuItem key={sourceCategory.id} value={sourceCategory.name}>{sourceCategory.name}</MenuItem>
+                            })}
+                        </Select>
                         <br />
                         <TextField id="outlined-basic" label="Source Name" variant="standard" value={sourceName} onChange={(event) => setSourceName(event.target.value)}/>
                         <br />
