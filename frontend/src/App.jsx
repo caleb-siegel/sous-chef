@@ -38,7 +38,6 @@ function App() {
         })
         .then((data) => {
             setUser(data);
-            // go to the home page if we log in successfully
             console.log(data)
             navigate("/recipes");
         })
@@ -59,7 +58,6 @@ function App() {
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-    // Toggle dark mode class on the body element
     document.body.classList.toggle('dark-mode');
   };
 

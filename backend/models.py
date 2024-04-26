@@ -19,7 +19,7 @@ db = SQLAlchemy(metadata=metadata)
 class User(db.Model, SerializerMixin):
     __tablename__ = "user"
     
-    serialize_rules = ["-user_recipes.user", "-user_recipe_tags.user", "-meal_preps"]
+    serialize_rules = ["-user_recipes.user", "-user_recipe_tags.user", "-meal_preps", "-recipes.user"]
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -28,6 +28,7 @@ class User(db.Model, SerializerMixin):
     user_recipes = db.relationship("User_Recipe", back_populates="user")
     user_recipe_tags = db.relationship("User_Recipe_Tag", back_populates="user")
     meal_preps = db.relationship("Meal_Prep", back_populates="user")
+    recipes = db.relationship("Recipe", back_populates="user")
 
 class User_Tag(db.Model, SerializerMixin):
     __tablename__ = "user_tag"
@@ -85,7 +86,7 @@ class Meal_Prep(db.Model, SerializerMixin):
 class Recipe(db.Model, SerializerMixin):
     __tablename__ = "recipe"
     
-    serialize_rules = ["-user_recipes.recipe", "-user_recipes.user.user_recipe_tags", "-user_recipe_tags.recipe", "meal_preps", "-source_category.recipes", "-recipe_ingredients.recipe", "-recipe_tags.recipe"]
+    serialize_rules = ["-user_recipes.recipe", "-user_recipes.user.user_recipe_tags", "-user_recipe_tags.recipe", "meal_preps", "-source_category.recipes", "-recipe_ingredients.recipe", "-recipe_tags.recipe", "-user.recipe"]
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -94,6 +95,7 @@ class Recipe(db.Model, SerializerMixin):
     source = db.Column(db.String)
     reference = db.Column(db.String)
     instructions = db.Column(db.String)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
     user_recipes = db.relationship("User_Recipe", back_populates="recipe")
     user_recipe_tags = db.relationship("User_Recipe_Tag", back_populates="recipe")
@@ -101,6 +103,7 @@ class Recipe(db.Model, SerializerMixin):
     source_category = db.relationship("Source_Category", back_populates="recipes")
     recipe_ingredients = db.relationship("Recipe_Ingredient", back_populates="recipe")
     recipe_tags = db.relationship("Recipe_Tag", back_populates="recipe")
+    user = db.relationship("User", back_populates="recipes")
 
 class Recipe_Ingredient(db.Model, SerializerMixin):
     __tablename__ = "recipe_ingredient"

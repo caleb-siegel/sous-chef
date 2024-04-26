@@ -54,6 +54,7 @@ function RecipePage({ recipe, user, id }) {
                         label="Dimensions"
                         value={dimensions}
                         onChange={(event) => handleDimensions(event)}
+                        size="small"
                     >
                         <MenuItem value=""></MenuItem>
                         <MenuItem value="0.5">0.5x</MenuItem>

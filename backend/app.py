@@ -82,7 +82,7 @@ def get_user_tags():
     return make_response( user_tags, 200 )
    
 @app.route('/api/userrecipetags', methods=['GET', 'POST'])
-def get_user_recipe_tags():
+def user_recipe_tags():
     if request.method == 'GET':
         user_recipe_tags = [user_recipe_tag.to_dict() for user_recipe_tag in User_Recipe_Tag.query.all()]
         return make_response( user_recipe_tags, 200 )
@@ -105,6 +105,15 @@ def get_user_recipe_tags():
         )
 
         return response
+    
+@app.route('/api/userrecipetags/<int:id>/', methods=['GET', 'POST', 'DELETE'])
+def delete_user_recipe_tags(id):
+    user_recipe_tag = db.session.get(User_Recipe_Tag, id)
+    if not user_recipe_tag:
+        return {"error": f"User Recipe Tag with id {id} not found"}, 404
+    db.session.delete(user_recipe_tag)
+    db.session.commit()
+    return {}, 202
 
 @app.route('/api/recipes', methods=['GET', 'POST'])
 def recipes():

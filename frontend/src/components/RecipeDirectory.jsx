@@ -421,6 +421,14 @@ function RecipeDirectory() {
 
     const open = Boolean(anchorEl);
 
+    const handleDeleteUserTag = (event, id) => {
+        event.preventDefault();
+        fetch(`/api/userrecipetags/${id}`, {
+            method: "DELETE",
+        })
+        .then((data) => {})
+      };
+
     return (
         <Container sx={{ paddingBottom: '50px'}}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -483,13 +491,12 @@ function RecipeDirectory() {
                                     user && 
                                         <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {handleFavorites(event, recipe.id)}}>
                                             {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
+                                            {/* <MoreVertIcon /> */}
+
                                         </IconButton>
+                                    // <IconButton aria-label="settings">
+                                    // </IconButton>
                                 }
-                                // action={
-                                //     <IconButton aria-label="settings">
-                                //     <MoreVertIcon />
-                                //     </IconButton>
-                                // }
                                 
                                 // subheader=
                                 />
@@ -518,6 +525,7 @@ function RecipeDirectory() {
                                             label={user_recipe_tag.user_tag.name}
                                             color="secondary"
                                             sx={{ margin: '1px'}}
+                                            onDelete={(event) => handleDeleteUserTag(event, user_recipe_tag.id)}
                                         />
                                     ))
                                 }
