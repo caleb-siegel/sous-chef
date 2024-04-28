@@ -76,11 +76,38 @@ def get_tags():
     tags = [tag.to_dict() for tag in Tag.query.all()]
     return make_response( tags, 200 )
 
-@app.route('/api/usertags')
-def get_user_tags():
-    user_tags = [user_tag.to_dict() for user_tag in User_Tag.query.all()]
-    return make_response( user_tags, 200 )
-   
+@app.route('/api/usertags', methods=['GET', 'POST'])
+def user_tags():
+    if request.method == 'GET':
+        user_tags = [user_tag.to_dict() for user_tag in User_Tag.query.all()]
+        return make_response( user_tags, 200 )
+    
+    elif request.method == 'POST':
+        new_user_tag = User_Tag(
+            name=request.json.get("name"),
+        )
+
+        db.session.add(new_user_tag)
+        db.session.commit()
+        
+        new_user_tag_dict = new_user_tag.to_dict()
+
+        response = make_response(
+            new_user_tag_dict,
+            201
+        )
+
+        return response
+    
+@app.route('/api/usertags/<int:id>/', methods=['DELETE'])
+def delete_user_tags(id):
+    user_tag = db.session.get(User_Tag, id)
+    if not user_tag:
+        return {"error": f"User Tag with id {id} not found"}, 404
+    db.session.delete(user_tag)
+    db.session.commit()
+    return {}, 202
+
 @app.route('/api/userrecipetags', methods=['GET', 'POST'])
 def user_recipe_tags():
     if request.method == 'GET':

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Popover from '@mui/material/Popover';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { Chip } from '@mui/material';
+import { Button, Chip, Divider, TextField } from '@mui/material';
 
 function UserRecipeTagsPopover({ recipeId, userTags, handleTagSelect }) {
   const [anchorEl, setAnchorEl] = useState(null);

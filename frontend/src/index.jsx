@@ -14,6 +14,7 @@ import MealPrep from './components/MealPrep';
 import IndividualRecipe from './components/IndividualRecipe';
 import RandomizeRecipe from './components/RandomizeRecipe';
 import ProfilePage from './components/ProfilePage';
+import NewTag from './components/NewTag';
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "user/:id",
         element: <ProfilePage />,
+      },
+      {
+        path: "newtag",
+        element: <NewTag />,
       }
     ]
   }
