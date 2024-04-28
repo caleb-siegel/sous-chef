@@ -24,7 +24,7 @@ function MealPrep() {
             method: "DELETE",
         })
         .then((data) => {
-            setMealPrep(mealPrep.filter(prep => {(data.id !== prep.id) && (data.weekday !== prep.weekday) && (data.meal !== prep.meal)}))
+            setMealPrep(prevMealPrep => prevMealPrep.filter(prep => prep.id !== id));
         })
       };
 
