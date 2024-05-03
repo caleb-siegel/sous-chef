@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from "react";
 import AddRecipe from "./AddRecipe";
-import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { Card, CardContent, CardHeader, CardMedia, Container } from "@mui/material";
-import Chip from "@mui/material/Chip";
+import { Button, Card, CardContent, CardHeader, CardMedia, Container, Icon, Chip, IconButton, Alert, Divider, BottomNavigation, BottomNavigationAction } from "@mui/material";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import Filter from "./Filter";
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import IconButton from "@mui/material/IconButton";
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useOutletContext } from "react-router-dom";
-import Alert from "@mui/material/Alert";
-import Divider from '@mui/material/Divider';
-import BottomNavigation from "@mui/material/BottomNavigation";
-import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import PersonIcon from '@mui/icons-material/Person';
@@ -489,11 +482,13 @@ function RecipeDirectory() {
                                 title={recipe.name}
                                 action={
                                     user && 
-                                        <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {handleFavorites(event, recipe.id)}}>
-                                            {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
-                                            {/* <MoreVertIcon /> */}
-
-                                        </IconButton>
+                                        <Container>
+                                            <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {handleFavorites(event, recipe.id)}}>
+                                                {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
+                                            </IconButton>                                            
+                                        </Container>
+                                        
+                                        
                                     // <IconButton aria-label="settings">
                                     // </IconButton>
                                 }
