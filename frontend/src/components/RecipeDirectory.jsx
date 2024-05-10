@@ -15,6 +15,7 @@ import UserRecipeTagsPopover from "./UserRecipeTagsPopover";
 import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
+import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
@@ -485,6 +486,9 @@ function RecipeDirectory() {
                                         <Container>
                                             <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {handleFavorites(event, recipe.id)}}>
                                                 {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
+                                            </IconButton>  
+                                            <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {handleFavorites(event, recipe.id)}}>
+                                            <AddBusinessIcon color="primary"/>
                                             </IconButton>                                            
                                         </Container>
                                         
