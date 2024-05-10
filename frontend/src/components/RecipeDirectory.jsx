@@ -15,7 +15,7 @@ import UserRecipeTagsPopover from "./UserRecipeTagsPopover";
 import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
-import AddBusinessIcon from '@mui/icons-material/AddBusiness';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
@@ -377,6 +377,10 @@ function RecipeDirectory() {
         }
     };
 
+    const handleVert = (event, recipeId) => {
+        event.preventDefault();
+    }
+
     const [value, setValue] = useState(0);
     
     const [anchorEl, setAnchorEl] = useState(null);
@@ -484,11 +488,11 @@ function RecipeDirectory() {
                                 action={
                                     user && 
                                         <Container>
-                                            <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {handleFavorites(event, recipe.id)}}>
+                                            <IconButton size="small" onClick={(event) => {handleFavorites(event, recipe.id)}}>
                                                 {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
                                             </IconButton>  
-                                            <IconButton size="small" sx={{ bgcolor:"primary" }} onClick={(event) => {handleFavorites(event, recipe.id)}}>
-                                            <AddBusinessIcon color="primary"/>
+                                            <IconButton onClick={(event) => {handleVert(event, recipe.id)}}>
+                                                <MoreVertIcon/>
                                             </IconButton>                                            
                                         </Container>
                                         

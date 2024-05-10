@@ -25,9 +25,10 @@ function Home() {
     const dimension = 150
 
     return (
-        <Container>
-            <Paper sx={{ bgcolor: "primary.main", padding: '50px', width: '100%', maxWidth: '100%'  }}>
-                <h1>Welcome to Sous Chef</h1>
+        <Container disableGutters maxWidth={false}>
+            <Paper sx={{ bgcolor: "primary.main", width: '100%', maxWidth: '100%'  }}>
+                <div style={{ padding: '10px' }}>
+                <h2>Welcome to Sous Chef</h2>
                 <h2>Your all-in-one kitchen assistant</h2>
                 <h4>Digital cookbook and meal prep guide</h4>
                 {!user ?
@@ -39,6 +40,8 @@ function Home() {
                         <Button color="secondary" variant="contained">See Recipes</Button>
                     </Link>
                 }
+                </div>
+
             </Paper>
             {!loading ? (
                 <Container sx={{ padding: "10px" }}>

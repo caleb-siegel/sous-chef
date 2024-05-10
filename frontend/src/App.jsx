@@ -62,14 +62,14 @@ function App() {
   };
 
   return (
-    <Container className="">
-      <Container sx={{ height: '100vh'}}>
+    // <Container className="">
+      <Container disableGutters maxWidth={false} sx={{ height: '100vh', width: '100%', padding: '0px'}}>
         <Typography component={'span'}>
           <Navbar logout={logout} user={user} toggleDarkMode={toggleDarkMode} darkMode={darkMode}/>
           <Outlet context={{ user, attemptLogin, logout }}/>
         </Typography>
       </Container>
-    </Container>
+    // {/* </Container> */}
   );
 };
 
