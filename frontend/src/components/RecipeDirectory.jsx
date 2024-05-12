@@ -141,8 +141,8 @@ function RecipeDirectory() {
                 recipe.recipe_ingredients.some(ingredient => {
                     return (
                         ingredient &&
-                        ingredient.ingredient_name.toLowerCase().includes("chicken") &&
-                        !ingredient.ingredient_name.toLowerCase().includes("chicken stock")
+                        ingredient.ingredient_name.toLowerCase().includes("chicken")
+                        // && !ingredient.ingredient_name.toLowerCase().includes("chicken stock")
                     )
                 })
             );
