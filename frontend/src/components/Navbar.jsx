@@ -1,13 +1,15 @@
 import { NavLink } from "react-router-dom";
-import { Container } from "@mui/material";
+import { Container, TextField, Autocomplete } from "@mui/material";
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
+import SearchIcon from '@mui/icons-material/Search';
+import SearchBar from "./SearchBar";
 
 function Navbar({ user, logout, darkMode, toggleDarkMode }) {
-
+    
     return (
         <Container className="navbar">
             <Grid container alignItems="center" justifyContent="space-between">

@@ -16,6 +16,7 @@ import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import SearchBar from "./SearchBar";
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
@@ -57,7 +58,26 @@ function RecipeDirectory() {
         setToggleRecipes(event)
     }
 
+    const [cookbooks, setCookbooks] = useState([]);
+    const [chosenCookbook, setChosenCookbook] = useState("")
+    useEffect(() => {
+        fetch("/api/recipes")
+        .then((response) => response.json())
+        .then((data) => {
+            const uniqueCookbooks = [];
+            data.forEach(cookbook => {
+                if (!uniqueCookbooks.includes(cookbook.source)) {
+                    uniqueCookbooks.push(cookbook.source);
+                }
+            });
+            setCookbooks(uniqueCookbooks);
+        });
+    }, []);
+
     let recipeList = recipes;
+    if (chosenCookbook) {
+        recipeList = recipeList.filter(recipe => chosenCookbook === recipe.source)
+    }
 
     if (toggleRecipes === "allrecipes") {
         recipeList = recipeList
@@ -431,6 +451,7 @@ function RecipeDirectory() {
         <Container sx={{ paddingBottom: '50px'}}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <h1>Recipe Directory</h1>
+                <SearchBar cookbooks={cookbooks} chosenCookbook={chosenCookbook} setChosenCookbook={setChosenCookbook}/>
                 <Button variant={variantAddRecipe} color="primary" size="small" startIcon={startIconAddRecipe} value={addRecipe} onClick={(event) => handleAddRecipe(event)}>{addRecipeButtonText}</Button>
             </div>
             {addRecipe &&
@@ -487,7 +508,7 @@ function RecipeDirectory() {
                                 title={recipe.name}
                                 action={
                                     user && 
-                                        <Container>
+                                        <Container sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                                             <IconButton size="small" onClick={(event) => {handleFavorites(event, recipe.id)}}>
                                                 {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
                                             </IconButton>  
