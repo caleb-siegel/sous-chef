@@ -50,21 +50,26 @@ def login():
     else:
         return { "error": "Invalid username or password" }, 401
     
-@app.post('/api/user')
-def post_user():
-    data = request.json
-    try:
-        new_user = User(
-            name= data.get("name"),
-            password_hash= bcrypt.generate_password_hash(data.get("password_hash"))
-        )
-        db.session.add(new_user)
-        db.session.commit()
-        
-        return new_user.to_dict(), 201
-    except Exception as e:
-        print(e)
-        return {"error": f"could not post user: {e}"}, 405
+@app.route('/api/user', methods=['GET', 'POST'])
+def user():
+    if request.method == 'GET':
+        users = [user.to_dict() for user in User.query.all()]
+        return make_response( users, 200 )
+    
+    elif request.method == 'POST':
+        data = request.json
+        try:
+            new_user = User(
+                name= data.get("name"),
+                password_hash= bcrypt.generate_password_hash(data.get("password_hash"))
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            
+            return new_user.to_dict(), 201
+        except Exception as e:
+            print(e)
+            return {"error": f"could not post user: {e}"}, 405
 
 @app.route('/api/sourcecategories')
 def get_source_categories():

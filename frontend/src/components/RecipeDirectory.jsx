@@ -74,6 +74,18 @@ function RecipeDirectory() {
         });
     }, []);
 
+    // const [users, setUsers] = useState([])
+    // useEffect(() => {
+    //     fetch("/api/users")
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //         data.forEach(user => {
+    //             uniqueCookbooks.push(user.name);
+    //         });
+    //         setCookbooks(uniqueCookbooks);
+    //     });
+    // }, []);
+
     let recipeList = recipes;
     if (chosenCookbook) {
         recipeList = recipeList.filter(recipe => chosenCookbook === recipe.source)

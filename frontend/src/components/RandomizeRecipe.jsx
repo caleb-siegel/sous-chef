@@ -20,9 +20,8 @@ function RandomizeRecipe() {
         <Container>
             <Paper sx={{ bgcolor: "primary.main", padding: '50px' }}>
                 <h1>Don't Know What To Cook?</h1>
-                <h2>Let Us Decide For You</h2>
-                <h4>Click Button Below</h4>
-                <Button color="secondary" variant="contained" onClick={handleRandom}>Random</Button>
+                <h2>Let Us Show You A Recipe At Random</h2>
+                <Button color="secondary" variant="contained" onClick={handleRandom}>Spice It Up</Button>
             </Paper>
             {showRecipe && randomRecipe.recipe ? <RecipePage recipe={randomRecipe.recipe} user={user}/> : ""}
             
