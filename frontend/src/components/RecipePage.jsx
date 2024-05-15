@@ -13,6 +13,49 @@ function RecipePage({ recipe, user, id }) {
         setDimensions(event.target.value)
     }
 
+    const [userTags, setUserTags] = useState([]);
+    useEffect(() => {
+        fetch("/api/usertags")
+        .then((response) => response.json())
+        .then((data) => setUserTags(data));
+    }, []);
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleTagSelect = (recipeIdTag, userTagId) => {
+        if (userTagId !== null) {
+            fetch('/api/userrecipetags', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    recipe_id: recipeIdTag,
+                    user_tag_id: userTagId,
+                }),
+            })
+            .then((response) => response.json())
+            .then(response => {
+                console.log('User tag posted successfully:', response.data);
+            })
+            .catch(error => {
+                console.error('Error posting user tag:', error);
+            });
+        };        
+        handleClose();
+    };
+
+    const handleDeleteUserTag = (event, id) => {
+        event.preventDefault();
+        fetch(`/api/userrecipetags/${id}`, {
+            method: "DELETE",
+        })
+        .then((data) => {})
+      };
+
     return (
         <Box key={recipe.id} >
             <Container>
@@ -37,9 +80,11 @@ function RecipePage({ recipe, user, id }) {
                             label={user_recipe_tag.user_tag.name}
                             color="secondary"
                             sx={{ margin: '1px'}}
+                            onDelete={(event) => handleDeleteUserTag(event, user_recipe_tag.id)}
                         />
                     ))
                 }
+                {user && <UserRecipeTagsPopover recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
                 <AddToMealPrep user={user} recipeId={recipe.id}/>
             </Container>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', }}>
