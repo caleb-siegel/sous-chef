@@ -1,52 +1,57 @@
-import React, { useState } from 'react'
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+// RecipePopover.js
+import React, { useState } from 'react';
+import Popover from '@mui/material/Popover';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import { Button, Chip, Divider, TextField, Menu } from '@mui/material';
 
-function UserRecipeTagsMenu({recipeId}) {
-    const [showAddUserRecipe, setShowAddUserRecipe] = useState(null);
-    const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+function UserRecipeTagsPopover({ recipeId, userTags, handleTagSelect }) {
+  const [anchorEl, setAnchorEl] = useState(null);
 
-    const handleAddUserTagsClick = (event) => {
-        setShowAddUserRecipe(event.currentTarget)
-        setSelectedRecipeId(recipeId);
-    };
+  const handleClick = (event) => {
+    event.preventDefault();
+    setAnchorEl(event.currentTarget);
+  };
 
-    const handleCloseUserRecipeTags = (recipeIdTag, userTagId) => {
-        console.log(`this is the recipe id inside the function: ${recipeIdTag}`)
-        setShowAddUserRecipe(null);
-        if (userTagId !== null) {
-            fetch('/api/userrecipetags', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    user_id: user.id,
-                    recipe_id: recipeIdTag,
-                    user_tag_id: userTagId,
-                }),
-            })
-            .then((response) => response.json())
-            .then(response => {
-                console.log('User tag posted successfully:', response.data);
-            })
-            .catch(error => {
-                console.error('Error posting user tag:', error);
-            });
-        };
-    }
-    return (
-    <Menu
-        anchorEl={showAddUserRecipe}
-        open={Boolean(showAddUserRecipe)}
-        onClose={handleCloseUserRecipeTags}
-    >
-        {userTags.map(userTag => {
-            console.log(recipe.id)
-            return <MenuItem key={userTag.id} onClick={() => handleCloseUserRecipeTags(recipe.id, userTag.id)}>{userTag.name} {recipe.id}</MenuItem>
-        })}
-    </Menu>
-  )
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
+  return (
+    <>
+      <Chip
+        id='+Chip'
+        size="small"
+        label="+"
+        color="secondary"
+        variant="outlined"
+        onClick={handleClick}
+      />
+      <Menu
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        MenuListProps={{ 'aria-labelledby': '+Chip'}}
+      >
+        {/* <Select value="" onChange={(event) => handleTagSelect(recipeId, event.target.value)}> */}
+          {userTags.map((userTag) => (
+            <MenuItem 
+              key={userTag.id} 
+              value={userTag.id} 
+              onClick={(event) => {
+                handleTagSelect(recipeId, event.target.value); 
+                handleClose()
+              }}
+            >
+              {userTag.name}
+            </MenuItem>
+          ))}
+        {/* </Select> */}
+      </Menu>
+    </>
+  );
 }
 
-export default UserRecipeTagsMenu
+export default UserRecipeTagsPopover;

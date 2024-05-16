@@ -11,7 +11,7 @@ import { useOutletContext } from "react-router-dom";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import PersonIcon from '@mui/icons-material/Person';
-import UserRecipeTagsPopover from "./UserRecipeTagsPopover";
+import UserRecipeTagsPopover from "./UserRecipeTagsMenu";
 import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
@@ -573,7 +573,7 @@ function RecipeDirectory() {
                                         />
                                     ))
                                 }
-                                {user && <UserRecipeTagsPopover recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
+                                {user && <UserRecipeTagsMenu recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
                                 <Divider/>
                                 <AddToMealPrep user={user} recipeId={recipe.id}/>
                                 {/* // <CardContent>

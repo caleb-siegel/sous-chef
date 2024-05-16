@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardMedia, Chip, Container, Divider, Box, Paper, Badge, IconButton, Typography } from '@mui/material';
-import UserRecipeTagsPopover from './UserRecipeTagsPopover';
+import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import AddToMealPrep from './AddToMealPrep';
 import { useOutletContext } from "react-router-dom";
 import FavoriteIcon from '@mui/icons-material/Favorite';

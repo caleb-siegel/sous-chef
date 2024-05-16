@@ -41,8 +41,27 @@ function Home() {
                     </Link>
                 }
                 </div>
-
             </Paper>
+            {/* <div style={{ width: '100%', maxWidth: '100%'  }}>
+                <div style={{ position: 'relative' }}>
+                    <img style={{ maxWidth: '100vw' }} src="https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?cs=srgb&dl=pexels-ella-olsson-572949-1640774.jpg&fm=jpg" alt="Your image" />
+                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', color: 'primary' }}>
+                        <h2>Welcome to Sous Chef</h2>
+                        <h2>Your all-in-one kitchen assistant</h2>
+                        <h4>Digital cookbook and meal prep guide</h4>
+                        {!user ?
+                            <Link to="login">
+                                <Button color="primary" variant="contained">Log In</Button>
+                            </Link>
+                        : 
+                            <Link to="recipes">
+                                <Button color="primary" variant="contained">See Recipes</Button>
+                            </Link>
+                        }
+                    </div>
+                </div>
+            </div> */}
+
             {!loading ? (
                 <Container sx={{ padding: "10px" }}>
                     <Typography variant="h1" color="secondary">Check out our recipes:</Typography>

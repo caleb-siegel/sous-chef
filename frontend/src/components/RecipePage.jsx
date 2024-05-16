@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
 import { Card, CardHeader, CardMedia, Chip, Container, Divider, Box, Paper, Badge, IconButton, Typography, Select, MenuItem, InputLabel } from '@mui/material';
-import UserRecipeTagsPopover from './UserRecipeTagsPopover';
+import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import AddToMealPrep from './AddToMealPrep';
 import { useOutletContext } from "react-router-dom";
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import RecipeCardsOptions from './RecipeCardsOptions';
 
 function RecipePage({ recipe, user, id }) {
     const [dimensions, setDimensions] = useState(1)
@@ -84,7 +85,7 @@ function RecipePage({ recipe, user, id }) {
                         />
                     ))
                 }
-                {user && <UserRecipeTagsPopover recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
+                {user && <UserRecipeTagsMenu recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
                 <AddToMealPrep user={user} recipeId={recipe.id}/>
             </Container>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', }}>
