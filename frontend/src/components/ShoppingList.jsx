@@ -5,7 +5,7 @@ function ShoppingList({ mealPrep, user }) {
   const ingredientsObject = {};
 
   return (
-    <Container>
+    <Container disableGutters maxWidth={false}>
       <Typography variant="h2">Shopping List</Typography>
       <FormGroup>
         {mealPrep.map(mealPrep => {

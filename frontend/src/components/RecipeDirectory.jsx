@@ -470,7 +470,7 @@ function RecipeDirectory() {
       };
 
     return (
-        <Container sx={{ paddingBottom: '50px'}}>
+        <Container disableGutters maxWidth={false} sx={{ paddingBottom: '50px'}}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <h1>Recipe Directory</h1>
                 <SearchBar cookbooks={cookbooks} chosenCookbook={chosenCookbook} setChosenCookbook={setChosenCookbook}/>
@@ -486,7 +486,7 @@ function RecipeDirectory() {
                 <Filter recipes={recipes} setRecipes={setRecipes} handleAddRecipe={handleAddRecipe} filterValue={filterValue} handleFilterValueChange={handleFilterValueChange} filterType={filterType} handleFilterTypeChange={handleFilterTypeChange} filterBy={filterBy} handleFilterByChange={handleFilterByChange} tags={tags} userTags={userTags}/>
             }
             <br/>
-            <Container>
+            <Container disableGutters maxWidth={false}>
                 <Button variant={outlinedVariant === "allrecipes" ? "outlined" : "contained"} color="primary" size="small" value="allrecipes" onClick={(event) => handleCategorizationButtons(event.target.value)}>All Recipes</Button>
                 { user && <Button variant={outlinedVariant === "breakfast" ? "outlined" : "contained"} color="primary" size="small" value="breakfast" onClick={(event) => handleCategorizationButtons(event.target.value)}>Breakfast</Button>}
                 { user && <Button variant={outlinedVariant === "chicken" ? "outlined" : "contained"} color="primary" size="small" value="chicken" onClick={(event) => handleCategorizationButtons(event.target.value)}>Chicken</Button>}

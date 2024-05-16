@@ -11,7 +11,7 @@ import SearchBar from "./SearchBar";
 function Navbar({ user, logout, darkMode, toggleDarkMode }) {
     
     return (
-        <Container className="navbar">
+        <Container disableGutters maxWidth={false} className="navbar">
             <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item>
                     <Box display="flex">

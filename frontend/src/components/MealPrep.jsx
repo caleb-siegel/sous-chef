@@ -29,9 +29,9 @@ function MealPrep() {
       };
 
     return (
-    <Container>
+    <Container disableGutters maxWidth={false}>
         {/* <MealPrepCalendar/> */}
-        <Container style={{ display: 'flex'}}>
+        <Container disableGutters maxWidth={false} style={{ display: 'flex'}}>
             {weekdayOptions.map((weekday) => {
                 return (
                     <Card key={weekday} sx={{ maxWidth: 345,  padding: '10px', border: '1px solid #3FFFC2' }}>

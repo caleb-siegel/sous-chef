@@ -63,7 +63,7 @@ function Home() {
             </div> */}
 
             {!loading ? (
-                <Container sx={{ padding: "10px" }}>
+                <Container disableGutters maxWidth={false} sx={{ padding: "10px" }}>
                     <Typography variant="h1" color="secondary">Check out our recipes:</Typography>
                     <Stack direction="row" sx={{ display: 'flex', flexWrap: 'wrap' }}>
                         {recipes.map(recipe => {
