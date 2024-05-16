@@ -15,8 +15,8 @@ import UserRecipeTagsPopover from "./UserRecipeTagsPopover";
 import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchBar from "./SearchBar";
+import RecipeCardsOptions from "./RecipeCardsOptions";
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
@@ -410,8 +410,16 @@ function RecipeDirectory() {
         }
     };
 
-    const handleVert = (event, recipeId) => {
+
+    const handleDeleteRecipe = (event, id) => {
         event.preventDefault();
+        fetch(`/api/recipes/${id}`, {
+            method: "DELETE",
+        })
+        .then((data) => {
+            alert("You have deleted the recipe")
+            window.location.reload()
+        })
     }
 
     const [value, setValue] = useState(0);
@@ -447,7 +455,8 @@ function RecipeDirectory() {
             .catch(error => {
                 console.error('Error posting user tag:', error);
             });
-        };        handleClose();
+        };        
+        handleClose();
     };
 
     const open = Boolean(anchorEl);
@@ -525,9 +534,7 @@ function RecipeDirectory() {
                                             <IconButton size="small" onClick={(event) => {handleFavorites(event, recipe.id)}}>
                                                 {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
                                             </IconButton>  
-                                            <IconButton onClick={(event) => {handleVert(event, recipe.id)}}>
-                                                <MoreVertIcon/>
-                                            </IconButton>                                            
+                                            {user.id === 2 && <RecipeCardsOptions handleDelete={handleDeleteRecipe} recipeId={recipe.id} />}
                                         </Container>
                                         
                                         

@@ -202,12 +202,22 @@ def random_recipe():
 
     return response
     
-@app.route('/api/recipes/<int:id>')
+@app.route('/api/recipes/<int:id>', methods=['GET', 'DELETE'])
 def recipe_id(id):
-    recipe_id = db.session.get(Recipe, id)
-    if not recipe_id:
-        return {"error": f"recipe with id {id} not found"}, 404
-    return recipe_id.to_dict()
+    if request.method == 'GET':
+        recipe_id = db.session.get(Recipe, id)
+        if not recipe_id:
+            return {"error": f"recipe with id {id} not found"}, 404
+        return recipe_id.to_dict()
+    
+    elif request.method == 'DELETE':
+        recipe_id = db.session.get(Recipe, id)
+        if not recipe_id:
+            return {"error": f"Recipe with id {id} not found"}, 404
+        db.session.delete(recipe_id)
+        db.session.commit()
+        return {}, 202
+
 
 @app.route('/api/userrecipes', methods=['GET', 'POST'])
 def user_recipes():
