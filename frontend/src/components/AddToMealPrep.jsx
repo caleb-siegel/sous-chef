@@ -1,7 +1,7 @@
-import { Container, Chip, InputLabel, Select, MenuItem, Button, Stack } from '@mui/material'
+import { Container, Chip, InputLabel, Select, MenuItem, Button, Stack, TextField } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 
-function AddToMealPrep({ user, recipeId }) {
+function AddToMealPrep({ user, recipeId = "" }) {
     const [showAddMealPrepForm, setShowAddMealPrepForm] = useState(false)
   
     const [weekday, setWeekday] = useState("")
@@ -9,6 +9,8 @@ function AddToMealPrep({ user, recipeId }) {
 
     const weekdayOptions = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     const mealOptions = ['Breakfast', 'Lunch', 'Dinner']
+
+    const [addedRecipe, setAddedRecipe] = useState("")
 
     const [mealPrep, setMealPrep] = useState([]);
     useEffect(() => {
@@ -23,13 +25,16 @@ function AddToMealPrep({ user, recipeId }) {
     }
 
     const handleSubmitMealPrep = (event) => {
+        console.log(recipeId)
+        console.log(addedRecipe)
         event.preventDefault();
         const mealPrepData = {
-            user_id: user.id,
-            recipe_id: recipeId,
+            user_id: user ? user.id : "",
+            recipe_id: recipeId ? recipeId : addedRecipe,
             weekday: weekday,
             meal: meal,
         }
+        console.log(mealPrepData)
         fetch("/api/mealprep", {
             method: "POST",
             headers: {
@@ -42,11 +47,14 @@ function AddToMealPrep({ user, recipeId }) {
                 setWeekday("")
                 setMeal("")
                 setShowAddMealPrepForm(!showAddMealPrepForm)
+                window.location.reload();
             })
     }
 
+    
+
     return (
-    <Container sx={{ paddingTop: '5px' }}>
+    <Container disableGutters maxWidth={false} sx={{ paddingTop: '5px' }}>
         {mealPrep && mealPrep.map(prep => {
             return (
                 (prep.recipe_id === recipeId) && (user && user.id && prep.user_id && (user.id === prep.user_id)) &&
@@ -64,6 +72,9 @@ function AddToMealPrep({ user, recipeId }) {
         {showAddMealPrepForm &&
             <form onSubmit={(event) => handleSubmitMealPrep(event)}>
                 <Stack direction="row">
+                    {recipeId === "" && 
+                    <TextField id="text-field-recipe-meal-prep-form" label="Recipe" variant="standard" value={addedRecipe} onChange={(event) => setAddedRecipe(event.target.value)} />
+                    }
                     <InputLabel id="demo-simple-select-label">Weekday</InputLabel>
                     <Select
                         labelId="demo-simple-select-label"

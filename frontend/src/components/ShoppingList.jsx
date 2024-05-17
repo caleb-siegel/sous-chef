@@ -9,7 +9,8 @@ function ShoppingList({ mealPrep, user }) {
       <Typography variant="h2">Shopping List</Typography>
       <FormGroup>
         {mealPrep.map(mealPrep => {
-          return mealPrep.recipe.recipe_ingredients.map(ingredient => {
+          return (typeof mealPrep.recipe_id) === "number" ?
+          mealPrep.recipe.recipe_ingredients.map(ingredient => {
               // {
               //   if ((!(ingredient.ingredient_name in ingredientsObject)) && ingredient.ingredient_name && ingredient.ingredient_quantity) {
               //     ingredientsObject[ingredient.ingredient_name] = ingredient.ingredient_quantity
@@ -27,6 +28,12 @@ function ShoppingList({ mealPrep, user }) {
                 />
               )
           })
+          : user && user.id && (user.id === mealPrep.user_id) &&
+            <FormControlLabel 
+              key={mealPrep.recipe_id} 
+              control={<Checkbox />} 
+              label={`${mealPrep.recipe_id}`} 
+            />
         })}
       </FormGroup>
     </Container>

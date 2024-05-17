@@ -634,7 +634,7 @@ function RecipeDirectory() {
                 </div>
                 
             ): (
-                <Container>
+                <Container disableGutters maxWidth={false}>
                     <RecipeSkeleton />
                 </Container>
 )}

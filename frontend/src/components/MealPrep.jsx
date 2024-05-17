@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Container, Card, CardHeader, Divider, Chip, FormGroup, FormControlLabel, Checkbox, Tooltip } from '@mui/material'
+import { Container, Card, CardHeader, Divider, Chip, FormGroup, FormControlLabel, Checkbox, Tooltip, Button } from '@mui/material'
 // import MealPrepCalendar from './MealPrepCalendar'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingList from './ShoppingList';
 import { useOutletContext } from "react-router-dom";
+import AddToMealPrep from './AddToMealPrep';
 
 function MealPrep() {
     const {user} = useOutletContext();
@@ -28,9 +29,18 @@ function MealPrep() {
         })
       };
 
+    const [showAddRecipeForm, setShowAddRecipeForm] = useState(false)
+
+    const handleAddRecipeForm = (event) => {
+        event.preventDefault();
+        setShowAddRecipeForm(!showAddRecipeForm);
+    };
+
+
     return (
     <Container disableGutters maxWidth={false}>
         {/* <MealPrepCalendar/> */}
+        <AddToMealPrep user={user} />
         <Container disableGutters maxWidth={false} style={{ display: 'flex'}}>
             {weekdayOptions.map((weekday) => {
                 return (
@@ -43,11 +53,16 @@ function MealPrep() {
                                     <CardHeader title={meal} titleTypographyProps={{ sx: { fontSize: 14 } }}/>
                                     {mealPrep.map(prep => {
                                         return user && user.id && prep.user_id === user.id && prep && (prep.meal === meal) && (prep.weekday === weekday) && 
-                                        <a href={`/recipes/${prep.recipe.id}`} key={prep.recipe.id} style={{ textDecoration: 'none' }}>
-                                            <Tooltip title={prep.recipe.name}>
-                                                <Chip key={prep.id} color="primary" label={prep.recipe.name} onDelete={(event) => handleDelete(event, prep.id)}></Chip>
+                                        typeof prep.recipe_id === "number" ?
+                                            <a href={`/recipes/${prep.recipe.id}`} key={prep.recipe.id} style={{ textDecoration: 'none' }}>
+                                                <Tooltip title={prep.recipe.name}>
+                                                    <Chip key={prep.id} color="primary" label={prep.recipe.name} onDelete={(event) => handleDelete(event, prep.id)}></Chip>
+                                                </Tooltip>
+                                            </a>
+                                        : user && user.id && prep.user_id === user.id && prep && (prep.meal === meal) && (prep.weekday === weekday) && typeof prep.recipe_id === "string" &&
+                                            <Tooltip title={prep.recipe_id}>
+                                                <Chip key={prep.recipe_id} color="primary" label={prep.recipe_id} onDelete={(event) => handleDelete(event, prep.id)}></Chip>
                                             </Tooltip>
-                                        </a>
                                     })}
                                 </Card>
                             )

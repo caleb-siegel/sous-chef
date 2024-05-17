@@ -17,7 +17,7 @@ function RandomizeRecipe() {
     }
   
     return (
-        <Container>
+        <Container disableGutters maxWidth={false}>
             <Paper sx={{ bgcolor: "primary.main", padding: '50px' }}>
                 <h1>Don't Know What To Cook?</h1>
                 <h2>Let Us Show You A Recipe At Random</h2>

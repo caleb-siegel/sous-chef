@@ -77,7 +77,7 @@ function Home() {
                 </Container>
             )
             :                 
-            <Container>
+            <Container disableGutters maxWidth={false}>
                 <HomeSkeleton dimension={dimension}/>
             </Container>
             }

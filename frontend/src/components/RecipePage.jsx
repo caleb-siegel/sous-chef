@@ -59,13 +59,13 @@ function RecipePage({ recipe, user, id }) {
 
     return (
         <Box key={recipe.id} >
-            <Container>
+            <Container disableGutters maxWidth={false}>
                 <Typography variant="h1" color="secondary" >{recipe.name}</Typography>
                 <Badge badgeContent={recipe && recipe.user_recipes && recipe.user_recipes.length} color="primary">
                     <FavoriteIcon color="action" />
                 </Badge>
             </Container>
-            <Container>
+            <Container disableGutters maxWidth={false}>
                 {recipe.recipe_tags && recipe.recipe_tags.map(tag => {
                     if (tag && tag.tag) {
                         return <Chip key={tag.tag.id} label={tag.tag.name} color="primary" sx={{ margin: '1px',}}/>
@@ -109,13 +109,13 @@ function RecipePage({ recipe, user, id }) {
                         <MenuItem value="5">5x</MenuItem>
                         <MenuItem value="10">10x</MenuItem>
                     </Select>
-                    <Container>Ingredients</Container>
+                    <div><strong>Ingredients</strong></div>
                     {recipe.recipe_ingredients && recipe.recipe_ingredients.map(ingredient => {
                         return <li key={ingredient.id}>{ingredient.ingredient_quantity === 0 ? "" : (ingredient.ingredient_quantity * dimensions)} {ingredient.ingredient_unit} {ingredient.ingredient_name} <em>{ingredient.ingredient_note && ingredient.ingredient_note}</em></li>
                     })}
                 </Paper>
                 <Paper sx={{ display: 'flex', flexWrap: 'wrap' }}>
-                    <Container>Instructions</Container>
+                    <div><strong>Instructions</strong></div>
                     {recipe.instructions && 
                         recipe.instructions.split(/\d+\./).filter(instruction => instruction.trim() !== "").map((instruction, index) => {
                             return <div key={index}>{index + 1}.{instruction}</div>;
