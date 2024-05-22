@@ -6,6 +6,7 @@ import AddToMealPrep from './AddToMealPrep';
 import { useOutletContext } from "react-router-dom";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import RecipePage from './RecipePage';
+import RecipeEditPage from './RecipeEditPage';
 
 
 function IndividualRecipe() {
@@ -18,9 +19,15 @@ function IndividualRecipe() {
         .then((response) => response.json())
         .then((data) => setRecipe(data));
     }, []);
+
+    const [editRecipe, setEditRecipe] = useState(false)
+
+    const handleEditRecipe = () => {
+        setEditRecipe(!editRecipe)
+    }
   
     return (
-        <RecipePage recipe={recipe} user={user} id={id}/>
+        !editRecipe ? <RecipePage recipe={recipe} user={user} id={id} editRecipe={editRecipe} handleEditRecipe={handleEditRecipe}/> : <RecipeEditPage recipe={recipe} user={user} id={id}/>
     )
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardMedia, Chip, Container, Divider, Box, Paper, Badge, IconButton, Typography, Select, MenuItem, InputLabel } from '@mui/material';
 import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import AddToMealPrep from './AddToMealPrep';
@@ -7,7 +7,10 @@ import { useOutletContext } from "react-router-dom";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import RecipeCardsOptions from './RecipeCardsOptions';
 
-function RecipePage({ recipe, user, id }) {
+
+function RecipePage({ recipe, user, id, editRecipe, handleEditRecipe }) {
+    const navigate = useNavigate();
+    
     const [dimensions, setDimensions] = useState(1)
     
     const handleDimensions = (event) => {
@@ -57,10 +60,24 @@ function RecipePage({ recipe, user, id }) {
         .then((data) => {})
       };
 
+      const handleDeleteRecipe = (event, id) => {
+        event.preventDefault();
+        fetch(`/api/recipes/${id}`, {
+            method: "DELETE",
+        })
+        .then((data) => {
+            alert("You have deleted the recipe")
+            navigate('/recipes')
+        })
+    }
+
     return (
         <Box key={recipe.id} >
             <Container disableGutters maxWidth={false}>
-                <Typography variant="h1" color="secondary" >{recipe.name}</Typography>
+                <div style={{ display: 'flex', alignItems: 'center'}}>
+                    <Typography variant="h1" color="secondary" >{recipe.name}</Typography>
+                    {user && user.id === 2 && <RecipeCardsOptions handleDelete={handleDeleteRecipe} recipeId={recipe.id} editRecipe={editRecipe} handleEditRecipe={handleEditRecipe}/>}
+                </div>
                 <Badge badgeContent={recipe && recipe.user_recipes && recipe.user_recipes.length} color="primary">
                     <FavoriteIcon color="action" />
                 </Badge>
@@ -85,7 +102,7 @@ function RecipePage({ recipe, user, id }) {
                         />
                     ))
                 }
-                {user && <UserRecipeTagsMenu recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
+                {user && <UserRecipeTagsMenu recipeId={recipe.id} tags={userTags} handleTagSelect={handleTagSelect} color="secondary"/>}
                 <AddToMealPrep user={user} recipeId={recipe.id}/>
             </Container>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', }}>

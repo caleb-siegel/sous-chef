@@ -54,6 +54,9 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    db.session.commit()
+
+
+
+    # db.session.commit()
 
 print("seed complete")

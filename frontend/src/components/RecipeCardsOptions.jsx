@@ -4,7 +4,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-function RecipeCardsOptions({ handleDelete, recipeId }) {
+function RecipeCardsOptions({ handleDelete, recipeId, editRecipe, handleEditRecipe }) {
     const [recipeOptionsAnchorEl, setRecipeOptionsAnchorEl] = useState(null);
 
     const handleClick = (event) => {
@@ -32,7 +32,7 @@ function RecipeCardsOptions({ handleDelete, recipeId }) {
                 'aria-labelledby': 'icon-button',
                 }}
             >
-                <MenuItem key="edit" value="edit"><EditIcon/></MenuItem>
+                <MenuItem key="edit" value="edit" onClick={(event) => handleEditRecipe(event, recipeId)}><EditIcon/></MenuItem>
                 <MenuItem key="delete" value="delete" onClick={(event) => handleDelete(event, recipeId)}><DeleteIcon/></MenuItem>
             </Menu>
         </div>

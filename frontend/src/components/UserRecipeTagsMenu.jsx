@@ -5,7 +5,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { Button, Chip, Divider, TextField, Menu } from '@mui/material';
 
-function UserRecipeTagsPopover({ recipeId, userTags, handleTagSelect }) {
+function UserRecipeTagsMenu({ recipeId, tags, handleTagSelect, color }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleClick = (event) => {
@@ -25,7 +25,7 @@ function UserRecipeTagsPopover({ recipeId, userTags, handleTagSelect }) {
         id='+Chip'
         size="small"
         label="+"
-        color="secondary"
+        color={color}
         variant="outlined"
         onClick={handleClick}
       />
@@ -36,16 +36,16 @@ function UserRecipeTagsPopover({ recipeId, userTags, handleTagSelect }) {
         MenuListProps={{ 'aria-labelledby': '+Chip'}}
       >
         {/* <Select value="" onChange={(event) => handleTagSelect(recipeId, event.target.value)}> */}
-          {userTags.map((userTag) => (
+          {tags.map((tag) => (
             <MenuItem 
-              key={userTag.id} 
-              value={userTag.id} 
+              key={tag.id} 
+              value={tag.id} 
               onClick={(event) => {
                 handleTagSelect(recipeId, event.target.value); 
                 handleClose()
               }}
             >
-              {userTag.name}
+              {tag.name}
             </MenuItem>
           ))}
         {/* </Select> */}
@@ -54,4 +54,4 @@ function UserRecipeTagsPopover({ recipeId, userTags, handleTagSelect }) {
   );
 }
 
-export default UserRecipeTagsPopover;
+export default UserRecipeTagsMenu;

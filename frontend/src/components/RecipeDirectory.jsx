@@ -11,7 +11,6 @@ import { useOutletContext } from "react-router-dom";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import PersonIcon from '@mui/icons-material/Person';
-import UserRecipeTagsPopover from "./UserRecipeTagsMenu";
 import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
@@ -410,18 +409,6 @@ function RecipeDirectory() {
         }
     };
 
-
-    const handleDeleteRecipe = (event, id) => {
-        event.preventDefault();
-        fetch(`/api/recipes/${id}`, {
-            method: "DELETE",
-        })
-        .then((data) => {
-            alert("You have deleted the recipe")
-            window.location.reload()
-        })
-    }
-
     const [value, setValue] = useState(0);
     
     const [anchorEl, setAnchorEl] = useState(null);
@@ -533,8 +520,7 @@ function RecipeDirectory() {
                                         <Container sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                                             <IconButton size="small" onClick={(event) => {handleFavorites(event, recipe.id)}}>
                                                 {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
-                                            </IconButton>  
-                                            {user.id === 2 && <RecipeCardsOptions handleDelete={handleDeleteRecipe} recipeId={recipe.id} />}
+                                            </IconButton>
                                         </Container>
                                         
                                         
@@ -573,7 +559,7 @@ function RecipeDirectory() {
                                         />
                                     ))
                                 }
-                                {user && <UserRecipeTagsMenu recipeId={recipe.id} userTags={userTags} handleTagSelect={handleTagSelect}/>}
+                                {user && <UserRecipeTagsMenu recipeId={recipe.id} tags={userTags} handleTagSelect={handleTagSelect} color="secondary"/>}
                                 <Divider/>
                                 <AddToMealPrep user={user} recipeId={recipe.id}/>
                                 {/* // <CardContent>
