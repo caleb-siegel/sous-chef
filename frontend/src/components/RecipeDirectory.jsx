@@ -151,7 +151,7 @@ function RecipeDirectory() {
                 recipe.recipe_ingredients &&
                 recipe.recipe_ingredients.some(ingredient => {
                     return (
-                        ingredient &&
+                        ingredient && ingredient.ingredient_name &&
                         ingredient.ingredient_name.toLowerCase().includes("chicken")
                         // && !ingredient.ingredient_name.toLowerCase().includes("chicken stock")
                     )
@@ -181,7 +181,7 @@ function RecipeDirectory() {
                 recipe.recipe_ingredients &&
                 recipe.recipe_ingredients.some(ingredient => {
                     return (
-                        ingredient &&
+                        ingredient && ingredient.ingredient_name &&
                         (
                             ingredient.ingredient_name.toLowerCase().includes("salmon") ||
                             ingredient.ingredient_name.toLowerCase().includes("tilapia") ||

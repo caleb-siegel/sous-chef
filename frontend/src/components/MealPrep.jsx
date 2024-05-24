@@ -49,7 +49,7 @@ function MealPrep() {
                         <Divider/>
                         {mealOptions.map((meal) => {
                             return (
-                                <Card key={meal} size="small" sx={{margin: "5px" }}>
+                                <Card key={`${weekday}${meal}`} size="small" sx={{margin: "5px" }}>
                                     <CardHeader title={meal} titleTypographyProps={{ sx: { fontSize: 14 } }}/>
                                     {mealPrep.map(prep => {
                                         return user && user.id && prep.user_id === user.id && prep && (prep.meal === meal) && (prep.weekday === weekday) && 

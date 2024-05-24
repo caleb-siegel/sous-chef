@@ -27,7 +27,7 @@ function IndividualRecipe() {
     }
   
     return (
-        !editRecipe ? <RecipePage recipe={recipe} user={user} id={id} editRecipe={editRecipe} handleEditRecipe={handleEditRecipe}/> : <RecipeEditPage recipe={recipe} user={user} id={id}/>
+        !editRecipe ? <RecipePage recipe={recipe} user={user} id={id} editRecipe={editRecipe} handleEditRecipe={handleEditRecipe}/> : <RecipeEditPage recipe={recipe} user={user} id={id} editRecipe={editRecipe} setEditRecipe={setEditRecipe}/>
     )
 }
 

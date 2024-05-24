@@ -36,7 +36,7 @@ function UserRecipeTagsMenu({ recipeId, tags, handleTagSelect, color }) {
         MenuListProps={{ 'aria-labelledby': '+Chip'}}
       >
         {/* <Select value="" onChange={(event) => handleTagSelect(recipeId, event.target.value)}> */}
-          {tags.map((tag) => (
+          {tags && tags.map((tag) => (
             <MenuItem 
               key={tag.id} 
               value={tag.id} 

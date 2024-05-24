@@ -202,7 +202,7 @@ def random_recipe():
 
     return response
     
-@app.route('/api/recipes/<int:id>', methods=['GET', 'DELETE'])
+@app.route('/api/recipes/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
 def recipe_id(id):
     if request.method == 'GET':
         recipe_id = db.session.get(Recipe, id)
@@ -217,6 +217,21 @@ def recipe_id(id):
         db.session.delete(recipe_id)
         db.session.commit()
         return {}, 202
+    
+    elif request.method == 'PATCH':
+        recipe = db.session.get(Recipe, id)
+        if not recipe:
+            return {"error": f"recipe for id {id} not found"}, 404
+        try:
+            data = request.json
+            for key in data:
+                setattr(recipe, key, data[key])
+            db.session.add(recipe)
+            db.session.commit()
+            return recipe.to_dict(), 200
+        except Exception as e:
+            return {"error": f'{e}'}
+
 
 
 @app.route('/api/userrecipes', methods=['GET', 'POST'])
@@ -273,7 +288,6 @@ def user_recipe_id(id):
 
 @app.route('/api/recipetags', methods=['GET', 'POST'])
 def recipe_tags():
-
     if request.method == 'GET':
         recipe_tags = []
         for recipe_tag in Recipe_Tag.query.all():
@@ -284,7 +298,6 @@ def recipe_tags():
             recipe_tags,
             200
         )
-
         return response
 
     elif request.method == 'POST':
@@ -304,7 +317,22 @@ def recipe_tags():
         )
 
         return response
-    
+
+@app.route('/api/recipetags/<int:id>/', methods=['GET', 'POST', 'DELETE'])
+def delete_recipe_tags(id):
+    if request.method == 'DELETE':
+        recipe_tag = db.session.get(Recipe_Tag, id)
+        if not recipe_tag:
+            return {"error": f"Recipe Tag with id {id} not found"}, 404
+        db.session.delete(recipe_tag)
+        db.session.commit()
+        return {}, 202
+    elif request.method == 'GET':
+        recipe_tag = db.session.get(Recipe_Tag, id)
+        if not recipe_tag:
+            return {"error": f"recipe tag with id {id} not found"}, 404
+        return recipe_tag.to_dict()
+
 @app.route('/api/recipeingredients', methods=['GET', 'POST'])
 def recipe_ingredients():
     if request.method == 'GET':

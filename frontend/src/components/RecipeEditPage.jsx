@@ -8,7 +8,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import RecipeCardsOptions from './RecipeCardsOptions';
 import Ingredients from './Ingredients';
 
-function RecipeEditPage({ recipe, user, id }) {
+function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
     const [name, setName] = useState(recipe.name)
     const [picture, setPicture] = useState(recipe.picture);
     const [sourceCategoryInput, setSourceCategoryInput] = useState(recipe.source_category.name);
@@ -16,13 +16,7 @@ function RecipeEditPage({ recipe, user, id }) {
     const [reference, setReference] = useState(recipe.reference);
     const [recipeInstructions, setRecipeInstructions] = useState(recipe.instructions);
     const [ingredients, setIngredients] = useState(recipe.recipe_ingredients);
-    console.log(ingredients)
-    const [dimensions, setDimensions] = useState(1)
     
-    const handleDimensions = (event) => {
-        setDimensions(event.target.value)
-    }
-
     const [tags, setTags] = useState([]);
     useEffect(() => {
         fetch("/api/tags")
@@ -31,44 +25,37 @@ function RecipeEditPage({ recipe, user, id }) {
     }, []);
     console.log(tags)
 
-    // const [userTags, setUserTags] = useState([]);
-    // useEffect(() => {
-    //     fetch("/api/usertags")
-    //     .then((response) => response.json())
-    //     .then((data) => setUserTags(data));
-    // }, []);
-
     const handleClose = () => {
         setAnchorEl(null);
     };
 
-    const handleTagSelect = (recipeIdTag, userTagId) => {
-        if (userTagId !== null) {
-            fetch('/api/userrecipetags', {
+    const handleTagSelect = (recipeIdTag, tagId) => {
+        if (tagId !== null) {
+            fetch('/api/recipetags', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    user_id: user.id,
                     recipe_id: recipeIdTag,
-                    user_tag_id: userTagId,
+                    tag_id: tagId,
                 }),
             })
             .then((response) => response.json())
             .then(response => {
-                console.log('User tag posted successfully:', response.data);
+                console.log('Tag posted successfully:', response.data);
             })
             .catch(error => {
-                console.error('Error posting user tag:', error);
+                console.error('Error posting tag:', error);
             });
         };        
         handleClose();
+        window.location.reload();
     };
 
     const handleDeleteTag = (event, id) => {
         event.preventDefault();
-        fetch(`/api/tags/${id}`, {
+        fetch(`/api/recipetags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {})
@@ -105,12 +92,35 @@ function RecipeEditPage({ recipe, user, id }) {
         ));
     };
 
+    const handlePatch = (id) => {
+        fetch(`/api/recipes/${id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            body: JSON.stringify({
+                name: name,
+                picture: picture,
+                reference: reference,
+                source: sourceName,
+                instructions: recipeInstructions,
+                // source_category_id: sourceCategoryInput,
+                // recipe_ingredients: ingredients
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                window.location.reload();
+            })
+    }
+
     return (
         <Box key={recipe.id} >
             <Container disableGutters maxWidth={false}>
                 <div style={{ display: 'flex', alignItems: 'center'}}>
                     <TextField id="outlined-basic" label="Name" variant="standard" value={name} onChange={(event) => setName(event.target.value)} fullWidth/>
-                    <Button variant="contained">Submit</Button>
+                    <Button variant="contained" onClick={() => handlePatch(recipe.id)}>Submit</Button>
                 </div>
             </Container>
             <TextField id="outlined-basic" label="Source Name" variant="standard" value={sourceName} onChange={(event) => setSourceName(event.target.value)}/>
@@ -132,7 +142,7 @@ function RecipeEditPage({ recipe, user, id }) {
             <Container disableGutters maxWidth={false}>
                 {recipe.recipe_tags && recipe.recipe_tags.map(tag => {
                     if (tag && tag.tag) {
-                        return <Chip key={tag.tag.id} label={tag.tag.name} color="primary" sx={{ margin: '1px',}} onDelete={(event) => handleDeleteTag(event, tag.tag.id)}/>
+                        return <Chip key={tag.tag.id} label={tag.tag.name} color="primary" sx={{ margin: '1px',}} onDelete={(event) => handleDeleteTag(event, tag.id)}/>
                     }
                 })}
                 {user && <UserRecipeTagsMenu recipeId={recipe.id} tags={tags} handleTagSelect={handleTagSelect} color="primary"/>}
@@ -144,7 +154,7 @@ function RecipeEditPage({ recipe, user, id }) {
                 </Paper>
                 <Paper sx={{ marginLeft: '10px' }}>
                     <div><strong>Ingredients</strong></div>
-                    {recipe.recipe_ingredients && recipe.recipe_ingredients.map((ingredient) => {
+                    {ingredients.map((ingredient) => {
                         return <Paper>
                             <TextField
                                 label="Quantity"
@@ -172,7 +182,7 @@ function RecipeEditPage({ recipe, user, id }) {
                                 label="Ingredient"
                                 variant="standard"
                                 value={ingredient.ingredient_name}
-                                onChange={(event) => handleIngredientChange(ingredient.id, event.target.value)}
+                                onChange={(event) => handleNameChange(ingredient.id, event.target.value)}
                             />
                             <TextField
                                 label="Ingredient Note"
