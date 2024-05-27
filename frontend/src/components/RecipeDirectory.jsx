@@ -65,7 +65,7 @@ function RecipeDirectory() {
         .then((data) => {
             const uniqueCookbooks = [];
             data.forEach(cookbook => {
-                if (!uniqueCookbooks.includes(cookbook.source)) {
+                if (!uniqueCookbooks.includes(cookbook.source) && cookbook.source !== "") {
                     uniqueCookbooks.push(cookbook.source);
                 }
             });

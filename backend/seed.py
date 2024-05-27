@@ -54,49 +54,54 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    # Create the recipe entry for Lemon-Maple Glazed Salmon
-    lemon_maple_glazed_salmon = Recipe(
-        name="Lemon-Maple Glazed Salmon",
-        picture="/recipes/Lemon-Maple Glazed Salmon.jpeg",
+    # Create the recipe entry for Crispy Chicken Wraps
+    crispy_chicken_wraps = Recipe(
+        name="Crispy Chicken Wraps",
+        picture="",
         source_category_id=2,
-        source="Simply Gourmet",
-        reference="",
-        instructions="""1. Prepare the lemon maple glaze. In a small bowl, whisk together all glaze ingredients until relatively smooth. Set aside.
-    2. Prepare the salmon. Preheat oven to 400°F. Line a baking sheet with parchment paper; coat with nonstick cooking spray.
-    3. Place salmon, skin-side down, on prepared baking sheet. Dab salmon with a dry paper towel; this helps the seasoning stick. Sprinkle with listed spices or your favorite seafood seasonings. Brush a generous amount of glaze onto fish. Allow to rest for 10 minutes.
-    4. Bake, uncovered, on the middle rack for 10 minutes. Remove baking sheet from oven, baste fish with a generous brushing of glaze. Return pan to oven for an additional 5-7 minutes.
-    5. Serve warm or at room temperature. Garnish with dill, if desired.
+        source="Starters and Sides Made Easy",
+        reference="Leah Schapira & Victoria Dwek",
+        instructions="""1. Heat oil in a sauté pan over medium heat. Add onion; sauté until soft and lightly golden, about 10 minutes. Set aside.
+    2. Season chicken with ½ teaspoon salt and 2 garlic cloves.
+    3. In a shallow dish, combine panko crumbs, chili powder, paprika, 3 garlic cloves, and ½ teaspoon salt. Lightly beat egg in a second shallow dish. Dredge chicken in egg, then coat in crumbs.
+    4. Heat a thin layer of oil in a sauté pan over medium heat. When oil is hot, add chicken; cook for 3-4 minutes per side. Remove to a paper towel-lined plate. When cool enough to handle, cut chicken into strips.
+    5. Prepare the red cabbage salad. In a small bowl, combine all ingredients.
+    6. Prepare the honey-garlic dipping sauce. In a small bowl, whisk together all ingredients.
+    7. Assemble the wraps. Spread a tablespoon of honey-garlic dipping sauce across the bottom-center of the wrap. Top with onions, chicken strips, and ¼ cup red cabbage. Make sure the filling is evenly distributed. Fold the bottom of the wrap over the filling and tuck under very tightly. Fold in the sides and continue to roll, egg roll-style, holding your fingers under the roll so that it remains very tight. Serve with remaining honey-garlic dipping sauce.
 
-    MAKE AHEAD: The glaze can be prepared ahead and frozen; thaw before use.
-
-    TIP! If preparing a whole side of salmon, bake for 30-35 minutes, basting every 10 minutes.
-    TIP! Instead of preparing a spice mix for the fish, you can also use any ready-made fish seasoning mix.
-
-    Yield: 6-8 servings"""
+    YIELD: 4 sandwiches"""
     )
 
     # Add the recipe to the session
-    db.session.add(lemon_maple_glazed_salmon)
+    db.session.add(crispy_chicken_wraps)
     db.session.commit()
 
     # Get the ID of the newly added recipe
-    recipe_id = lemon_maple_glazed_salmon.id
+    recipe_id = crispy_chicken_wraps.id
 
     # Create the ingredients entries
     ingredients = [
-        {"name": "Salmon fillets", "quantity": 6-8, "unit": "1½-inch", "note": ""},
-        {"name": "Sea salt", "quantity": 0, "unit": "", "note": "for sprinkling"},
-        {"name": "Paprika", "quantity": 0, "unit": "", "note": "for sprinkling"},
-        {"name": "Onion powder", "quantity": 0, "unit": "", "note": "for sprinkling"},
-        {"name": "Garlic powder", "quantity": 0, "unit": "", "note": "for sprinkling"},
-        {"name": "Maple syrup", "quantity": 0.25, "unit": "cup", "note": ""},
-        {"name": "Lemon juice", "quantity": 2, "unit": "Tbsp", "note": ""},
-        {"name": "Ketchup", "quantity": 2, "unit": "Tbsp", "note": ""},
-        {"name": "Garlic cloves", "quantity": 3, "unit": "", "note": "minced"},
-        {"name": "Fresh dill", "quantity": 1, "unit": "Tbsp", "note": "chopped or 1½ tsp dried dill"},
-        {"name": "Kosher salt", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Dill fronds", "quantity": 0, "unit": "", "note": "for garnish, optional"}
+        {"name": "Oil, plus more for frying", "quantity": 1, "unit": "Tbsp", "note": ""},
+        {"name": "Onion, thinly sliced", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Whole wheat wraps (8-inch)", "quantity": 4, "unit": "", "note": ""},
+        {"name": "Boneless, skinless chicken breasts, thinly sliced", "quantity": 0.75, "unit": "lb", "note": ""},
+        {"name": "Garlic cloves, minced, divided", "quantity": 5, "unit": "", "note": ""},
+        {"name": "Kosher salt, divided", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Panko crumbs", "quantity": 0.75, "unit": "cup", "note": ""},
+        {"name": "Chili powder", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Paprika", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Egg", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Shredded red cabbage", "quantity": 1.25, "unit": "cups", "note": ""},
+        {"name": "Vinegar", "quantity": 2, "unit": "Tbsp", "note": ""},
+        {"name": "Oil", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Sugar", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Kosher salt", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Mayonnaise", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Water", "quantity": 0.25, "unit": "cup", "note": ""},
+        {"name": "Honey", "quantity": 2, "unit": "Tbsp", "note": ""},
+        {"name": "Garlic cloves, minced", "quantity": 2, "unit": "", "note": ""},
+        {"name": "Paprika", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Black pepper", "quantity": 0, "unit": "", "note": ""}
     ]
 
     # Add each ingredient to the session
@@ -113,8 +118,7 @@ with app.app_context():
     # Commit the session to save the ingredients
     db.session.commit()
 
-    print("Lemon-Maple Glazed Salmon recipe and ingredients added successfully!")
-
+    print("Crispy Chicken Wraps recipe and ingredients added successfully!")
 
     # db.session.commit()
 
