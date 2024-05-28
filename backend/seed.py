@@ -54,54 +54,45 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    # Create the recipe entry for Crispy Chicken Wraps
-    crispy_chicken_wraps = Recipe(
-        name="Crispy Chicken Wraps",
-        picture="",
+    # Create the recipe entry for Silan Salmon with Chickpea-Date Salad
+    silan_salmon_chickpea_date_salad = Recipe(
+        name="Silan Salmon with Chickpea-Date Salad",
+        picture="/recipes/Silan Salmon with Chickpea-Date Salad.jpeg",
         source_category_id=2,
-        source="Starters and Sides Made Easy",
-        reference="Leah Schapira & Victoria Dwek",
-        instructions="""1. Heat oil in a sauté pan over medium heat. Add onion; sauté until soft and lightly golden, about 10 minutes. Set aside.
-    2. Season chicken with ½ teaspoon salt and 2 garlic cloves.
-    3. In a shallow dish, combine panko crumbs, chili powder, paprika, 3 garlic cloves, and ½ teaspoon salt. Lightly beat egg in a second shallow dish. Dredge chicken in egg, then coat in crumbs.
-    4. Heat a thin layer of oil in a sauté pan over medium heat. When oil is hot, add chicken; cook for 3-4 minutes per side. Remove to a paper towel-lined plate. When cool enough to handle, cut chicken into strips.
-    5. Prepare the red cabbage salad. In a small bowl, combine all ingredients.
-    6. Prepare the honey-garlic dipping sauce. In a small bowl, whisk together all ingredients.
-    7. Assemble the wraps. Spread a tablespoon of honey-garlic dipping sauce across the bottom-center of the wrap. Top with onions, chicken strips, and ¼ cup red cabbage. Make sure the filling is evenly distributed. Fold the bottom of the wrap over the filling and tuck under very tightly. Fold in the sides and continue to roll, egg roll-style, holding your fingers under the roll so that it remains very tight. Serve with remaining honey-garlic dipping sauce.
+        source="Best of Kosher",
+        reference="",
+        instructions="""1. Preheat oven to 350°F. Line a baking sheet with parchment paper.
+    2. Lay salmon fillets on prepared baking sheet. Brush each with a thin coat of silan on all surfaces. Bake, uncovered, for 12 minutes. Remove from oven; brush on a thicker coating of silan. Return salmon to the oven; bake for a final 5 minutes or until almost cooked in the center at the thickest part.
+    3. Meanwhile, prepare the salad. Place chickpeas into a large bowl. Slice and dice dates; add to the bowl. Add celery, radishes, onion, and mint. Drizzle in olive oil. Sprinkle with salt, pepper, orange zest, juice, and parsley. Toss well to evenly dress.
+    4. Scoop salad onto a serving platter or individual plates. Top with salmon. Drizzle a little olive oil and additional silan around the plate.
 
-    YIELD: 4 sandwiches"""
+    TIP: To serve this in small portions, as shown in the photo, use salmon cubes instead of fillets, with 2-3 cubes per person. Reduce baking time.
+
+    YIELD: 6-8 servings"""
     )
 
     # Add the recipe to the session
-    db.session.add(crispy_chicken_wraps)
+    db.session.add(silan_salmon_chickpea_date_salad)
     db.session.commit()
 
     # Get the ID of the newly added recipe
-    recipe_id = crispy_chicken_wraps.id
+    recipe_id = silan_salmon_chickpea_date_salad.id
 
     # Create the ingredients entries
     ingredients = [
-        {"name": "Oil, plus more for frying", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Onion, thinly sliced", "quantity": 1, "unit": "", "note": ""},
-        {"name": "Whole wheat wraps (8-inch)", "quantity": 4, "unit": "", "note": ""},
-        {"name": "Boneless, skinless chicken breasts, thinly sliced", "quantity": 0.75, "unit": "lb", "note": ""},
-        {"name": "Garlic cloves, minced, divided", "quantity": 5, "unit": "", "note": ""},
-        {"name": "Kosher salt, divided", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Panko crumbs", "quantity": 0.75, "unit": "cup", "note": ""},
-        {"name": "Chili powder", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Paprika", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Egg", "quantity": 1, "unit": "", "note": ""},
-        {"name": "Shredded red cabbage", "quantity": 1.25, "unit": "cups", "note": ""},
-        {"name": "Vinegar", "quantity": 2, "unit": "Tbsp", "note": ""},
-        {"name": "Oil", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Sugar", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Kosher salt", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Mayonnaise", "quantity": 0.5, "unit": "cup", "note": ""},
-        {"name": "Water", "quantity": 0.25, "unit": "cup", "note": ""},
-        {"name": "Honey", "quantity": 2, "unit": "Tbsp", "note": ""},
-        {"name": "Garlic cloves, minced", "quantity": 2, "unit": "", "note": ""},
-        {"name": "Paprika", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Black pepper", "quantity": 0, "unit": "", "note": ""}
+        {"name": "Salmon fillets", "quantity": 6, "unit": "(6-8 oz)", "note": ""},
+        {"name": "Silan, for brushing plus additional for plating", "quantity": 0, "unit": "", "note": ""},
+        {"name": "Chickpeas, drained and rinsed", "quantity": 1, "unit": "(15 oz) can", "note": ""},
+        {"name": "Medjool dates, sliced into ⅓-inch pieces", "quantity": 1, "unit": "cup", "note": "(8-9 dates)"},
+        {"name": "Celery stalk, cut into ¼-inch dice", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Red radishes, cut into ¼-inch dice", "quantity": 3, "unit": "", "note": ""},
+        {"name": "Red onion, very thinly sliced", "quantity": 0.5, "unit": "small", "note": ""},
+        {"name": "Mint leaves, finely chopped", "quantity": 6, "unit": "", "note": ""},
+        {"name": "Olive oil, plus additional for plating", "quantity": 0.25, "unit": "cup", "note": ""},
+        {"name": "Fine sea salt", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Black pepper", "quantity": 0.125, "unit": "tsp", "note": ""},
+        {"name": "Zest and juice of ½ orange", "quantity": 0, "unit": "", "note": ""},
+        {"name": "Fresh parsley leaves, chopped", "quantity": 0.33, "unit": "cup", "note": ""}
     ]
 
     # Add each ingredient to the session
@@ -118,7 +109,7 @@ with app.app_context():
     # Commit the session to save the ingredients
     db.session.commit()
 
-    print("Crispy Chicken Wraps recipe and ingredients added successfully!")
+    print("Silan Salmon with Chickpea-Date Salad recipe and ingredients added successfully!")
 
     # db.session.commit()
 

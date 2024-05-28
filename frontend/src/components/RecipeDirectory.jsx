@@ -338,7 +338,7 @@ function RecipeDirectory() {
                     recipe.recipe_ingredients &&
                     recipe.recipe_ingredients.some(ingredient => {
                         return (
-                            ingredient &&
+                            ingredient && ingredient.ingredient_name &&
                             ingredient.ingredient_name.toLowerCase().includes(filterValue.toLowerCase())
                         )
                     })
