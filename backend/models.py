@@ -22,7 +22,7 @@ class User(db.Model, SerializerMixin):
     serialize_rules = ["-user_recipes.user", "-user_recipe_tags.user", "-meal_preps", "-recipes.user"]
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True)
     password_hash = db.Column(db.String)
 
     user_recipes = db.relationship("User_Recipe", back_populates="user")
@@ -36,7 +36,7 @@ class User_Tag(db.Model, SerializerMixin):
     serialize_rules = ["-user_recipe_tags.user_tag"]
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True)
 
     user_recipe_tags = db.relationship("User_Recipe_Tag", back_populates="user_tag")
 
@@ -125,7 +125,7 @@ class Tag(db.Model, SerializerMixin):
     serialize_rules = ["-recipe_tags.tag"]
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True)
 
     recipe_tags = db.relationship("Recipe_Tag", back_populates="tag")
 
