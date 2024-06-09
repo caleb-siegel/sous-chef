@@ -15,7 +15,6 @@ import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
 import SearchBar from "./SearchBar";
-import RecipeCardsOptions from "./RecipeCardsOptions";
 
 function RecipeDirectory() {
     const {user} = useOutletContext();

@@ -51,8 +51,8 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 <MenuItem value="Cup">Cup</MenuItem>
                 <MenuItem value="Oz">Oz</MenuItem>
                 <MenuItem value="Lb">Lb</MenuItem>
-                <MenuItem value="Lb">Dash</MenuItem>
-                <MenuItem value="Lb">Pinch</MenuItem>
+                <MenuItem value="Dash">Dash</MenuItem>
+                <MenuItem value="Pinch">Pinch</MenuItem>
             </Select>
             <TextField
                 id={`ingredient-${index}`}

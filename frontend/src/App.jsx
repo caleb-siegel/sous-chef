@@ -4,9 +4,6 @@ import Navbar from './components/Navbar';
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography } from '@mui/material';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
 
 function App() {
 

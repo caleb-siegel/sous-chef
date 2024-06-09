@@ -28,18 +28,18 @@ function Home() {
         <Container disableGutters maxWidth={false}>
             <Paper sx={{ bgcolor: "primary.main", width: '100%', maxWidth: '100%'  }}>
                 <div style={{ padding: '10px' }}>
-                <h2>Welcome to Sous Chef</h2>
-                <h2>Your all-in-one kitchen assistant</h2>
-                <h4>Digital cookbook and meal prep guide</h4>
-                {!user ?
-                    <Link to="login">
-                        <Button color="secondary" variant="contained">Log In</Button>
-                    </Link>
-                : 
-                    <Link to="recipes">
-                        <Button color="secondary" variant="contained">See Recipes</Button>
-                    </Link>
-                }
+                    <h2>Welcome to Sous Chef</h2>
+                    <h2>Your all-in-one kitchen assistant</h2>
+                    <h4>Digital cookbook and meal prep guide</h4>
+                    {!user ?
+                        <Link to="login">
+                            <Button color="secondary" variant="contained">Log In</Button>
+                        </Link>
+                    : 
+                        <Link to="recipes">
+                            <Button color="secondary" variant="contained">See Recipes</Button>
+                        </Link>
+                    }
                 </div>
             </Paper>
             {/* <div style={{ width: '100%', maxWidth: '100%'  }}>
@@ -71,7 +71,6 @@ function Home() {
                             <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>
                                 <Avatar alt={recipe.name} src={recipe.picture} sx={{ width: dimension, height: dimension }}/>
                             </a>
-                            
                         })}
                     </Stack>
                 </Container>
