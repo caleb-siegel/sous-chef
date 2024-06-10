@@ -54,36 +54,42 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    chili_lime_potatoes_and_onions = Recipe(
-        name="Chili Lime Potatoes and Onions",
-        picture="/recipes/Chili Lime Potatoes and Onions.jpeg",
+    pizza_bubble_ring = Recipe(
+        name="Pizza Bubble Ring",
+        picture="/recipes/Pizza Bubble Ring.jpeg",
         source_category_id=2,
         source="Best of Kosher",
         reference="",
-        instructions="""1. Preheat oven to 400°F. Line a baking sheet with parchment paper.
-    2. In a large bowl, toss potatoes and onions with oil, maple syrup, salt, chili powder, pepper, garlic powder, onion powder, and lime zest. Spread evenly on prepared baking sheet.
-    3. Bake, uncovered, for about 1 hour, or until tender crisp. Drizzle with lime juice before serving.
-    YIELD: 4-6 servings"""
+        instructions="""1. Preheat the oven to 350°F. Spray a 10-inch tube pan with nonstick cooking spray. Make sure to spray the outside of the tube as well. Set aside.
+    2. In a bowl, combine butter, garlic, oregano, garlic powder, onion powder, salt, black pepper, and crushed red pepper flakes.
+    3. With a sharp knife, carefully divide the dough into 40 small balls.
+    4. Flatten one of the balls and place some of the mozzarella into the center. Roll the dough around the cheese to enclose it. Repeat with all 40 balls.
+    5. Dip each ball into the butter/spice mixture; place into the prepared tube pan.
+    6. Sprinkle Parmesan over the dough balls. Drizzle on any extra butter mixture. Place tube pan on a baking sheet to catch leaks. Bake for 45 minutes or until golden brown.
+    7. Let cool for 5 minutes, then carefully lift the tube to remove base from the sides of the pan. Place the tube with the base on a serving plate.
+    8. Warm pizza sauce in a small pot over medium heat. Serve pizza bubble ring warm with pizza sauce.
+    TIP: If making your own dough, the Bistro Pizza Dough recipe on page 212 will yield 3 pounds of dough. Use 2/3 of the recipe to make the Pizza Bubble Ring.
+    TIP: You can use less crushed red pepper if your kids prefer it less spicy.
+    YIELD: 8 servings"""
     )
 
-    db.session.add(chili_lime_potatoes_and_onions)
+    db.session.add(pizza_bubble_ring)
     db.session.commit()
 
-    recipe_id = chili_lime_potatoes_and_onions.id
+    recipe_id = pizza_bubble_ring.id
 
     ingredients = [
-        {"name": "Potatoes, cut into chunks (do not peel)", "quantity": 6, "unit": "", "note": ""},
-        {"name": "Sweet potato, cut into chunks (do not peel)", "quantity": 1, "unit": "", "note": ""},
-        {"name": "Onions, cut into chunks", "quantity": 2, "unit": "", "note": ""},
-        {"name": "Oil", "quantity": 3, "unit": "Tbsp", "note": ""},
-        {"name": "Maple syrup", "quantity": 3, "unit": "Tbsp", "note": ""},
-        {"name": "Kosher salt", "quantity": 2, "unit": "tsp", "note": ""},
-        {"name": "Chili powder, or to taste", "quantity": 1.5, "unit": "tsp", "note": ""},
-        {"name": "Black pepper", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Garlic powder", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Onion powder", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Zest of 2 limes", "quantity": 0, "unit": "", "note": ""},
-        {"name": "Juice of 1 lime", "quantity": 0, "unit": "", "note": ""}
+        {"name": "Butter, melted", "quantity": 0.5, "unit": "cup (1 stick)", "note": ""},
+        {"name": "Garlic cloves, minced", "quantity": 2, "unit": "", "note": ""},
+        {"name": "Oregano", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Garlic powder", "quantity": 0.5, "unit": "tsp", "note": ""},
+        {"name": "Onion powder", "quantity": 0.5, "unit": "tsp", "note": ""},
+        {"name": "Black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Crushed red pepper flakes", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Fresh pizza dough", "quantity": 2, "unit": "lbs", "note": ""},
+        {"name": "Mozzarella cheese, cut into 40 cubes", "quantity": 8, "unit": "oz", "note": ""},
+        {"name": "Grated Parmesan cheese", "quantity": 0.25, "unit": "cup", "note": ""},
+        {"name": "Pizza sauce, warmed", "quantity": 1, "unit": "cup", "note": ""}
     ]
 
     for ing in ingredients:
@@ -98,7 +104,7 @@ with app.app_context():
 
     db.session.commit()
 
-    print("Chili Lime Potatoes and Onions recipe and ingredients added successfully!")
+    print("Pizza Bubble Ring recipe and ingredients added successfully!")
 
 
 
