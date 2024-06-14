@@ -246,6 +246,15 @@ function RecipeDirectory() {
                 recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "dessert"))
             )
         })    
+    } else if (categorizationButtons === "drinks") {
+        outlinedVariant = "drinks"
+        recipeList = recipeList.filter(recipe => {
+            return (
+                recipe &&
+                recipe.recipe_tags &&
+                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "drinks"))
+            )
+        })    
     }    
 
     const [addRecipe, setAddRecipe] = useState(false)
@@ -484,6 +493,7 @@ function RecipeDirectory() {
                 { user && <Button variant={outlinedVariant === "sides" ? "outlined" : "contained"} color="primary" size="small" value="sides" onClick={(event) => handleCategorizationButtons(event.target.value)}>Sides</Button>}
                 { user && <Button variant={outlinedVariant === "condiments" ? "outlined" : "contained"} color="primary" size="small" value="condiments" onClick={(event) => handleCategorizationButtons(event.target.value)}>Condiments</Button>}
                 { user && <Button variant={outlinedVariant === "dessert" ? "outlined" : "contained"} color="primary" size="small" value="dessert" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dessert</Button>}
+                { user && <Button variant={outlinedVariant === "drinks" ? "outlined" : "contained"} color="primary" size="small" value="drinks" onClick={(event) => handleCategorizationButtons(event.target.value)}>Drinks</Button>}
             </Container>
             <br/>
             <Container style={{
