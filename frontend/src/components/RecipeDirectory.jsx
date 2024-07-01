@@ -184,9 +184,11 @@ function RecipeDirectory() {
                         (
                             ingredient.ingredient_name.toLowerCase().includes("salmon") ||
                             ingredient.ingredient_name.toLowerCase().includes("tilapia") ||
+                            ingredient.ingredient_name.toLowerCase().includes("crab") ||
                             ingredient.ingredient_name.toLowerCase().includes("flounder") ||
                             ingredient.ingredient_name.toLowerCase().includes("sea bass") ||
-                            ingredient.ingredient_name.toLowerCase().includes("tuna")
+                            ingredient.ingredient_name.toLowerCase().includes("tuna") ||
+                            ingredient.ingredient_name.toLowerCase().includes("fish") && !ingredient.ingredient_name.toLowerCase().includes("fish-free")
                         )
                     )
                 })

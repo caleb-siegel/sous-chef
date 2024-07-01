@@ -132,9 +132,9 @@ function RecipePage({ recipe, user, id, editRecipe, handleEditRecipe }) {
                     })}
                 </Paper>
                 <Paper sx={{ display: 'flex', flexWrap: 'wrap' }}>
-                    <Container><strong>Instructions</strong></Container>
+                    <Container disableGutters maxWidth={false}><strong>Instructions</strong></Container>
                     {recipe.instructions && 
-                        recipe.instructions.split(/\s\d+\.\s/).map((instruction, index) => {
+                        recipe.instructions.split(/\s\d+\.\s/).filter(instruction => instruction.trim() !== "").map((instruction, index) => {
                             return  <Container disableGutters maxWidth={false} key={index}>{index + 1}. {instruction}</Container>;
                         })
                     }

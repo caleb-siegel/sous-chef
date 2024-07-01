@@ -54,54 +54,54 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    miso_vegetable_soup_recipe = Recipe(
-        name="Miso Vegetable Soup",
-        picture="/recipes/miso vegetable soup.jpeg",
+    artichoke_chicken_recipe = Recipe(
+        name="Artichoke Chicken",
+        picture="/recipes/artichoke chicken.jpeg",
         source_category_id=2,
         source="Peas Love and Carrots",
-        reference="Page 100",
+        reference="Page 172",
         instructions="""
-    1. In a medium bowl, combine dried mushrooms and boiling water. Cover with plastic wrap; set aside.
-    2. Heat a large pot over medium high heat. Add oils, tofu, and 1 tablespoon soy sauce. Stir often for 8-10 minutes so that tofu edges can crisp up. Transfer crisped tofu to a plate; set aside.
-    3. Add onion, leek, carrots, and celery to the pot. Cook, stirring often, for 12-14 minutes until onions and leeks begin to brown. Add cremini mushrooms; stir to combine. Cook for 6-8 minutes; stir in zucchini and scallions. Return tofu to the pot.
-    4. Add miso to the center of all the vegetables, exposing the bottom of the pot; stir in miso and gochujang.
-    5. Add vinegar, soy sauce, and black pepper. Stir so that all the flavors are evenly distributed among the vegetables.
-    6. Strain dried mushroom liquid into a bowl, discard the rehydrated mushrooms, and add the mushroom liquid to the pot along with stock or water. Stir to combine.
-    7. Bring soup to a boil. Reduce heat to low and cover the pot. Allow soup to simmer over low heat for 2-3 hours. Serve hot and enjoy!
+    1. If using frozen artichokes, defrost, cut away any rough parts, and skip to preparing the chicken.
+    2. For fresh artichokes, cover with water and add lemon juice from 1/2 lemon. Bring to a boil, reduce heat, and simmer for 2 hours.
+    3. When artichokes are tender, reduce heat and simmer for 30 minutes until cool enough to handle.
+    4. Bring artichokes and set aside for 30 minutes until completely cool.
+    5. Peel leaves off the artichoke to expose the heart (don't discard the leaves; they make the best dip into any salad dressing or dip and eaten).
+    6. Cut hearts into 4 pieces. Set aside.
+    7. Preheat oven to 350°F / 180°C. Coat a 9x13 inch pan with nonstick cooking spray.
+    8. In a large bowl, combine flour, salt, and pepper; toss with chicken.
+    9. In a large frying pan, heat oil on medium high heat and brown chicken cutlets on both sides (1.5-2 minutes per side, chicken will still be a little raw inside).
+    10. Transfer to prepared pan.
+    11. In the same skillet, sauté artichoke heart pieces, garlic, and crushed red pepper flakes for 1 minute, being careful not to burn the garlic.
+    12. Add white wine while scraping all the bits off the bottom of the pan. Allow alcohol to cook off for 2-3 minutes.
+    13. Add chicken stock; season with salt and pepper to taste.
+    14. Pour sauce over chicken; bake for 30 minutes.
+    15. If adding fresh parsley, sprinkle on top during the last 2 minutes of baking.
         """
     )
 
-    db.session.add(miso_vegetable_soup_recipe)
+    db.session.add(artichoke_chicken_recipe)
     db.session.commit()
 
-    miso_vegetable_soup_id = miso_vegetable_soup_recipe.id
+    artichoke_chicken_id = artichoke_chicken_recipe.id
 
-    miso_vegetable_soup_ingredients = [
-        {"name": "Dried mushrooms", "quantity": 1.0, "unit": "cup", "note": ""},
-        {"name": "Boiling water", "quantity": 4.0, "unit": "cups", "note": ""},
-        {"name": "Avocado oil", "quantity": 1.0, "unit": "tbsp", "note": ""},
-        {"name": "Toasted sesame oil", "quantity": 1.0, "unit": "tsp", "note": ""},
-        {"name": "Firm tofu", "quantity": 10.5, "unit": "oz/300 g", "note": "cut into ½ inch cubes"},
-        {"name": "Soy sauce", "quantity": 2.0, "unit": "tbsp", "note": "divided"},
-        {"name": "Onion", "quantity": 1.0, "unit": "", "note": "diced"},
-        {"name": "Leek", "quantity": 1.0, "unit": "", "note": "white and light green diced"},
-        {"name": "Carrots", "quantity": 3.0, "unit": "", "note": "peeled and diced"},
-        {"name": "Celery stalks", "quantity": 5.0, "unit": "", "note": "peeled and diced"},
-        {"name": "Cremini mushrooms", "quantity": 3.0, "unit": "cups", "note": "sliced"},
-        {"name": "Kosher salt", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Zucchini", "quantity": 2.0, "unit": "", "note": "diced"},
-        {"name": "Scallions", "quantity": 5.0, "unit": "", "note": "chopped"},
-        {"name": "White miso", "quantity": 3.0, "unit": "tbsp", "note": ""},
-        {"name": "Gochujang", "quantity": 2.0, "unit": "tbsp", "note": ""},
-        {"name": "Seasoned rice vinegar", "quantity": 1.0, "unit": "tbsp", "note": ""},
-        {"name": "Soy sauce", "quantity": 1.0, "unit": "tbsp", "note": ""},
-        {"name": "Coarsely ground black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Vegetable stock or water", "quantity": 6.0, "unit": "cups", "note": ""}
+    artichoke_chicken_ingredients = [
+        {"name": "Frozen artichokes", "quantity": 1, "unit": "bag", "note": "defrosted"},
+        {"name": "Lemon", "quantity": 0.5, "unit": "", "note": "juice of"},
+        {"name": "Chicken cutlets", "quantity": 12, "unit": "", "note": ""},
+        {"name": "Flour", "quantity": 1, "unit": "cup", "note": ""},
+        {"name": "Kosher salt", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Coarsely ground black pepper", "quantity": 0.5, "unit": "tsp", "note": ""},
+        {"name": "Canola oil", "quantity": 2, "unit": "Tbsp", "note": ""},
+        {"name": "Garlic", "quantity": 2, "unit": "Tbsp", "note": "minced"},
+        {"name": "Crushed red pepper flakes", "quantity": 0.5, "unit": "tsp", "note": ""},
+        {"name": "Dry white wine", "quantity": 1, "unit": "cup", "note": ""},
+        {"name": "Chicken stock", "quantity": 1, "unit": "cup", "note": ""},
+        {"name": "Fresh parsley", "quantity": 1, "unit": "handful", "note": "for garnish (optional)"}
     ]
 
-    for ing in miso_vegetable_soup_ingredients:
+    for ing in artichoke_chicken_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=miso_vegetable_soup_id,
+            recipe_id=artichoke_chicken_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
@@ -110,7 +110,6 @@ with app.app_context():
         db.session.add(ingredient_entry)
 
     db.session.commit()
-
 
 
     # db.session.commit()
