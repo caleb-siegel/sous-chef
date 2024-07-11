@@ -54,81 +54,52 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    vietnamese_beef_bahn_mi_recipe = Recipe(
-        name="Vietnamese Beef Bahn Mi",
-        picture="/recipes/vietnamese beef bahn mi.jpeg",
+    chipotle_bbq_broiled_skirt_steak_recipe = Recipe(
+        name="Chipotle Barbecue Broiled Skirt Steak",
+        picture="/recipes/chipotle bbq broiled skirt steak.jpeg",
         source_category_id=2,
         source="Peas Love and Carrots",
-        reference="Page 248",
+        reference="Page 250",
         instructions="""
-    PICKLED VEGETABLES
-    1. In a food processor fitted with the grater with the largest holes, or using a knife, cut carrots into matchsticks. Slice radishes very thinly.
-    2. Place carrots and radishes into jars. (You can combine in one jar or separately.)
-    3. In a large bowl, combine all the remaining pickling ingredients. Whisk until sugar and salt have dissolved.
-    4. Pour pickling liquid into the jars until the vegetables are covered.
-    5. Cover and shake to combine. Allow vegetables to sit in pickling liquid for 1 hour before using.
+    Cut skirt steak into 2-3 inch pieces.
+    Place in a bowl. Cover with cold water and vinegar.
+    Soak meat for 30 minutes, then rinse and pat dry.
 
-    SOY-LIME MAYONNAISE
-    6. Place egg, mustard, lime juice, salt, and pepper in a very tall, narrow 4 cup (1 liter) container.
-    7. Using an immersion blender, blend until well combined, 30-45 seconds.
-    (Alternatively, this can be done in a food processor.)
-    8. Continue to blend while you begin streaming in the oil very slowly and evenly at first, then increasing speed.
-    9. As the mayo begins to emulsify and thicken toward the bottom of the cup, you may need to pull the blender up and down to ensure that the oil is being incorporated. The mixture should be thick and mayo-like.
-    10. Add soy sauce, gently folding in with a spatula. Refrigerate mayo for at least 2 hours before serving.
+    In a bowl, combine remaining ingredients; add steak. 
+    Marinate for 30 minutes or up to overnight in the fridge.
 
-    MEAT
-    11. Add all marinade ingredients to a ziploc bag. Shake bag to combine. Add meat; shake again to distribute the marinade all over the meat. Marinate for 1 hour.
-    12. Preheat a skillet over high heat till it is very hot. Add 1 teaspoon oil to the pan to prevent meat from sticking.
-    13. Working in small batches, add ¼ of the meat to the pan, stirring constantly to prevent sticking. Since the meat is sliced very thinly it will only take 1-2 minutes to cook. Once the meat is cooked, remove from the pan, set aside.
-    14. Continue to cook the rest of the meat in the same way.
+    Set oven to broil. Line a baking sheet with parchment paper.
 
-    TO ASSEMBLE
-    15. Slice baguettes in half lengthwise. Spread bottom half with a nice amount of Soy-Lime Mayonnaise.
-    16. Add a layer of meat; top with pickled vegetables.
-    17. Top vegetables with a few leaves of cilantro and some chili slices. Eat right away and enjoy!
-        """
+    Place skirt steaks on prepared baking sheet. Reserve marinade.
+    Broil for 6 minutes on one side.
+    Remove from oven; brush with reserved marinade.
+    Flip steaks over, brush the second side with marinade.
+    Return baking sheet to oven. Broil for 4-5 minutes.
+
+    Remove from oven and enjoy.
+
+    (To cook more well done, after broiling, set oven to 350°F / 180°C, cover pan tightly with foil, and bake for 15 minutes.)
+
+    Slice meat AGAINST the grain and enjoy!
+    """
     )
 
-    db.session.add(vietnamese_beef_bahn_mi_recipe)
+    db.session.add(chipotle_bbq_broiled_skirt_steak_recipe)
     db.session.commit()
 
-    vietnamese_beef_bahn_mi_id = vietnamese_beef_bahn_mi_recipe.id
+    chipotle_bbq_broiled_skirt_steak_id = chipotle_bbq_broiled_skirt_steak_recipe.id
 
-    vietnamese_beef_bahn_mi_ingredients = [
-        # Pickled Vegetables
-        {"name": "Large carrots, peeled and tops cut off", "quantity": 4, "unit": "", "note": ""},
-        {"name": "Radishes, washed", "quantity": 8, "unit": "", "note": ""},
-        {"name": "Warm water", "quantity": 3, "unit": "cups", "note": ""},
-        {"name": "Rice vinegar", "quantity": 0.5, "unit": "cup", "note": "depending on how sweet you like your pickles"},
-        {"name": "Sugar", "quantity": 2.5, "unit": "Tbsp", "note": ""},
-        {"name": "Kosher salt", "quantity": 2, "unit": "tsp", "note": ""},
-        
-        # Soy-Lime Mayonnaise
-        {"name": "Egg", "quantity": 1, "unit": "", "note": ""},
-        {"name": "Dijon mustard", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Lime juice, fresh", "quantity": 1, "unit": "Tbsp", "note": "juice of ½ lime"},
-        {"name": "Kosher salt", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Coarsely ground black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Soy sauce", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Soy oil", "quantity": 1, "unit": "cup", "note": ""},
-
-        # Meat
-        {"name": "Very thinly sliced beef", "quantity": 1.5, "unit": "lb", "note": "600 g"},
-        {"name": "Soy sauce", "quantity": 3, "unit": "Tbsp", "note": ""},
-        {"name": "Sugar", "quantity": 2, "unit": "tsp", "note": ""},
-        {"name": "Garlic, minced", "quantity": 3, "unit": "cloves", "note": ""},
-        {"name": "Sesame oil", "quantity": 1.5, "unit": "tsp", "note": ""},
-        {"name": "Canola oil", "quantity": 4, "unit": "Tbsp", "note": ""},
-        
-        # For Serving
-        {"name": "Baguettes", "quantity": 6, "unit": "", "note": ""},
-        {"name": "Cilantro leaves", "quantity": 0, "unit": "", "note": "to taste"},
-        {"name": "Thai chilies, thinly sliced", "quantity": 0, "unit": "", "note": "to taste"}
+    chipotle_bbq_broiled_skirt_steak_ingredients = [
+        {"name": "Skirt steak", "quantity": 3, "unit": "lb", "note": "1.3 kg"},
+        {"name": "Apple cider vinegar", "quantity": 1, "unit": "Tbsp", "note": ""},
+        {"name": "Fave BBQ sauce", "quantity": 1, "unit": "cup", "note": ""},
+        {"name": "Chipotles in adobo, mashed with a fork", "quantity": 2, "unit": "", "note": ""},
+        {"name": "Adobo sauce", "quantity": 2, "unit": "Tbsp", "note": ""}
     ]
 
-    for ing in vietnamese_beef_bahn_mi_ingredients:
+    for ing in chipotle_bbq_broiled_skirt_steak_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=vietnamese_beef_bahn_mi_id,
+            recipe_id=chipotle_bbq_broiled_skirt_steak_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],

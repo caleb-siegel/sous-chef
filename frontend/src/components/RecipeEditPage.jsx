@@ -216,7 +216,7 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
                     <div><strong>Ingredients</strong></div>
                     {ingredients.map((ingredient) => {
                         return <Paper key={ingredient.id}>
-                            <DeleteIcon onClick={(event) => handleDelete(event, recipe.id)}></DeleteIcon>
+                            <DeleteIcon onClick={(event) => handleDelete(event, ingredient.id)}></DeleteIcon>
                             <TextField
                                 label="Quantity"
                                 variant="standard"

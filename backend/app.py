@@ -393,7 +393,7 @@ def recipe_ingredient(id):
         
     elif request.method == 'DELETE':
         ingredient = db.session.get(Recipe_Ingredient, id)
-        if not meal_prep:
+        if not ingredient:
             return {"error": f"Ingredient with id {id} not found"}, 404
         db.session.delete(ingredient)
         db.session.commit()
