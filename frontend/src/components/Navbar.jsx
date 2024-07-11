@@ -19,7 +19,7 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
                         <NavLink to="recipes" className="nav-link">Recipes</NavLink>
                         <NavLink to="mealprep" className="nav-link">Meal Prep</NavLink>
                         <NavLink to="random" className="nav-link">Spice It Up</NavLink>
-                        <NavLink to="newtag" className="nav-link">Add New Tag</NavLink>
+                        {user && user.id && <NavLink to="newtag" className="nav-link">Add New Tag</NavLink>}
                         {user && user.id && <NavLink to={`user/${user.id}`} className="nav-link">Profile Page</NavLink>}
                     </Box>
                 </Grid>

@@ -10,24 +10,24 @@ function ShoppingList({ mealPrep, user }) {
       <FormGroup>
         {mealPrep.map(mealPrep => {
           return (typeof mealPrep.recipe_id) === "number" ?
-          mealPrep.recipe.recipe_ingredients.map(ingredient => {
-              // {
-              //   if ((!(ingredient.ingredient_name in ingredientsObject)) && ingredient.ingredient_name && ingredient.ingredient_quantity) {
-              //     ingredientsObject[ingredient.ingredient_name] = ingredient.ingredient_quantity
+            mealPrep.recipe.recipe_ingredients.map(ingredient => {
+                // {
+                //   if ((!(ingredient.ingredient_name in ingredientsObject)) && ingredient.ingredient_name && ingredient.ingredient_quantity) {
+                //     ingredientsObject[ingredient.ingredient_name] = ingredient.ingredient_quantity
 
-              //   } else {
-              //     ingredientsObject[ingredient.ingredient_name] += ingredient.ingredient_quantity
-              //   }
-              // }
-              return (
-                user && user.id && (user.id === mealPrep.user_id) &&
-                <FormControlLabel 
-                  key={ingredient.id} 
-                  control={<Checkbox />} 
-                  label={`${ingredient.ingredient_quantity === 0 ? "" : ingredient.ingredient_quantity} ${ingredient.ingredient_unit} ${ingredient.ingredient_name}${(ingredient.ingredient_note === null || ingredient.ingredient_note === "") ? "" : ", " + ingredient.ingredient_note}`} 
-                />
-              )
-          })
+                //   } else {
+                //     ingredientsObject[ingredient.ingredient_name] += ingredient.ingredient_quantity
+                //   }
+                // }
+                return (
+                  user && user.id && (user.id === mealPrep.user_id) &&
+                  <FormControlLabel 
+                    key={ingredient.id} 
+                    control={<Checkbox />} 
+                    label={`${ingredient.ingredient_quantity === 0 ? "" : ingredient.ingredient_quantity} ${ingredient.ingredient_unit} ${ingredient.ingredient_name}${(ingredient.ingredient_note === null || ingredient.ingredient_note === "") ? "" : ", " + ingredient.ingredient_note}`} 
+                  />
+                )
+            })
           : user && user.id && (user.id === mealPrep.user_id) &&
             <FormControlLabel 
               key={mealPrep.recipe_id} 

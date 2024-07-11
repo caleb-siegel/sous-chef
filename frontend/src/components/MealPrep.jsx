@@ -31,7 +31,7 @@ function MealPrep() {
         .then((data) => {
             setMealPrep(prevMealPrep => prevMealPrep.filter(prep => prep.id !== id));
         })
-      };
+    };
 
     const [showAddRecipeForm, setShowAddRecipeForm] = useState(false)
 

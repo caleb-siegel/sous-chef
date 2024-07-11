@@ -369,6 +369,37 @@ def recipe_ingredients():
 
         return response
 
+@app.route('/api/recipeingredients/<int:id>/', methods=['GET', 'PATCH', 'DELETE'])
+def recipe_ingredient(id):
+    if request.method == 'GET':
+        ingredient_id = db.session.get(Recipe_Ingredient, id)
+        if not ingredient_id:
+            return {"error": f"ingredient with id {id} not found"}, 404
+        return ingredient_id.to_dict()
+    
+    elif request.method == 'PATCH':
+        ingredient = db.session.get(Recipe_Ingredient, id)
+        if not ingredient:
+            return {"error": f"ingredient with id {id} not found"}, 404
+        try:
+            data = request.json
+            for key in data:
+                setattr(ingredient, key, data[key])
+            db.session.add(ingredient)
+            db.session.commit()
+            return ingredient.to_dict(), 200
+        except Exception as e:
+            return {"error": f'{e}'}
+        
+    elif request.method == 'DELETE':
+        ingredient = db.session.get(Recipe_Ingredient, id)
+        if not meal_prep:
+            return {"error": f"Ingredient with id {id} not found"}, 404
+        db.session.delete(ingredient)
+        db.session.commit()
+        return {}, 202
+
+
 @app.route('/api/mealprep', methods=['GET', 'POST'])
 def meal_prep():
     if request.method == 'GET':

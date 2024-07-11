@@ -7,16 +7,21 @@ import { useOutletContext } from "react-router-dom";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import RecipeCardsOptions from './RecipeCardsOptions';
 import Ingredients from './Ingredients';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 
 function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
-    const [name, setName] = useState(recipe.name)
+    const [name, setName] = useState(recipe.name);
     const [picture, setPicture] = useState(recipe.picture);
     const [sourceCategoryInput, setSourceCategoryInput] = useState(recipe.source_category.name);
     const [sourceName, setSourceName] = useState(recipe.source);
     const [reference, setReference] = useState(recipe.reference);
     const [recipeInstructions, setRecipeInstructions] = useState(recipe.instructions);
     const [ingredients, setIngredients] = useState(recipe.recipe_ingredients);
-    
+    const emptyIngredient = [{ quantity: 0, unit: '', name: '', note: '' }];
+    const [newIngredient, setNewIngredient] = useState();
+
     const [tags, setTags] = useState([]);
     useEffect(() => {
         fetch("/api/tags")
@@ -111,9 +116,64 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
         })
             .then((response) => response.json())
             .then((data) => {
+                ingredients && ingredients.map(ingredient => {
+                    const ingredientData = {
+                        // recipe_id: id,
+                        ingredient_name: ingredient.ingredient_name,
+                        ingredient_quantity: ingredient.ingredient_quantity,
+                        ingredient_unit: ingredient.ingredient_unit,
+                        ingredient_note: ingredient.ingredient_note
+                    };
+                    fetch(`/api/recipeingredients/${ingredient.id}`, {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "Application/JSON",
+                        },
+                        body: JSON.stringify(ingredientData),
+                    })
+                    .then((response) => response.json())
+                    .then((newIngredientData) => {
+                        console.log("success")
+                        // setIngredients([emptyIngredient]);
+                    });
+                });
                 window.location.reload();
             })
     }
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const ingredientData = {
+            recipe_id: recipe.id,
+            ingredient_name: newIngredient[0].name,
+            ingredient_quantity: newIngredient[0].quantity,
+            ingredient_unit: newIngredient[0].unit,
+            ingredient_note: newIngredient[0].note
+        };
+        fetch("/api/recipeingredients", {
+            method: "POST",
+            headers: {
+                "Content-Type": "Application/JSON",
+            },
+            body: JSON.stringify(ingredientData),
+        })
+        .then((response) => response.json())
+        .then((newIngredientData) => {
+            // console.log("success")
+            setNewIngredient();
+            setIngredients([...ingredients, newIngredientData]);
+        });
+    };
+
+    const handleDelete = (event, id) => {
+        event.preventDefault();
+        fetch(`/api/recipeingredients/${id}`, {
+            method: "DELETE",
+        })
+        .then((data) => {
+            setIngredients(prevIng => prevIng.filter(ing => ing.id !== id));
+        })
+    };
 
     return (
         <Box key={recipe.id} >
@@ -155,7 +215,8 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
                 <Paper sx={{ marginLeft: '10px' }}>
                     <div><strong>Ingredients</strong></div>
                     {ingredients.map((ingredient) => {
-                        return <Paper>
+                        return <Paper key={ingredient.id}>
+                            <DeleteIcon onClick={(event) => handleDelete(event, recipe.id)}></DeleteIcon>
                             <TextField
                                 label="Quantity"
                                 variant="standard"
@@ -192,6 +253,17 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
                             />
                         </Paper>
                     })}
+                    <Button variant="contained" color="primary" size="small" startIcon={<AddIcon/>} onClick={() => setNewIngredient(emptyIngredient)}>Add Ingredient</Button>
+                    {newIngredient && 
+                        <Paper>
+                            <form onSubmit={handleSubmit}>
+                                <Ingredients key={0} index={0} ingredients={newIngredient} setIngredients={setNewIngredient}/>
+                                <Button variant="contained" color="primary" size="small" type="submit">Submit</Button>
+                            </form>
+                                
+                        </Paper>
+                            
+                    }
                 </Paper>
                 <Paper>
                     <div><strong>Instructions</strong></div>

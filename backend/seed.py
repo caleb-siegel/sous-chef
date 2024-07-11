@@ -54,54 +54,81 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    artichoke_chicken_recipe = Recipe(
-        name="Artichoke Chicken",
-        picture="/recipes/artichoke chicken.jpeg",
+    vietnamese_beef_bahn_mi_recipe = Recipe(
+        name="Vietnamese Beef Bahn Mi",
+        picture="/recipes/vietnamese beef bahn mi.jpeg",
         source_category_id=2,
         source="Peas Love and Carrots",
-        reference="Page 172",
+        reference="Page 248",
         instructions="""
-    1. If using frozen artichokes, defrost, cut away any rough parts, and skip to preparing the chicken.
-    2. For fresh artichokes, cover with water and add lemon juice from 1/2 lemon. Bring to a boil, reduce heat, and simmer for 2 hours.
-    3. When artichokes are tender, reduce heat and simmer for 30 minutes until cool enough to handle.
-    4. Bring artichokes and set aside for 30 minutes until completely cool.
-    5. Peel leaves off the artichoke to expose the heart (don't discard the leaves; they make the best dip into any salad dressing or dip and eaten).
-    6. Cut hearts into 4 pieces. Set aside.
-    7. Preheat oven to 350°F / 180°C. Coat a 9x13 inch pan with nonstick cooking spray.
-    8. In a large bowl, combine flour, salt, and pepper; toss with chicken.
-    9. In a large frying pan, heat oil on medium high heat and brown chicken cutlets on both sides (1.5-2 minutes per side, chicken will still be a little raw inside).
-    10. Transfer to prepared pan.
-    11. In the same skillet, sauté artichoke heart pieces, garlic, and crushed red pepper flakes for 1 minute, being careful not to burn the garlic.
-    12. Add white wine while scraping all the bits off the bottom of the pan. Allow alcohol to cook off for 2-3 minutes.
-    13. Add chicken stock; season with salt and pepper to taste.
-    14. Pour sauce over chicken; bake for 30 minutes.
-    15. If adding fresh parsley, sprinkle on top during the last 2 minutes of baking.
+    PICKLED VEGETABLES
+    1. In a food processor fitted with the grater with the largest holes, or using a knife, cut carrots into matchsticks. Slice radishes very thinly.
+    2. Place carrots and radishes into jars. (You can combine in one jar or separately.)
+    3. In a large bowl, combine all the remaining pickling ingredients. Whisk until sugar and salt have dissolved.
+    4. Pour pickling liquid into the jars until the vegetables are covered.
+    5. Cover and shake to combine. Allow vegetables to sit in pickling liquid for 1 hour before using.
+
+    SOY-LIME MAYONNAISE
+    6. Place egg, mustard, lime juice, salt, and pepper in a very tall, narrow 4 cup (1 liter) container.
+    7. Using an immersion blender, blend until well combined, 30-45 seconds.
+    (Alternatively, this can be done in a food processor.)
+    8. Continue to blend while you begin streaming in the oil very slowly and evenly at first, then increasing speed.
+    9. As the mayo begins to emulsify and thicken toward the bottom of the cup, you may need to pull the blender up and down to ensure that the oil is being incorporated. The mixture should be thick and mayo-like.
+    10. Add soy sauce, gently folding in with a spatula. Refrigerate mayo for at least 2 hours before serving.
+
+    MEAT
+    11. Add all marinade ingredients to a ziploc bag. Shake bag to combine. Add meat; shake again to distribute the marinade all over the meat. Marinate for 1 hour.
+    12. Preheat a skillet over high heat till it is very hot. Add 1 teaspoon oil to the pan to prevent meat from sticking.
+    13. Working in small batches, add ¼ of the meat to the pan, stirring constantly to prevent sticking. Since the meat is sliced very thinly it will only take 1-2 minutes to cook. Once the meat is cooked, remove from the pan, set aside.
+    14. Continue to cook the rest of the meat in the same way.
+
+    TO ASSEMBLE
+    15. Slice baguettes in half lengthwise. Spread bottom half with a nice amount of Soy-Lime Mayonnaise.
+    16. Add a layer of meat; top with pickled vegetables.
+    17. Top vegetables with a few leaves of cilantro and some chili slices. Eat right away and enjoy!
         """
     )
 
-    db.session.add(artichoke_chicken_recipe)
+    db.session.add(vietnamese_beef_bahn_mi_recipe)
     db.session.commit()
 
-    artichoke_chicken_id = artichoke_chicken_recipe.id
+    vietnamese_beef_bahn_mi_id = vietnamese_beef_bahn_mi_recipe.id
 
-    artichoke_chicken_ingredients = [
-        {"name": "Frozen artichokes", "quantity": 1, "unit": "bag", "note": "defrosted"},
-        {"name": "Lemon", "quantity": 0.5, "unit": "", "note": "juice of"},
-        {"name": "Chicken cutlets", "quantity": 12, "unit": "", "note": ""},
-        {"name": "Flour", "quantity": 1, "unit": "cup", "note": ""},
-        {"name": "Kosher salt", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Coarsely ground black pepper", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Canola oil", "quantity": 2, "unit": "Tbsp", "note": ""},
-        {"name": "Garlic", "quantity": 2, "unit": "Tbsp", "note": "minced"},
-        {"name": "Crushed red pepper flakes", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Dry white wine", "quantity": 1, "unit": "cup", "note": ""},
-        {"name": "Chicken stock", "quantity": 1, "unit": "cup", "note": ""},
-        {"name": "Fresh parsley", "quantity": 1, "unit": "handful", "note": "for garnish (optional)"}
+    vietnamese_beef_bahn_mi_ingredients = [
+        # Pickled Vegetables
+        {"name": "Large carrots, peeled and tops cut off", "quantity": 4, "unit": "", "note": ""},
+        {"name": "Radishes, washed", "quantity": 8, "unit": "", "note": ""},
+        {"name": "Warm water", "quantity": 3, "unit": "cups", "note": ""},
+        {"name": "Rice vinegar", "quantity": 0.5, "unit": "cup", "note": "depending on how sweet you like your pickles"},
+        {"name": "Sugar", "quantity": 2.5, "unit": "Tbsp", "note": ""},
+        {"name": "Kosher salt", "quantity": 2, "unit": "tsp", "note": ""},
+        
+        # Soy-Lime Mayonnaise
+        {"name": "Egg", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Dijon mustard", "quantity": 1, "unit": "Tbsp", "note": ""},
+        {"name": "Lime juice, fresh", "quantity": 1, "unit": "Tbsp", "note": "juice of ½ lime"},
+        {"name": "Kosher salt", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Coarsely ground black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Soy sauce", "quantity": 1, "unit": "Tbsp", "note": ""},
+        {"name": "Soy oil", "quantity": 1, "unit": "cup", "note": ""},
+
+        # Meat
+        {"name": "Very thinly sliced beef", "quantity": 1.5, "unit": "lb", "note": "600 g"},
+        {"name": "Soy sauce", "quantity": 3, "unit": "Tbsp", "note": ""},
+        {"name": "Sugar", "quantity": 2, "unit": "tsp", "note": ""},
+        {"name": "Garlic, minced", "quantity": 3, "unit": "cloves", "note": ""},
+        {"name": "Sesame oil", "quantity": 1.5, "unit": "tsp", "note": ""},
+        {"name": "Canola oil", "quantity": 4, "unit": "Tbsp", "note": ""},
+        
+        # For Serving
+        {"name": "Baguettes", "quantity": 6, "unit": "", "note": ""},
+        {"name": "Cilantro leaves", "quantity": 0, "unit": "", "note": "to taste"},
+        {"name": "Thai chilies, thinly sliced", "quantity": 0, "unit": "", "note": "to taste"}
     ]
 
-    for ing in artichoke_chicken_ingredients:
+    for ing in vietnamese_beef_bahn_mi_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=artichoke_chicken_id,
+            recipe_id=vietnamese_beef_bahn_mi_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
