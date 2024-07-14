@@ -17,6 +17,7 @@ npm install --save @emotion/styled
 For the backend
 - run "pipenv install"
 - activate the local environment by running "pipenv shell"
+- run app.py by typing "python app.py"
 
 Link to ERD:
 https://miro.com/app/board/uXjVKZjGWME=/

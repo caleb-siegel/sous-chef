@@ -23,7 +23,7 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
     const [newIngredient, setNewIngredient] = useState();
     
     const [comments, setComments] = useState(recipe.user_recipes.filter(userRecipe => userRecipe.user_id === user.id).comments);
-    console.log(comments)
+    
     const [tags, setTags] = useState([]);
     useEffect(() => {
         fetch("/api/tags")

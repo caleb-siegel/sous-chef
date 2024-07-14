@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, TextField, InputLabel, MenuItem, Select, Paper } from '@mui/material/Button';
+import { Button, TextField, InputLabel, MenuItem, Select, Paper } from '@mui/material';
 import Tag from "./Tag";
 import { useOutletContext } from "react-router-dom";
 import Ingredients from "./Ingredients";
