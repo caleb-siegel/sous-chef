@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
+import { Button, TextField, InputLabel, MenuItem, Select, Paper } from '@mui/material/Button';
 import Tag from "./Tag";
-import { Paper } from "@mui/material";
 import { useOutletContext } from "react-router-dom";
 import Ingredients from "./Ingredients";
 import AddIcon from '@mui/icons-material/Add';

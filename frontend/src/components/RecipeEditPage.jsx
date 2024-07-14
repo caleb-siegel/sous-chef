@@ -21,14 +21,16 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
     const [ingredients, setIngredients] = useState(recipe.recipe_ingredients);
     const emptyIngredient = [{ quantity: 0, unit: '', name: '', note: '' }];
     const [newIngredient, setNewIngredient] = useState();
-
+    
+    const [comments, setComments] = useState(recipe.user_recipes.filter(userRecipe => userRecipe.user_id === user.id).comments);
+    console.log(comments)
     const [tags, setTags] = useState([]);
     useEffect(() => {
         fetch("/api/tags")
         .then((response) => response.json())
         .then((data) => setTags(data));
     }, []);
-    console.log(tags)
+    // console.log(tags)
 
     const handleClose = () => {
         setAnchorEl(null);
@@ -111,34 +113,47 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
                 source: sourceName,
                 instructions: recipeInstructions,
                 // source_category_id: sourceCategoryInput,
-                // recipe_ingredients: ingredients
             }),
         })
             .then((response) => response.json())
-            .then((data) => {
-                ingredients && ingredients.map(ingredient => {
-                    const ingredientData = {
-                        // recipe_id: id,
-                        ingredient_name: ingredient.ingredient_name,
-                        ingredient_quantity: ingredient.ingredient_quantity,
-                        ingredient_unit: ingredient.ingredient_unit,
-                        ingredient_note: ingredient.ingredient_note
-                    };
-                    fetch(`/api/recipeingredients/${ingredient.id}`, {
-                        method: "PATCH",
-                        headers: {
-                            "Content-Type": "Application/JSON",
-                        },
-                        body: JSON.stringify(ingredientData),
-                    })
-                    .then((response) => response.json())
-                    .then((newIngredientData) => {
-                        console.log("success")
-                        // setIngredients([emptyIngredient]);
-                    });
+            .then((data) => {})
+            ingredients && ingredients.map(ingredient => {
+                const ingredientData = {
+                    ingredient_name: ingredient.ingredient_name,
+                    ingredient_quantity: ingredient.ingredient_quantity,
+                    ingredient_unit: ingredient.ingredient_unit,
+                    ingredient_note: ingredient.ingredient_note
+                };
+                fetch(`/api/recipeingredients/${ingredient.id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "Application/JSON",
+                    },
+                    body: JSON.stringify(ingredientData),
+                })
+                .then((response) => response.json())
+                .then((newIngredientData) => {
+                    console.log("success")
                 });
-                window.location.reload();
+            });
+            const commentInfo = {
+                comments: comments
+            }
+            recipe.user_recipes && recipe.user_recipes.filter(userRecipe => {
+                userRecipe.user_id === user.id &&
+                fetch(`/api/userrecipes/${userRecipe.id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "Application/JSON",
+                    },
+                    body: JSON.stringify(commentInfo),
+                })
+                .then((response) => response.json())
+                .then((newCommentData) => {
+                    console.log("success")
+                });
             })
+            window.location.reload();
     }
 
     const handleSubmit = (event) => {
@@ -268,6 +283,10 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
                 <Paper>
                     <div><strong>Instructions</strong></div>
                     <TextField label="Recipe Instructions" variant="standard" multiline maxRows={20} value={recipeInstructions} onChange={(event) => setRecipeInstructions(event.target.value)} sx={{ display: 'flex' }}/>
+                </Paper>
+                <Paper>
+                    <div><strong>Comments</strong></div>
+                    <TextField label="Recipe Comments" variant="standard" multiline maxRows={20} value={comments} onChange={(event) => setComments(event.target.value)} sx={{ display: 'flex' }}/>
                 </Paper>
             </Box>
             <br/>

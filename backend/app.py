@@ -270,13 +270,27 @@ def user_recipes():
 
         return response
 
-@app.route('/api/userrecipes/<int:id>', methods=['GET', 'DELETE'])
+@app.route('/api/userrecipes/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
 def user_recipe_id(id):
     if request.method == 'GET':
         user_recipe = db.session.get(User_Recipe, id)
         if not user_recipe:
             return {"error": f"user recipe with id {id} not found"}, 404
         return user_recipe.to_dict()
+    
+    elif request.method == 'PATCH':
+        user_recipe = db.session.get(User_Recipe, id)
+        if not user_recipe:
+            return {"error": f"user recipe with id {id} not found"}, 404
+        try:
+            data = request.json
+            for key in data:
+                setattr(user_recipe, key, data[key])
+            db.session.add(user_recipe)
+            db.session.commit()
+            return user_recipe.to_dict(), 200
+        except Exception as e:
+            return {"error": f'{e}'}
 
     elif request.method == 'DELETE':
         user_recipe = db.session.get(User_Recipe, id)
