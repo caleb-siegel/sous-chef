@@ -147,6 +147,6 @@ class Source_Category(db.Model, SerializerMixin):
     serialize_rules = ["-recipes.source_category"]
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True)
 
     recipes = db.relationship("Recipe", back_populates="source_category")

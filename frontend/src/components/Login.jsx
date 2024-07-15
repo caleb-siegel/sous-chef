@@ -28,8 +28,6 @@ function Login() {
         })
         .then((response) => response.json())
         .then((newUser) => {
-            console.log(newName)
-            console.log(newPassword)
             setNewName("");
             setNewPassword("");
             attemptLogin({ name: newName, password: newPassword });
@@ -82,4 +80,3 @@ function Login() {
 }
 
 export default Login
-

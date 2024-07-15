@@ -1,35 +1,22 @@
-import React, { useState } from 'react';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import { Container } from '@mui/material';
-import TextField from '@mui/material/TextField';
-import Paper from '@mui/material/Paper';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
-
+import React from 'react';
+import { Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, TextField, Paper, InputLabel, MenuItem, Select } from '@mui/material';
 
 function Filter({ filterValue, handleFilterValueChange, filterType, handleFilterTypeChange, filterBy, handleFilterByChange, tags, userTags }) {
   
     return (
-        <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px', width: '250px'}}>
+        <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px', width: '450px'}}>
             <FormControl>
-            <FormLabel id="demo-row-radio-buttons-group-label">Filter:</FormLabel>
-            <RadioGroup
-                row
-                aria-labelledby="demo-row-radio-buttons-group-label"
-                name="row-radio-buttons-group"
-                value={filterType}
-                onChange={handleFilterTypeChange}
-            >
-                <FormControlLabel value="include" control={<Radio />} label="Include" />
-                <FormControlLabel value="exclude" control={<Radio />} label="Exclude" />
-            </RadioGroup>
+                <FormLabel id="demo-row-radio-buttons-group-label">Filter:</FormLabel>
+                <RadioGroup
+                    row
+                    aria-labelledby="demo-row-radio-buttons-group-label"
+                    name="row-radio-buttons-group"
+                    value={filterType}
+                    onChange={handleFilterTypeChange}
+                >
+                    <FormControlLabel value="include" control={<Radio />} label="Include" />
+                    <FormControlLabel value="exclude" control={<Radio />} label="Exclude" />
+                </RadioGroup>
             </FormControl>
             <br />
             <FormControl>
@@ -61,7 +48,6 @@ function Filter({ filterValue, handleFilterValueChange, filterType, handleFilter
                         >
                             {tags.map(tag => {
                                 return <MenuItem key={tag.id} value={tag.name}>{tag.name}</MenuItem>
-
                             })}
                         </Select>
                     </div>

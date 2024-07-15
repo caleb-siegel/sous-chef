@@ -19,14 +19,12 @@ function AddToMealPrep({ user, recipeId = "" }) {
         .then((data) => setMealPrep(data));
     }, []);
 
-    const handleShowAddMealPrepForm = () => {
+    const handleShowAddMealPrepForm = (event) => {
         event.preventDefault();
         setShowAddMealPrepForm(!showAddMealPrepForm)
     }
 
     const handleSubmitMealPrep = (event) => {
-        console.log(recipeId)
-        console.log(addedRecipe)
         event.preventDefault();
         const mealPrepData = {
             user_id: user ? user.id : "",
@@ -34,24 +32,21 @@ function AddToMealPrep({ user, recipeId = "" }) {
             weekday: weekday,
             meal: meal,
         }
-        console.log(mealPrepData)
         fetch("/api/mealprep", {
             method: "POST",
             headers: {
                 "Content-Type": "Application/JSON",
             },
             body: JSON.stringify(mealPrepData),
-            })
-            .then((response) => response.json())
-            .then((newMealPrepData) => {
-                setWeekday("")
-                setMeal("")
-                setShowAddMealPrepForm(!showAddMealPrepForm)
-                window.location.reload();
-            })
+        })
+        .then((response) => response.json())
+        .then((newMealPrepData) => {
+            setWeekday("")
+            setMeal("")
+            setShowAddMealPrepForm(!showAddMealPrepForm)
+            window.location.reload();
+        })
     }
-
-    
 
     return (
     <Container disableGutters maxWidth={false} sx={{ paddingTop: '5px' }}>

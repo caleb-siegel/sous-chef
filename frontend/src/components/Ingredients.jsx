@@ -1,6 +1,5 @@
 import React from 'react';
-import { Button, MenuItem, Paper, TextField, Select } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { MenuItem, Paper, TextField, Select } from '@mui/material';
 
 function Ingredients({ index, ingredients, setIngredients }) {
     
@@ -70,6 +69,6 @@ function Ingredients({ index, ingredients, setIngredients }) {
             />
         </Paper>
     );
-}
+};
 
 export default Ingredients;

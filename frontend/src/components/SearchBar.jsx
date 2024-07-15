@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { TextField, Autocomplete } from "@mui/material";
 
 function SearchBar({ cookbooks, chosenCookbook, setChosenCookbook }) {

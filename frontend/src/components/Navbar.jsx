@@ -1,12 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Container, TextField, Autocomplete } from "@mui/material";
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import SearchIcon from '@mui/icons-material/Search';
-import SearchBar from "./SearchBar";
+import { Container, Switch, FormControlLabel, FormGroup, Grid, Box } from "@mui/material";
 
 function Navbar({ user, logout, darkMode, toggleDarkMode }) {
     
@@ -19,7 +12,7 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
                         <NavLink to="recipes" className="nav-link">Recipes</NavLink>
                         <NavLink to="mealprep" className="nav-link">Meal Prep</NavLink>
                         <NavLink to="random" className="nav-link">Spice It Up</NavLink>
-                        {user && user.id && <NavLink to="newtag" className="nav-link">Add New Tag</NavLink>}
+                        {user && user.id === 2 && <NavLink to="newtag" className="nav-link">Add New Tag</NavLink>}
                         {user && user.id && <NavLink to={`user/${user.id}`} className="nav-link">Profile Page</NavLink>}
                     </Box>
                 </Grid>

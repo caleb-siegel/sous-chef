@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Container, Card, CardHeader, Divider, Chip, FormGroup, FormControlLabel, Checkbox, Tooltip, Button, Skeleton } from '@mui/material'
-// import MealPrepCalendar from './MealPrepCalendar'
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Container, Card, CardHeader, Divider, Chip, Tooltip, Skeleton } from '@mui/material'
 import ShoppingList from './ShoppingList';
 import { useOutletContext } from "react-router-dom";
 import AddToMealPrep from './AddToMealPrep';
@@ -33,17 +31,8 @@ function MealPrep() {
         })
     };
 
-    const [showAddRecipeForm, setShowAddRecipeForm] = useState(false)
-
-    const handleAddRecipeForm = (event) => {
-        event.preventDefault();
-        setShowAddRecipeForm(!showAddRecipeForm);
-    };
-
-
     return (
     <Container disableGutters maxWidth={false}>
-        {/* <MealPrepCalendar/> */}
         <AddToMealPrep user={user} />
         {!loading ? (
             <Container disableGutters maxWidth={false} style={{ display: 'flex'}}>
@@ -98,8 +87,7 @@ function MealPrep() {
         <br/>
         <ShoppingList mealPrep={mealPrep} user={user}/>
     </Container>
-    
-  )
+    )
 }
 
 export default MealPrep

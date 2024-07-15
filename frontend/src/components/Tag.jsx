@@ -1,7 +1,5 @@
 import React from 'react'
-import Checkbox from '@mui/material/Checkbox';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
+import { Checkbox, TextField, Autocomplete } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
@@ -33,11 +31,10 @@ function Tag({ tags, selectedTags, handleTagChange }) {
             )}
             style={{ width: 200 }}
             renderInput={(params) => (
-                <TextField {...params} label="tags" placeholder="tags" />
+                <TextField {...params} label="Tags" placeholder="tags" />
             )}
         />
     )
 }
 
 export default Tag;
-

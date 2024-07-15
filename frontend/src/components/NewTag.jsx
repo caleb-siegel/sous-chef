@@ -65,7 +65,7 @@ function NewTag() {
             {alertMessage && <Alert severity="success">You have successfully added the new tag.</Alert>
             }
         </Paper>
-  )
+    )
 }
 
 export default NewTag

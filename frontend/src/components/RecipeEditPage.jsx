@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom';
-import { Card, CardHeader, CardMedia, Chip, Container, Divider, Box, Paper, Badge, Button, IconButton, Typography, Select, MenuItem, InputLabel, TextField } from '@mui/material';
+import { Chip, Container, Box, Paper, Button, Select, MenuItem, InputLabel, TextField } from '@mui/material';
 import UserRecipeTagsMenu from './UserRecipeTagsMenu';
-import AddToMealPrep from './AddToMealPrep';
-import { useOutletContext } from "react-router-dom";
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import RecipeCardsOptions from './RecipeCardsOptions';
 import Ingredients from './Ingredients';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-
-function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
+function RecipeEditPage({ recipe, user }) {
     const [name, setName] = useState(recipe.name);
     const [picture, setPicture] = useState(recipe.picture);
     const [sourceCategoryInput, setSourceCategoryInput] = useState(recipe.source_category.name);
@@ -30,7 +24,6 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
         .then((response) => response.json())
         .then((data) => setTags(data));
     }, []);
-    // console.log(tags)
 
     const handleClose = () => {
         setAnchorEl(null);
@@ -115,45 +108,45 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
                 // source_category_id: sourceCategoryInput,
             }),
         })
-            .then((response) => response.json())
-            .then((data) => {})
-            ingredients && ingredients.map(ingredient => {
-                const ingredientData = {
-                    ingredient_name: ingredient.ingredient_name,
-                    ingredient_quantity: ingredient.ingredient_quantity,
-                    ingredient_unit: ingredient.ingredient_unit,
-                    ingredient_note: ingredient.ingredient_note
-                };
-                fetch(`/api/recipeingredients/${ingredient.id}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "Application/JSON",
-                    },
-                    body: JSON.stringify(ingredientData),
-                })
-                .then((response) => response.json())
-                .then((newIngredientData) => {
-                    console.log("success")
-                });
-            });
-            const commentInfo = {
-                comments: comments
-            }
-            recipe.user_recipes && recipe.user_recipes.filter(userRecipe => {
-                userRecipe.user_id === user.id &&
-                fetch(`/api/userrecipes/${userRecipe.id}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "Application/JSON",
-                    },
-                    body: JSON.stringify(commentInfo),
-                })
-                .then((response) => response.json())
-                .then((newCommentData) => {
-                    console.log("success")
-                });
+        .then((response) => response.json())
+        .then((data) => {})
+        ingredients && ingredients.map(ingredient => {
+            const ingredientData = {
+                ingredient_name: ingredient.ingredient_name,
+                ingredient_quantity: ingredient.ingredient_quantity,
+                ingredient_unit: ingredient.ingredient_unit,
+                ingredient_note: ingredient.ingredient_note
+            };
+            fetch(`/api/recipeingredients/${ingredient.id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "Application/JSON",
+                },
+                body: JSON.stringify(ingredientData),
             })
-            window.location.reload();
+            .then((response) => response.json())
+            .then((newIngredientData) => {
+                console.log("success")
+            });
+        });
+        const commentInfo = {
+            comments: comments
+        }
+        recipe.user_recipes && recipe.user_recipes.filter(userRecipe => {
+            userRecipe.user_id === user.id &&
+            fetch(`/api/userrecipes/${userRecipe.id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "Application/JSON",
+                },
+                body: JSON.stringify(commentInfo),
+            })
+            .then((response) => response.json())
+            .then((newCommentData) => {
+                console.log("success")
+            });
+        })
+        window.location.reload();
     }
 
     const handleSubmit = (event) => {
@@ -275,9 +268,7 @@ function RecipeEditPage({ recipe, user, id, editRecipe, setEditRecipe }) {
                                 <Ingredients key={0} index={0} ingredients={newIngredient} setIngredients={setNewIngredient}/>
                                 <Button variant="contained" color="primary" size="small" type="submit">Submit</Button>
                             </form>
-                                
                         </Paper>
-                            
                     }
                 </Paper>
                 <Paper>

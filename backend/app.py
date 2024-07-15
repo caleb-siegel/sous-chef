@@ -22,7 +22,7 @@ db.init_app(app)
 
 @app.route("/")
 def root():
-    return "<h1>Welcome to the simple json server<h1>"
+    return "<h1>Welcome to the json server for Sous Chef<h1>"
 
 @app.get('/api/check_session')
 def check_session():
@@ -65,7 +65,6 @@ def user():
             )
             db.session.add(new_user)
             db.session.commit()
-            
             return new_user.to_dict(), 201
         except Exception as e:
             print(e)
@@ -91,17 +90,13 @@ def user_tags():
         new_user_tag = User_Tag(
             name=request.json.get("name"),
         )
-
         db.session.add(new_user_tag)
         db.session.commit()
-        
         new_user_tag_dict = new_user_tag.to_dict()
-
         response = make_response(
             new_user_tag_dict,
             201
         )
-
         return response
     
 @app.route('/api/usertags/<int:id>/', methods=['DELETE'])
@@ -149,7 +144,6 @@ def delete_user_recipe_tags(id):
 
 @app.route('/api/recipes', methods=['GET', 'POST'])
 def recipes():
-
     if request.method == 'GET':
         recipes = []
         for recipe in Recipe.query.order_by(Recipe.id.desc()).all():
@@ -236,7 +230,6 @@ def recipe_id(id):
 
 @app.route('/api/userrecipes', methods=['GET', 'POST'])
 def user_recipes():
-
     if request.method == 'GET':
         user_recipes = []
         for user_recipe in User_Recipe.query.filter_by(user_id=session.get('user_id')).order_by(User_Recipe.id.desc()).all():

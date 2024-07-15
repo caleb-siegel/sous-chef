@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Button, TextField, InputLabel, MenuItem, Select, Paper } from '@mui/material';
-import Tag from "./Tag";
 import { useOutletContext } from "react-router-dom";
+import Tag from "./Tag";
 import Ingredients from "./Ingredients";
+import { Button, TextField, InputLabel, MenuItem, Select, Paper } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
 function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
@@ -32,7 +32,6 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        
         let sourceCategoryId = 0;
         sourceCategories.map((source_category) => {
             if (source_category.name === sourceCategoryInput) {
@@ -64,24 +63,6 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                 setSourceName("");
                 setReference("");
                 setRecipeInstructions("");
-                
-                // const userRecipeData = {
-                //     user_id: user.id,
-                //     recipe_id: newRecipeData.id,
-                //     not_reorder: false,
-                //     comments: ''
-                // };
-                // fetch("http://127.0.0.1:5555/userrecipe", {
-                //     method: "POST",
-                //     headers: {
-                //         "Content-Type": "Application/JSON",
-                //     },
-                //     body: JSON.stringify(userRecipeData),
-                // })
-                // .then((response) => response.json())
-                // .then((newUserRecipe) => {
-                //     setRecipes([...recipes, newRecipeData]);
-                // });
                 selectedTags && selectedTags.length > 0 && selectedTags.map(tag => {
                     const tagData = {
                         recipe_id: newRecipeData.id,
@@ -100,7 +81,6 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         setSelectedTags([]);
                     });
                 });
-                
                 ingredients && ingredients.map(ingredient => {
                     const ingredientData = {
                         recipe_id: newRecipeData.id,
@@ -122,16 +102,10 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         setIngredients([emptyIngredient]);
                     });
                 });
-
-
                 setRecipes([newRecipeData, ...recipes]);
                 handleAddRecipe(event);
             });
-    };
-
-
-
-    
+    };    
     
     return (
         <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px'}}>
@@ -141,7 +115,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                     <div>
                         <TextField id="outlined-basic" label="Name" variant="standard" value={name} onChange={(event) => setName(event.target.value)}/>
                         <br />
-                        <TextField id="outlined-basic" label="picture" variant="standard" value={picture} onChange={(event) => setPicture(event.target.value)}/>
+                        <TextField id="outlined-basic" label="Picture" variant="standard" value={picture} onChange={(event) => setPicture(event.target.value)}/>
                         <br />
                         <br />
                         <InputLabel id="demo-simple-select-label">Source Category</InputLabel>

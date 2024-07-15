@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardMedia, Chip, Container, Divider, Box, Paper, Badge, IconButton, Typography, Select, MenuItem, InputLabel } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Chip, Container, Box, Paper, Badge, Typography, Select, MenuItem, InputLabel } from '@mui/material';
 import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import AddToMealPrep from './AddToMealPrep';
-import { useOutletContext } from "react-router-dom";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import RecipeCardsOptions from './RecipeCardsOptions';
 
-
-function RecipePage({ recipe, user, id, editRecipe, handleEditRecipe }) {
+function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
     const navigate = useNavigate();
     
     const [dimensions, setDimensions] = useState(1)
@@ -60,7 +58,7 @@ function RecipePage({ recipe, user, id, editRecipe, handleEditRecipe }) {
         .then((data) => {})
       };
 
-      const handleDeleteRecipe = (event, id) => {
+    const handleDeleteRecipe = (event, id) => {
         event.preventDefault();
         fetch(`/api/recipes/${id}`, {
             method: "DELETE",

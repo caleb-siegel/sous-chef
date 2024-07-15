@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { IconButton, Popover, Select, MenuItem, Menu } from "@mui/material";
+import { IconButton, MenuItem, Menu } from "@mui/material";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-function RecipeCardsOptions({ handleDelete, recipeId, editRecipe, handleEditRecipe }) {
+function RecipeCardsOptions({ handleDelete, recipeId, handleEditRecipe }) {
     const [recipeOptionsAnchorEl, setRecipeOptionsAnchorEl] = useState(null);
 
     const handleClick = (event) => {
@@ -29,7 +29,7 @@ function RecipeCardsOptions({ handleDelete, recipeId, editRecipe, handleEditReci
                 open={open}
                 onClose={handleClose}
                 MenuListProps={{
-                'aria-labelledby': 'icon-button',
+                    'aria-labelledby': 'icon-button',
                 }}
             >
                 <MenuItem key="edit" value="edit" onClick={(event) => handleEditRecipe(event, recipeId)}><EditIcon/></MenuItem>

@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import AddRecipe from "./AddRecipe";
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import { Button, Card, CardContent, CardHeader, CardMedia, Container, Icon, Chip, IconButton, Alert, Divider, BottomNavigation, BottomNavigationAction } from "@mui/material";
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import Filter from "./Filter";
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import { useOutletContext } from "react-router-dom";
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
-import PersonIcon from '@mui/icons-material/Person';
 import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
 import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
 import SearchBar from "./SearchBar";
+import Filter from "./Filter";
+import { Button, Card, CardHeader, CardMedia, Container, Chip, IconButton, Divider, BottomNavigation, BottomNavigationAction } from "@mui/material";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+import PersonIcon from '@mui/icons-material/Person';
+import { useOutletContext } from "react-router-dom";
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
@@ -71,18 +71,6 @@ function RecipeDirectory() {
             setCookbooks(uniqueCookbooks);
         });
     }, []);
-
-    // const [users, setUsers] = useState([])
-    // useEffect(() => {
-    //     fetch("/api/users")
-    //     .then((response) => response.json())
-    //     .then((data) => {
-    //         data.forEach(user => {
-    //             uniqueCookbooks.push(user.name);
-    //         });
-    //         setCookbooks(uniqueCookbooks);
-    //     });
-    // }, []);
 
     let recipeList = recipes;
     if (chosenCookbook) {
@@ -313,7 +301,7 @@ function RecipeDirectory() {
             if (filterBy === "recipeName") {
                 return (
                     recipe && 
-                    recipe.name && 
+                    recipe.name &&
                     recipe.name.toLowerCase().includes(filterValue.toLowerCase())
                 );
             } else if (filterBy === "tag") {
@@ -387,7 +375,6 @@ function RecipeDirectory() {
                 not_reorder: false,
                 comments: ''
             };
-    
             fetch("/api/userrecipes", {
                 method: "POST",
                 headers: {
@@ -422,11 +409,6 @@ function RecipeDirectory() {
     const [value, setValue] = useState(0);
     
     const [anchorEl, setAnchorEl] = useState(null);
-    const [tagSelect, setTagSelect] = useState("")
-
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
 
     const handleClose = () => {
         setAnchorEl(null);
@@ -509,9 +491,7 @@ function RecipeDirectory() {
                 <BottomNavigation
                     showLabels
                     value={value}
-                    onChange={(event, newValue) => {
-                        setValue(newValue);
-                    }}
+                    onChange={(event, newValue) => {setValue(newValue)}}
                 >
                     <BottomNavigationAction label="All Recipes" icon={<AddIcon />} onClick={(event) => handleToggleRecipes("allrecipes")}/>
                     <BottomNavigationAction label="Your Recipes" icon={<PersonIcon />} onClick={(event) => handleToggleRecipes("yourrecipes")}/>
@@ -519,7 +499,7 @@ function RecipeDirectory() {
                     <BottomNavigationAction label="Dislikes" icon={<ThumbDownOffAltIcon />} onClick={(event) => handleToggleRecipes("notreorder")}/>
                 </BottomNavigation>
             </Container>
-            {!loading ? (
+            {!loading ?
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {filteredRecipes.map((recipe) => (
                         <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>
@@ -533,24 +513,14 @@ function RecipeDirectory() {
                                                 {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
                                             </IconButton>
                                         </Container>
-                                        
-                                        
-                                    // <IconButton aria-label="settings">
-                                    // </IconButton>
                                 }
-                                
-                                // subheader=
                                 />
-                                {/* <Alert severity="error" onClose={handleCloseAlert} open={showAlert}>
-                                    Sign in to save recipe to your cookbook
-                                </Alert> */}
                                 <CardMedia
                                 component="img"
                                 height="194"
                                 image={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"}
                                 alt={recipe.name}
                                 />
-                                {/* <Divider /> */}
                                 {recipe.recipe_tags.map(tag => {
                                     if (tag && tag.tag) {
                                         return <Chip key={tag.tag.id} size="small" label={tag.tag.name} color="primary" sx={{ margin: '1px'}}/>
@@ -573,68 +543,16 @@ function RecipeDirectory() {
                                 {user && <UserRecipeTagsMenu recipeId={recipe.id} tags={userTags} handleTagSelect={handleTagSelect} color="secondary"/>}
                                 <Divider/>
                                 <AddToMealPrep user={user} recipeId={recipe.id}/>
-                                {/* // <CardContent>
-                                // <Typography variant="body2" color="text.secondary">
-                                //     This impressive paella is a perfect party dish and a fun meal to cook
-                                //     together with your guests. Add 1 cup of frozen peas along with the mussels,
-                                //     if you like.
-                                // </Typography>
-                                // </CardContent>
-                                // <CardActions disableSpacing>
-                                // <IconButton aria-label="add to favorites">
-                                //     <FavoriteIcon />
-                                // </IconButton>
-                                // <IconButton aria-label="share">
-                                //     <ShareIcon />
-                                // </IconButton>
-                                // <ExpandMore
-                                //     expand={expanded}
-                                //     onClick={handleExpandClick}
-                                //     aria-expanded={expanded}
-                                //     aria-label="show more"
-                                // >
-                                //     <ExpandMoreIcon />
-                                // </ExpandMore>
-                                // </CardActions>
-                                // <Collapse in={expanded} timeout="auto" unmountOnExit>
-                                // <CardContent>
-                                //     <Typography paragraph>Method:</Typography>
-                                //     <Typography paragraph>
-                                //     Heat 1/2 cup of the broth in a pot until simmering, add saffron and set
-                                //     aside for 10 minutes.
-                                //     </Typography>
-                                //     <Typography paragraph>
-                                //     Heat oil in a (14- to 16-inch) paella pan or a large, deep skillet over
-                                //     medium-high heat. Add chicken, shrimp and chorizo, and cook, stirring
-                                //     occasionally until lightly browned, 6 to 8 minutes. Transfer shrimp to a
-                                //     large plate and set aside, leaving chicken and chorizo in the pan. Add
-                                //     pimentón, bay leaves, garlic, tomatoes, onion, salt and pepper, and cook,
-                                //     stirring often until thickened and fragrant, about 10 minutes. Add
-                                //     saffron broth and remaining 4 1/2 cups chicken broth; bring to a boil.
-                                //     </Typography>
-                                //     <Typography paragraph>
-                                //     Add rice and stir very gently to distribute. Top with artichokes and
-                                //     peppers, and cook without stirring, until most of the liquid is absorbed,
-                                //     15 to 18 minutes. Reduce heat to medium-low, add reserved shrimp and
-                                //     mussels, tucking them down into the rice, and cook again without
-                                //     stirring, until mussels have opened and rice is just tender, 5 to 7
-                                //     minutes more. (Discard any mussels that don&apos;t open.)
-                                //     </Typography>
-                                //     <Typography>
-                                //     Set aside off of the heat to let rest for 10 minutes, and then serve.
-                                //     </Typography>
-                                // </CardContent>
-                                // </Collapse> */}
                             </Card>
                         </a>
                     ))}
                 </div>
                 
-            ): (
+            :
                 <Container disableGutters maxWidth={false}>
                     <RecipeSkeleton />
                 </Container>
-)}
+            }
         </Container>
     )
 }

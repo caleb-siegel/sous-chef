@@ -1,10 +1,8 @@
 import React from 'react'
-import { useParams } from 'react-router-dom';
 import { useOutletContext } from "react-router-dom";
 
 function ProfilePage() {
     const {user} = useOutletContext();
-    const { id } = useParams();
 
     return (
         <div>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Container, Paper, Link, Button } from '@mui/material'
+import React, { useState } from 'react'
+import { Container, Paper, Button } from '@mui/material'
 import { useOutletContext } from "react-router-dom";
 import RecipePage from './RecipePage';
 
