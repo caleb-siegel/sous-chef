@@ -54,52 +54,57 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    chipotle_bbq_broiled_skirt_steak_recipe = Recipe(
-        name="Chipotle Barbecue Broiled Skirt Steak",
-        picture="/recipes/chipotle bbq broiled skirt steak.jpeg",
+    ultimate_kale_salad_recipe = Recipe(
+        name="Ultimate Kale Salad",
+        picture="/recipes/ultimate_kale_salad.jpeg",
         source_category_id=2,
-        source="Peas Love and Carrots",
-        reference="Page 250",
+        source="Unknown Source",
+        reference="Unknown Reference",
         instructions="""
-    Cut skirt steak into 2-3 inch pieces.
-    Place in a bowl. Cover with cold water and vinegar.
-    Soak meat for 30 minutes, then rinse and pat dry.
+    1. Prepare the roasted butternut squash: Preheat oven to 400°F. Line a rimmed baking sheet with parchment paper. Place the cubed butternut squash on prepared baking sheet in a single layer. Spray or drizzle with olive oil; season with salt and pepper. Roast for 25-28 minutes.
 
-    In a bowl, combine remaining ingredients; add steak. 
-    Marinate for 30 minutes or up to overnight in the fridge.
+    2. Prepare the sautéed mushrooms: Heat oil in a frying pan over medium heat. Add mushrooms, sauté until soft, about 5 minutes. Season with salt. Stir; set aside.
 
-    Set oven to broil. Line a baking sheet with parchment paper.
+    3. Prepare the creamy apple cider dressing: In a glass jar, combine all dressing ingredients; whisk or shake until emulsified. Taste; adjust seasonings, if necessary.
 
-    Place skirt steaks on prepared baking sheet. Reserve marinade.
-    Broil for 6 minutes on one side.
-    Remove from oven; brush with reserved marinade.
-    Flip steaks over, brush the second side with marinade.
-    Return baking sheet to oven. Broil for 4-5 minutes.
+    4. To assemble: Place a bed of kale onto a large platter or into a large bowl. Top with roasted butternut squash, sautéed mushrooms, peppers, cherry tomatoes, avocado, dried cranberries, and candied pecans.
 
-    Remove from oven and enjoy.
-
-    (To cook more well done, after broiling, set oven to 350°F / 180°C, cover pan tightly with foil, and bake for 15 minutes.)
-
-    Slice meat AGAINST the grain and enjoy!
+    5. Immediately before serving, drizzle with dressing and toss to coat.
     """
     )
 
-    db.session.add(chipotle_bbq_broiled_skirt_steak_recipe)
+    db.session.add(ultimate_kale_salad_recipe)
     db.session.commit()
 
-    chipotle_bbq_broiled_skirt_steak_id = chipotle_bbq_broiled_skirt_steak_recipe.id
+    ultimate_kale_salad_id = ultimate_kale_salad_recipe.id
 
-    chipotle_bbq_broiled_skirt_steak_ingredients = [
-        {"name": "Skirt steak", "quantity": 3, "unit": "lb", "note": "1.3 kg"},
-        {"name": "Apple cider vinegar", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Fave BBQ sauce", "quantity": 1, "unit": "cup", "note": ""},
-        {"name": "Chipotles in adobo, mashed with a fork", "quantity": 2, "unit": "", "note": ""},
-        {"name": "Adobo sauce", "quantity": 2, "unit": "Tbsp", "note": ""}
+    ultimate_kale_salad_ingredients = [
+        {"name": "Kale, chopped", "quantity": 4, "unit": "oz", "note": ""},
+        {"name": "Sweet mini peppers, cut into rounds", "quantity": 1, "unit": "cup", "note": ""},
+        {"name": "Cherry tomatoes, halved", "quantity": 1, "unit": "cup", "note": ""},
+        {"name": "Avocado, sliced", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Dried cranberries", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Chopped candied pecans", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Butternut squash, peeled and cubed", "quantity": 0.5, "unit": "lb", "note": "for roasted butternut squash"},
+        {"name": "Olive oil or olive oil spray", "quantity": 2, "unit": "tbsp", "note": "for roasted butternut squash"},
+        {"name": "Sea salt", "quantity": 0.25, "unit": "tsp", "note": "for roasted butternut squash"},
+        {"name": "Black pepper", "quantity": None, "unit": "pinch", "note": "for roasted butternut squash"},
+        {"name": "Olive oil", "quantity": 1.5, "unit": "tbsp", "note": "for sautéed mushrooms"},
+        {"name": "White mushrooms, sliced", "quantity": 1, "unit": "8-oz container", "note": "for sautéed mushrooms"},
+        {"name": "Sea salt", "quantity": 0.25, "unit": "tsp", "note": "for sautéed mushrooms"},
+        {"name": "Apple cider vinegar", "quantity": 0.25, "unit": "cup", "note": "for creamy apple cider dressing"},
+        {"name": "Honey", "quantity": 3, "unit": "tbsp", "note": "for creamy apple cider dressing"},
+        {"name": "Extra-virgin olive oil", "quantity": 2, "unit": "tbsp", "note": "for creamy apple cider dressing"},
+        {"name": "Mayonnaise", "quantity": 1, "unit": "tbsp", "note": "for creamy apple cider dressing"},
+        {"name": "Ground mustard", "quantity": 0.5, "unit": "tsp", "note": "for creamy apple cider dressing"},
+        {"name": "Garlic powder", "quantity": 0.25, "unit": "tsp", "note": "for creamy apple cider dressing"},
+        {"name": "Sea salt", "quantity": 0.25, "unit": "tsp", "note": "for creamy apple cider dressing"},
+        {"name": "Black pepper", "quantity": 0.125, "unit": "tsp", "note": "for creamy apple cider dressing"}
     ]
 
-    for ing in chipotle_bbq_broiled_skirt_steak_ingredients:
+    for ing in ultimate_kale_salad_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=chipotle_bbq_broiled_skirt_steak_id,
+            recipe_id=ultimate_kale_salad_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
@@ -108,6 +113,7 @@ with app.app_context():
         db.session.add(ingredient_entry)
 
     db.session.commit()
+
 
 
     # db.session.commit()

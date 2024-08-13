@@ -42,6 +42,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
             .then((response) => response.json())
             .then(response => {
                 console.log('User tag posted successfully:', response.data);
+                recipe.user_recipe_tags.push(response.data)
             })
             .catch(error => {
                 console.error('Error posting user tag:', error);
@@ -68,8 +69,6 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
             navigate('/recipes')
         })
     }
-
-    const comments = recipe.user_recipes && user ? recipe.user_recipes.filter(userRecipe => userRecipe.user_id === user.id) : "";
 
     return (
         <Box key={recipe.id} >
@@ -141,7 +140,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                 </Paper>
                 <Paper>
                     <Container disableGutters maxWidth={false}><strong>Comments</strong></Container>
-                    <Container disableGutters maxWidth={false} >{comments.comments}</Container>;
+                    <Container disableGutters maxWidth={false} >{recipe.user_recipes && recipe.user_recipes[0].comments}</Container>;
                 </Paper>
             </Box>
             <br/>
