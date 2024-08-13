@@ -70,8 +70,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
         })
     }
 
-    const properComment = recipe.user_recipes && recipe.user_recipes.filter(comment => comment && user && comment.user_id === user.id);    // let comments = recipe.user_recipes && recipe.user_recipes[0].comments
-    
+    const properComment = recipe.user_recipes && recipe.user_recipes.filter(comment => comment && user && comment.user_id === user.id);
 
     return (
         <Box key={recipe.id} >
@@ -143,7 +142,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                 </Paper>
                 <Paper>
                     <Container disableGutters maxWidth={false}><strong>Comments</strong></Container>
-                    <Container disableGutters maxWidth={false} >{`${user && user.name}'s Comments: ${properComment && properComment[0] && properComment[0].comments}`}</Container>;
+                    <Container disableGutters maxWidth={false} >{`${user && user.name}'s Comments: ${properComment && properComment[0] && properComment[0].comments}`}</Container>
                 </Paper>
             </Box>
             <br/>
