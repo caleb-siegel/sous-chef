@@ -16,7 +16,7 @@ function RecipeEditPage({ recipe, user }) {
     const emptyIngredient = [{ quantity: 0, unit: '', name: '', note: '' }];
     const [newIngredient, setNewIngredient] = useState();
     
-    const [comments, setComments] = useState(recipe.user_recipes.filter(userRecipe => userRecipe.user_id === user.id).comments);
+    const [comments, setComments] = useState(recipe.user_recipes && recipe.user_recipes.filter(comment => comment && user && comment.user_id === user.id)[0].comments);
     
     const [tags, setTags] = useState([]);
     useEffect(() => {

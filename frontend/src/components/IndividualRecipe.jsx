@@ -20,6 +20,8 @@ function IndividualRecipe() {
     const handleEditRecipe = () => {
         setEditRecipe(!editRecipe)
     }
+
+    const properComment = recipe.user_recipes && recipe.user_recipes.filter(comment => comment && user && comment.user_id === user.id);
   
     return (
         !editRecipe ? 
