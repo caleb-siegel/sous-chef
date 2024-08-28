@@ -9,16 +9,24 @@ function ShoppingList({ mealPrep, user }) {
       <FormGroup>
         {mealPrep.map(mealPrep => {
           return (typeof mealPrep.recipe_id) === "number" ?
-            mealPrep.recipe.recipe_ingredients.map(ingredient => {
-              return (
-                user && user.id && (user.id === mealPrep.user_id) &&
-                <FormControlLabel 
-                  key={ingredient.id} 
-                  control={<Checkbox />} 
-                  label={`${ingredient.ingredient_quantity === 0 ? "" : ingredient.ingredient_quantity} ${ingredient.ingredient_unit} ${ingredient.ingredient_name}${(ingredient.ingredient_note === null || ingredient.ingredient_note === "") ? "" : ", " + ingredient.ingredient_note}`} 
-                />
-              )
-            })
+            <div>
+              {user && user.id && (user.id === mealPrep.user_id) &&  
+              <div style={{ paddingTop: '16px' }}>
+                <strong>{mealPrep.recipe.name}</strong>
+              </div>}
+              {mealPrep.recipe.recipe_ingredients.map(ingredient => {
+                return (
+                  user && user.id && (user.id === mealPrep.user_id) &&  
+                  <div>
+                    <FormControlLabel 
+                      key={ingredient.id} 
+                      control={<Checkbox />} 
+                      label={`${ingredient.ingredient_quantity === 0 ? "" : ingredient.ingredient_quantity} ${ingredient.ingredient_unit} ${ingredient.ingredient_name}${(ingredient.ingredient_note === null || ingredient.ingredient_note === "") ? "" : ", " + ingredient.ingredient_note}`} 
+                    />
+                  </div>
+                )
+              })}
+            </div>
           : user && user.id && (user.id === mealPrep.user_id) &&
             <FormControlLabel 
               key={mealPrep.recipe_id} 

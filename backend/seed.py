@@ -54,57 +54,49 @@ with app.app_context():
 
     # User_Recipe_Tag.query.delete()
 
-    ultimate_kale_salad_recipe = Recipe(
-        name="Ultimate Kale Salad",
-        picture="/recipes/ultimate_kale_salad.jpeg",
+    vegan_pesto_pasta_salad_recipe = Recipe(
+        name="Vegan Pesto Pasta Salad",
+        picture="/recipes/vegan_pesto_pasta_salad.jpeg",
         source_category_id=2,
         source="Unknown Source",
         reference="Unknown Reference",
         instructions="""
-    1. Prepare the roasted butternut squash: Preheat oven to 400°F. Line a rimmed baking sheet with parchment paper. Place the cubed butternut squash on prepared baking sheet in a single layer. Spray or drizzle with olive oil; season with salt and pepper. Roast for 25-28 minutes.
+    Step 1
+    Bring a large pot of salted water to a boil. Add the pasta and cook until tender. Drain the pasta, rinse under cold water until cool to the touch, then shake dry.
 
-    2. Prepare the sautéed mushrooms: Heat oil in a frying pan over medium heat. Add mushrooms, sauté until soft, about 5 minutes. Season with salt. Stir; set aside.
+    Step 2
+    Transfer the tomatoes and a big pinch of salt to a large bowl. Stir to combine and set aside.
+    Make the pesto: Add the pistachios, capers, and garlic to a food processor and pulse until coarsely chopped. Add the basil and a pinch of salt and pepper. Pulse until finely chopped. Add the lemon juice. While the motor is running, gradually drizzle in the olive oil until well blended, scraping down the sides as needed. Scrape the pesto into the bowl of tomatoes.
 
-    3. Prepare the creamy apple cider dressing: In a glass jar, combine all dressing ingredients; whisk or shake until emulsified. Taste; adjust seasonings, if necessary.
+    Step 3
+    Add the pasta to the pesto and tomatoes, stir until well coated. Let cool slightly (about 5 minutes), then stir in the arugula and a few torn basil leaves. Season to taste with salt.
 
-    4. To assemble: Place a bed of kale onto a large platter or into a large bowl. Top with roasted butternut squash, sautéed mushrooms, peppers, cherry tomatoes, avocado, dried cranberries, and candied pecans.
-
-    5. Immediately before serving, drizzle with dressing and toss to coat.
+    The salad can sit for up to 2 hours, or be refrigerated for up to 2 days. Refresh with salt, lemon juice, and oil as needed.
     """
     )
 
-    db.session.add(ultimate_kale_salad_recipe)
+    db.session.add(vegan_pesto_pasta_salad_recipe)
     db.session.commit()
 
-    ultimate_kale_salad_id = ultimate_kale_salad_recipe.id
+    vegan_pesto_pasta_salad_id = vegan_pesto_pasta_salad_recipe.id
 
-    ultimate_kale_salad_ingredients = [
-        {"name": "Kale, chopped", "quantity": 4, "unit": "oz", "note": ""},
-        {"name": "Sweet mini peppers, cut into rounds", "quantity": 1, "unit": "cup", "note": ""},
-        {"name": "Cherry tomatoes, halved", "quantity": 1, "unit": "cup", "note": ""},
-        {"name": "Avocado, sliced", "quantity": 1, "unit": "", "note": ""},
-        {"name": "Dried cranberries", "quantity": 0.5, "unit": "cup", "note": ""},
-        {"name": "Chopped candied pecans", "quantity": 0.5, "unit": "cup", "note": ""},
-        {"name": "Butternut squash, peeled and cubed", "quantity": 0.5, "unit": "lb", "note": "for roasted butternut squash"},
-        {"name": "Olive oil or olive oil spray", "quantity": 2, "unit": "tbsp", "note": "for roasted butternut squash"},
-        {"name": "Sea salt", "quantity": 0.25, "unit": "tsp", "note": "for roasted butternut squash"},
-        {"name": "Black pepper", "quantity": None, "unit": "pinch", "note": "for roasted butternut squash"},
-        {"name": "Olive oil", "quantity": 1.5, "unit": "tbsp", "note": "for sautéed mushrooms"},
-        {"name": "White mushrooms, sliced", "quantity": 1, "unit": "8-oz container", "note": "for sautéed mushrooms"},
-        {"name": "Sea salt", "quantity": 0.25, "unit": "tsp", "note": "for sautéed mushrooms"},
-        {"name": "Apple cider vinegar", "quantity": 0.25, "unit": "cup", "note": "for creamy apple cider dressing"},
-        {"name": "Honey", "quantity": 3, "unit": "tbsp", "note": "for creamy apple cider dressing"},
-        {"name": "Extra-virgin olive oil", "quantity": 2, "unit": "tbsp", "note": "for creamy apple cider dressing"},
-        {"name": "Mayonnaise", "quantity": 1, "unit": "tbsp", "note": "for creamy apple cider dressing"},
-        {"name": "Ground mustard", "quantity": 0.5, "unit": "tsp", "note": "for creamy apple cider dressing"},
-        {"name": "Garlic powder", "quantity": 0.25, "unit": "tsp", "note": "for creamy apple cider dressing"},
-        {"name": "Sea salt", "quantity": 0.25, "unit": "tsp", "note": "for creamy apple cider dressing"},
-        {"name": "Black pepper", "quantity": 0.125, "unit": "tsp", "note": "for creamy apple cider dressing"}
+    vegan_pesto_pasta_salad_ingredients = [
+        {"name": "Salt", "quantity": None, "unit": "", "note": ""},
+        {"name": "Fusilli or other twirly noodles", "quantity": 1, "unit": "lb", "note": ""},
+        {"name": "Cherry tomatoes, halved", "quantity": 1, "unit": "pint", "note": ""},
+        {"name": "Raw pistachios, slivered almonds, or pine nuts", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Capers, rinsed", "quantity": 0.33, "unit": "cup", "note": ""},
+        {"name": "Garlic clove, peeled", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Basil leaves", "quantity": 2, "unit": "packed cups", "note": "plus more for serving"},
+        {"name": "Black pepper", "quantity": None, "unit": "", "note": ""},
+        {"name": "Lemon juice", "quantity": 2, "unit": "tbsp", "note": ""},
+        {"name": "Extra-virgin olive oil", "quantity": 0.33, "unit": "cup", "note": ""},
+        {"name": "Arugula", "quantity": 2, "unit": "big handfuls", "note": ""}
     ]
 
-    for ing in ultimate_kale_salad_ingredients:
+    for ing in vegan_pesto_pasta_salad_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=ultimate_kale_salad_id,
+            recipe_id=vegan_pesto_pasta_salad_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
