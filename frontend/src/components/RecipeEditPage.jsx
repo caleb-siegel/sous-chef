@@ -16,8 +16,21 @@ function RecipeEditPage({ recipe, user }) {
     const emptyIngredient = [{ quantity: 0, unit: '', name: '', note: '' }];
     const [newIngredient, setNewIngredient] = useState();
     
-    const [comments, setComments] = useState(recipe.user_recipes && recipe.user_recipes.filter(comment => comment && user && comment.user_id === user.id)[0].comments);
+    const getComments = () => {
+        if (!recipe.user_recipes || !user) return null;
     
+        const userRecipe = recipe.user_recipes.find(comment => 
+            comment && 
+            comment.comments && 
+            comment.user_id && 
+            comment.user_id === user.id
+        );
+    
+        return userRecipe ? userRecipe.comments : "";
+    };
+    
+    const [comments, setComments] = useState(getComments());
+
     const [tags, setTags] = useState([]);
     useEffect(() => {
         fetch("/api/tags")
