@@ -176,6 +176,7 @@ function RecipeDirectory() {
                             ingredient.ingredient_name.toLowerCase().includes("flounder") ||
                             ingredient.ingredient_name.toLowerCase().includes("sea bass") ||
                             ingredient.ingredient_name.toLowerCase().includes("tuna") ||
+                            ingredient.ingredient_name.toLowerCase().includes("snapper") ||
                             ingredient.ingredient_name.toLowerCase().includes("fish") && !ingredient.ingredient_name.toLowerCase().includes("fish-free")
                         )
                     )
