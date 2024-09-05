@@ -5,7 +5,7 @@ import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
 import SearchBar from "./SearchBar";
 import Filter from "./Filter";
-import { Button, Card, CardHeader, CardMedia, Container, Chip, IconButton, Divider, BottomNavigation, BottomNavigationAction } from "@mui/material";
+import { Button, Card, CardHeader, CardMedia, Container, Chip, IconButton, Divider, BottomNavigation, BottomNavigationAction, Typography } from "@mui/material";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -465,6 +465,8 @@ function RecipeDirectory() {
             {addFilter &&
                 <Filter recipes={recipes} setRecipes={setRecipes} handleAddRecipe={handleAddRecipe} filterValue={filterValue} handleFilterValueChange={handleFilterValueChange} filterType={filterType} handleFilterTypeChange={handleFilterTypeChange} filterBy={filterBy} handleFilterByChange={handleFilterByChange} tags={tags} userTags={userTags}/>
             }
+            <br/>
+            {!loading ? <Typography variant="h3" color="secondary" >There are {filteredRecipes.length} results.</Typography> : ""}
             <br/>
             <Container disableGutters maxWidth={false}>
                 <Button variant={outlinedVariant === "allrecipes" ? "outlined" : "contained"} color="primary" size="small" value="allrecipes" onClick={(event) => handleCategorizationButtons(event.target.value)}>All Recipes</Button>
