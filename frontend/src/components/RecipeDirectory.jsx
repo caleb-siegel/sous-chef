@@ -452,7 +452,7 @@ function RecipeDirectory() {
     return (
         <Container disableGutters maxWidth={false} sx={{ paddingBottom: '50px'}}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <h1>Recipe Directory</h1>
+                {/* <h1>Recipe Directory</h1> */}
                 <SearchBar cookbooks={cookbooks} chosenCookbook={chosenCookbook} setChosenCookbook={setChosenCookbook}/>
                 <Button variant={variantAddRecipe} color="primary" size="small" startIcon={startIconAddRecipe} value={addRecipe} onClick={(event) => handleAddRecipe(event)}>{addRecipeButtonText}</Button>
             </div>
@@ -466,7 +466,10 @@ function RecipeDirectory() {
                 <Filter recipes={recipes} setRecipes={setRecipes} handleAddRecipe={handleAddRecipe} filterValue={filterValue} handleFilterValueChange={handleFilterValueChange} filterType={filterType} handleFilterTypeChange={handleFilterTypeChange} filterBy={filterBy} handleFilterByChange={handleFilterByChange} tags={tags} userTags={userTags}/>
             }
             <br/>
-            {!loading ? <Typography variant="h3" color="secondary" >There are {filteredRecipes.length} results.</Typography> : ""}
+            {!loading ? 
+                <Typography variant="h3" color="secondary" >There are {filteredRecipes.length} results.</Typography> 
+                : 
+                <Typography variant="h3" color="secondary" >Recipes are loading...</Typography>}
             <br/>
             <Container disableGutters maxWidth={false}>
                 <Button variant={outlinedVariant === "allrecipes" ? "outlined" : "contained"} color="primary" size="small" value="allrecipes" onClick={(event) => handleCategorizationButtons(event.target.value)}>All Recipes</Button>

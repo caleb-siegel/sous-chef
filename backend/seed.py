@@ -57,117 +57,74 @@ with app.app_context():
     # db.session.commit()
 
 
-    # Recipe 1: General Tso's Chicken and Broccoli Bake
-    general_tsos_chicken_and_broccoli_bake_recipe = Recipe(
-        name="General Tso's Chicken and Broccoli Bake",
-        picture="/recipes/general_tsos_chicken_and_broccoli_bake.jpeg",
+    # Recipe 1: Candied Beef Fry and Potatoes Au Gratin
+    candied_beef_fry_and_potatoes_au_gratin_recipe = Recipe(
+        name="Candied Beef Fry and Potatoes Au Gratin",
+        picture="/recipes/candied_beef_fry_and_potatoes_au_gratin.jpeg",
         source_category_id=2,
         source="Simply Gourmet",
-        reference="168",
+        reference="232",
         instructions="""
     Step 1
-    Preheat oven to 350°F. Coat a 9x13-inch baking pan with cooking spray.
+    Preheat oven to 350°F. Line a baking sheet with parchment paper. Coat a 9x13-inch oven-to-table casserole dish with cooking spray, set aside.
 
     Step 2
-    Place chicken strips, flour, salt, and pepper into a resealable bag. Seal bag; shake until all chicken strips are well coated. Remove strips from flour. Shake off the excess flour; place chicken strips into prepared baking pan.
+    Prepare the candied beef fry: In a small bowl, combine sugar, maple syrup, and pepper.
 
     Step 3
-    Prepare the General Tso's sauce: In a small saucepan, whisk together sugar and cornstarch. Whisk in water. Add remaining ingredients; whisk until smooth. Bring to a boil over medium-high heat, stirring constantly. Lower heat to a simmer and allow sauce to thicken until it lightly coats the back of a spoon. Remove from heat. Alternatively, place mixture into a microwave-safe bowl or container. Microwave on high for 1 minute; stir well. Repeat this two more times for a total of 3 minutes in the microwave. Mixture will be smooth and thickened.
+    Place beef fry slices on prepared baking sheet. Cut 4 slices into 1/4-inch pieces (for garnish). Brush both sides of beef fry with half of the brown sugar mixture. Bake for 10 minutes.
 
     Step 4
-    Pour half the sauce over the chicken strips. Cover pan with foil; bake for 30 minutes.
+    Remove from oven; turn slices over. Brush with remaining sugar mixture. Bake 10-15 minutes until beef fry is caramelized. Set aside to cool. Cut larger pieces into a smaller crumble for garnish. Beef fry is easiest to cut while warm.
 
     Step 5
-    Remove pan from oven. Place broccoli florets over the chicken strips. Pour remaining sauce over the broccoli. Cover; bake an additional 15-20 minutes.
+    Prepare the caramelized onions: In a skillet over medium heat, heat olive oil. Add onions, salt, and pepper; sauté for at least 20-30 minutes, until onions have softened. Raise heat; slightly caramelize (brown) the onion, stirring constantly, for about 3 minutes. Remove from heat.
 
     Step 6
-    Before serving, sprinkle with glazed cashews and sesame seeds, if using.
+    Prepare the potatoes: In a large bowl, combine potatoes, olive oil, garlic, soy sauce, vinegar, herbs, and spices. Toss to coat potatoes.
+
+    Step 7
+    Assemble the au gratin: Place a thin layer of caramelized onions into prepared casserole dish, to just cover the bottom. Layer half the potatoes in 3 slightly overlapping rows. Reserve 1/2 cup caramelized onions. Spread remaining caramelized onions over potato layer. Arrange candied beef fry slices over onions.
+
+    Step 8
+    Layer remaining potatoes in 3 slightly overlapping rows over onions. Sprinkle with reserved caramelized onions and chopped beef fry.
+
+    Step 9
+    Cover casserole dish with foil. Bake for 1 hour 15 minutes. Remove from oven; check that potatoes are soft. Add additional bake time if necessary.
+
+    Step 10
+    Uncover; bake additional 10-15 minutes.
     """
     )
 
-    db.session.add(general_tsos_chicken_and_broccoli_bake_recipe)
+    db.session.add(candied_beef_fry_and_potatoes_au_gratin_recipe)
     db.session.commit()
 
-    general_tsos_chicken_and_broccoli_bake_recipe_id = general_tsos_chicken_and_broccoli_bake_recipe.id
+    candied_beef_fry_and_potatoes_au_gratin_recipe_id = candied_beef_fry_and_potatoes_au_gratin_recipe.id
 
-    general_tsos_chicken_and_broccoli_bake_ingredients = [
-        {"name": "Chicken cutlets, cut into strips", "quantity": 1.5, "unit": "lb", "note": ""},
-        {"name": "Flour", "quantity": 0.25, "unit": "cup", "note": ""},
-        {"name": "Kosher salt", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Black pepper", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Frozen broccoli florets, defrosted", "quantity": 24, "unit": "oz", "note": ""},
-        {"name": "Honey-glazed cashews", "quantity": 0.5, "unit": "cup", "note": "Optional"},
-        {"name": "Black and white sesame seeds", "quantity": 0, "unit": "", "note": "Optional, for sprinkling"},
-        {"name": "Sugar", "quantity": 0.5, "unit": "cup", "note": "General Tso's Sauce"},
-        {"name": "Cornstarch", "quantity": 2, "unit": "Tbsp", "note": "General Tso's Sauce"},
-        {"name": "Water", "quantity": 0.5, "unit": "cup", "note": "General Tso's Sauce"},
-        {"name": "Rice vinegar", "quantity": 0.5, "unit": "cup", "note": "General Tso's Sauce"},
-        {"name": "Low sodium soy sauce", "quantity": 0.5, "unit": "cup", "note": "General Tso's Sauce"},
-        {"name": "Hoisin sauce", "quantity": 1.5, "unit": "Tbsp", "note": "General Tso's Sauce"},
-        {"name": "Garlic, crushed", "quantity": 4, "unit": "cloves", "note": "General Tso's Sauce"},
-        {"name": "Ground ginger", "quantity": 0.5, "unit": "tsp", "note": "General Tso's Sauce"},
-        {"name": "Crushed red pepper flakes", "quantity": 0.25, "unit": "tsp", "note": "General Tso's Sauce"}
-    ]
-
-    for ing in general_tsos_chicken_and_broccoli_bake_ingredients:
-        ingredient_entry = Recipe_Ingredient(
-            recipe_id=general_tsos_chicken_and_broccoli_bake_recipe_id,
-            ingredient_name=ing["name"],
-            ingredient_quantity=ing["quantity"],
-            ingredient_unit=ing["unit"],
-            ingredient_note=ing["note"]
-        )
-        db.session.add(ingredient_entry)
-
-    # Recipe 2: Sweet Chili-Glazed Chicken Wings
-    sweet_chili_glazed_chicken_wings_recipe = Recipe(
-        name="Sweet Chili-Glazed Chicken Wings",
-        picture="/recipes/sweet_chili_glazed_chicken_wings.jpeg",
-        source_category_id=2,
-        source="Simply Gourmet",
-        reference="158",
-        instructions="""
-    Step 1
-    Preheat oven to 450°F. Set out a baking sheet.
-
-    Step 2
-    Pat wings dry with a paper towel (this will help crisp the skin). Place wings on prepared baking sheet. Drizzle with olive oil; sprinkle with salt and pepper. Turn wings to coat evenly.
-
-    Step 3
-    Bake skin-side up, uncovered, for 20 minutes.
-
-    Step 4
-    Prepare the sweet chili glaze: In a small bowl, combine glaze ingredients.
-
-    Step 5
-    Remove wings from oven. Pour off any liquid. Turn wings over. Pour glaze over wings. Bake for 15 minutes. Brush wings with glaze from the baking sheet. Bake for another 15 minutes.
-
-    Step 6
-    Turn wings skin-side up. Brush wings once again with glaze. Raise oven temperature to 500°F. Bake an additional 10-15 minutes. Wings will have a fabulous BBQ look.
-    """
-    )
-
-    db.session.add(sweet_chili_glazed_chicken_wings_recipe)
-    db.session.commit()
-
-    sweet_chili_glazed_chicken_wings_recipe_id = sweet_chili_glazed_chicken_wings_recipe.id
-
-    sweet_chili_glazed_chicken_wings_ingredients = [
-        {"name": "Chicken wings", "quantity": 2, "unit": "lb", "note": ""},
+    candied_beef_fry_and_potatoes_au_gratin_ingredients = [
+        {"name": "Beef fry", "quantity": 2, "unit": "6-8 oz packages", "note": ""},
+        {"name": "Brown sugar", "quantity": 0.25, "unit": "cup", "note": ""},
+        {"name": "Pure maple syrup", "quantity": 2, "unit": "Tbsp", "note": ""},
+        {"name": "Black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Spanish onions, halved", "quantity": 4, "unit": "large", "note": "Caramelized onions"},
         {"name": "Olive oil", "quantity": 3, "unit": "Tbsp", "note": ""},
+        {"name": "Kosher salt", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Red potatoes", "quantity": 2, "unit": "lb", "note": "Peeled and sliced into 1/4-inch rounds"},
+        {"name": "Garlic, crushed", "quantity": 4, "unit": "cloves", "note": ""},
+        {"name": "Soy sauce", "quantity": 1, "unit": "Tbsp", "note": ""},
+        {"name": "Red wine vinegar", "quantity": 1, "unit": "Tbsp", "note": ""},
+        {"name": "Dried rosemary", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Dried basil", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Dried parsley flakes", "quantity": 1, "unit": "tsp", "note": ""},
         {"name": "Kosher salt", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Black pepper", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Honey", "quantity": 0.5, "unit": "cup", "note": "Sweet Chili Glaze"},
-        {"name": "Sweet chili sauce", "quantity": 0.5, "unit": "cup", "note": "Sweet Chili Glaze"},
-        {"name": "Garlic, crushed", "quantity": 5, "unit": "cloves", "note": "Sweet Chili Glaze"},
-        {"name": "Low sodium soy sauce", "quantity": 3, "unit": "Tbsp", "note": "Sweet Chili Glaze"},
-        {"name": "Apple cider vinegar", "quantity": 3, "unit": "Tbsp", "note": "Sweet Chili Glaze"},
-        {"name": "Crushed red pepper flakes", "quantity": 0.25, "unit": "tsp", "note": "Sweet Chili Glaze"}
+        {"name": "Black pepper", "quantity": 0.25, "unit": "tsp", "note": ""}
     ]
 
-    for ing in sweet_chili_glazed_chicken_wings_ingredients:
+    for ing in candied_beef_fry_and_potatoes_au_gratin_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=sweet_chili_glazed_chicken_wings_recipe_id,
+            recipe_id=candied_beef_fry_and_potatoes_au_gratin_recipe_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
@@ -175,54 +132,44 @@ with app.app_context():
         )
         db.session.add(ingredient_entry)
 
-    # Recipe 3: Savory Herb-Rubbed Chicken
-    savory_herb_rubbed_chicken_recipe = Recipe(
-        name="Savory Herb-Rubbed Chicken",
-        picture="/recipes/savory_herb_rubbed_chicken.jpeg",
+
+    # Recipe 2: Honey Mustard Potatoes
+    honey_mustard_potatoes_recipe = Recipe(
+        name="Honey Mustard Potatoes",
+        picture="/recipes/honey_mustard_potatoes.jpeg",
         source_category_id=2,
         source="Simply Gourmet",
-        reference="156",
+        reference="230",
         instructions="""
-    Step 1 (Optional)
-    Brine the chicken: Fill a large container with brining liquid ingredients. Mix all together. Add chicken; marinate, covered, in refrigerator for at least one hour or overnight.
+    Step 1
+    Preheat oven to 400°F. Coat a 9x13-inch baking pan with cooking spray.
 
     Step 2
-    Prepare the savory herb rub: In a small bowl, mix together rub ingredients.
+    Rinse potatoes; place potatoes into a medium pot. Cover with water; bring to a boil for 10 minutes; drain. This step ensures that potatoes are completely baked.
 
     Step 3
-    Preheat oven to 350°F. Prepare a 9x13-inch baking pan.
+    Place potatoes in a single layer in prepared baking pan. In a small bowl mix together potatoes, toss to coat, honey, and onion soup mix.
 
     Step 4
-    Remove chicken from brine, if using. Pat chicken dry; coat generously with rub. Cover; bake for 1 hour 15 minutes. Uncover, drizzle with honey. Broil for five minutes.
+    Bake uncovered, for 55-60 minutes, tossing occasionally. Serve warm.
     """
     )
 
-    db.session.add(savory_herb_rubbed_chicken_recipe)
+    db.session.add(honey_mustard_potatoes_recipe)
     db.session.commit()
 
-    savory_herb_rubbed_chicken_recipe_id = savory_herb_rubbed_chicken_recipe.id
+    honey_mustard_potatoes_recipe_id = honey_mustard_potatoes_recipe.id
 
-    savory_herb_rubbed_chicken_ingredients = [
-        {"name": "Chickens, cut into quarters or eighths", "quantity": 6, "unit": "lb", "note": ""},
-        {"name": "Honey", "quantity": 3, "unit": "Tbsp", "note": ""},
-        {"name": "Dark brown sugar (packed)", "quantity": 9, "unit": "Tbsp", "note": "Savory Herb Rub"},
-        {"name": "Sweet or smoked paprika", "quantity": 6, "unit": "Tbsp", "note": "Savory Herb Rub"},
-        {"name": "Chili powder", "quantity": 4.5, "unit": "Tbsp", "note": "Savory Herb Rub"},
-        {"name": "Kosher salt", "quantity": 3, "unit": "tsp", "note": "Savory Herb Rub"},
-        {"name": "Garlic powder", "quantity": 3, "unit": "tsp", "note": "Savory Herb Rub"},
-        {"name": "Black pepper", "quantity": 1.5, "unit": "tsp", "note": "Savory Herb Rub"},
-        {"name": "Cumin", "quantity": 1.5, "unit": "tsp", "note": "Savory Herb Rub"},
-        {"name": "Crushed red pepper flakes", "quantity": 1, "unit": "tsp", "note": "Savory Herb Rub"},
-        {"name": "Nutmeg", "quantity": 0.5, "unit": "tsp", "note": "Savory Herb Rub"},
-        {"name": "Water", "quantity": 4, "unit": "cups", "note": "Optional Brining Liquid"},
-        {"name": "Dark brown sugar", "quantity": 0.5, "unit": "cup", "note": "Optional Brining Liquid"},
-        {"name": "Kosher salt", "quantity": 0.5, "unit": "cup", "note": "Optional Brining Liquid"},
-        {"name": "Vinegar", "quantity": 0.5, "unit": "cup", "note": "Optional Brining Liquid"}
+    honey_mustard_potatoes_ingredients = [
+        {"name": "Pebble (mini) potatoes", "quantity": 2, "unit": "lb", "note": ""},
+        {"name": "Yellow mustard", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Honey", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Onion soup mix", "quantity": 1, "unit": "Tbsp", "note": ""}
     ]
 
-    for ing in savory_herb_rubbed_chicken_ingredients:
+    for ing in honey_mustard_potatoes_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=savory_herb_rubbed_chicken_recipe_id,
+            recipe_id=honey_mustard_potatoes_recipe_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
