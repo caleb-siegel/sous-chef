@@ -56,75 +56,39 @@ with app.app_context():
 
     # db.session.commit()
 
-
-    # Recipe 1: Candied Beef Fry and Potatoes Au Gratin
-    candied_beef_fry_and_potatoes_au_gratin_recipe = Recipe(
-        name="Candied Beef Fry and Potatoes Au Gratin",
-        picture="/recipes/candied_beef_fry_and_potatoes_au_gratin.jpeg",
+    # Recipe 1: Butter Pecan Milkshakes
+    butter_pecan_milkshakes_recipe = Recipe(
+        name="Butter Pecan Milkshakes",
+        picture="/recipes/butter_pecan_milkshakes.jpeg",
         source_category_id=2,
         source="Simply Gourmet",
-        reference="232",
+        reference="64",
         instructions="""
     Step 1
-    Preheat oven to 350°F. Line a baking sheet with parchment paper. Coat a 9x13-inch oven-to-table casserole dish with cooking spray, set aside.
+    In a blender or with an immersion blender, mix ice cream, milk, Viennese Crunch, caramel cream, and vanilla sugar.
 
     Step 2
-    Prepare the candied beef fry: In a small bowl, combine sugar, maple syrup, and pepper.
-
-    Step 3
-    Place beef fry slices on prepared baking sheet. Cut 4 slices into 1/4-inch pieces (for garnish). Brush both sides of beef fry with half of the brown sugar mixture. Bake for 10 minutes.
-
-    Step 4
-    Remove from oven; turn slices over. Brush with remaining sugar mixture. Bake 10-15 minutes until beef fry is caramelized. Set aside to cool. Cut larger pieces into a smaller crumble for garnish. Beef fry is easiest to cut while warm.
-
-    Step 5
-    Prepare the caramelized onions: In a skillet over medium heat, heat olive oil. Add onions, salt, and pepper; sauté for at least 20-30 minutes, until onions have softened. Raise heat; slightly caramelize (brown) the onion, stirring constantly, for about 3 minutes. Remove from heat.
-
-    Step 6
-    Prepare the potatoes: In a large bowl, combine potatoes, olive oil, garlic, soy sauce, vinegar, herbs, and spices. Toss to coat potatoes.
-
-    Step 7
-    Assemble the au gratin: Place a thin layer of caramelized onions into prepared casserole dish, to just cover the bottom. Layer half the potatoes in 3 slightly overlapping rows. Reserve 1/2 cup caramelized onions. Spread remaining caramelized onions over potato layer. Arrange candied beef fry slices over onions.
-
-    Step 8
-    Layer remaining potatoes in 3 slightly overlapping rows over onions. Sprinkle with reserved caramelized onions and chopped beef fry.
-
-    Step 9
-    Cover casserole dish with foil. Bake for 1 hour 15 minutes. Remove from oven; check that potatoes are soft. Add additional bake time if necessary.
-
-    Step 10
-    Uncover; bake additional 10-15 minutes.
+    Prepare 2 large glasses: Drizzle caramel cream down the inside of each glass. Divide ice cream mixture between glasses. Garnish with toppings of choice.
     """
     )
 
-    db.session.add(candied_beef_fry_and_potatoes_au_gratin_recipe)
+    db.session.add(butter_pecan_milkshakes_recipe)
     db.session.commit()
 
-    candied_beef_fry_and_potatoes_au_gratin_recipe_id = candied_beef_fry_and_potatoes_au_gratin_recipe.id
+    butter_pecan_milkshakes_recipe_id = butter_pecan_milkshakes_recipe.id
 
-    candied_beef_fry_and_potatoes_au_gratin_ingredients = [
-        {"name": "Beef fry", "quantity": 2, "unit": "6-8 oz packages", "note": ""},
-        {"name": "Brown sugar", "quantity": 0.25, "unit": "cup", "note": ""},
-        {"name": "Pure maple syrup", "quantity": 2, "unit": "Tbsp", "note": ""},
-        {"name": "Black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Spanish onions, halved", "quantity": 4, "unit": "large", "note": "Caramelized onions"},
-        {"name": "Olive oil", "quantity": 3, "unit": "Tbsp", "note": ""},
-        {"name": "Kosher salt", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Black pepper", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Red potatoes", "quantity": 2, "unit": "lb", "note": "Peeled and sliced into 1/4-inch rounds"},
-        {"name": "Garlic, crushed", "quantity": 4, "unit": "cloves", "note": ""},
-        {"name": "Soy sauce", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Red wine vinegar", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Dried rosemary", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Dried basil", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Dried parsley flakes", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Kosher salt", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Black pepper", "quantity": 0.25, "unit": "tsp", "note": ""}
+    butter_pecan_milkshakes_ingredients = [
+        {"name": "Butter pecan ice cream", "quantity": 2.5, "unit": "cups", "note": ""},
+        {"name": "Milk", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "White Viennese Crunch, crushed", "quantity": 3, "unit": "sticks", "note": ""},
+        {"name": "Caramel cream", "quantity": 0.25, "unit": "cup", "note": ""},
+        {"name": "Vanilla sugar", "quantity": 0.5, "unit": "Tbsp", "note": ""},
+        {"name": "Optional toppings", "quantity": 0, "unit": "", "note": "whipped cream, caramel cream, chocolate syrup, Viennese Crunch crumbs"}
     ]
 
-    for ing in candied_beef_fry_and_potatoes_au_gratin_ingredients:
+    for ing in butter_pecan_milkshakes_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=candied_beef_fry_and_potatoes_au_gratin_recipe_id,
+            recipe_id=butter_pecan_milkshakes_recipe_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
@@ -132,44 +96,212 @@ with app.app_context():
         )
         db.session.add(ingredient_entry)
 
-
-    # Recipe 2: Honey Mustard Potatoes
-    honey_mustard_potatoes_recipe = Recipe(
-        name="Honey Mustard Potatoes",
-        picture="/recipes/honey_mustard_potatoes.jpeg",
+    # Recipe 2: Malawah Calzones
+    malawah_calzones_recipe = Recipe(
+        name="Malawah Calzones",
+        picture="/recipes/malawah_calzones.jpeg",
         source_category_id=2,
         source="Simply Gourmet",
-        reference="230",
+        reference="48",
         instructions="""
     Step 1
-    Preheat oven to 400°F. Coat a 9x13-inch baking pan with cooking spray.
+    Prepare the filling: Heat butter in a medium skillet over medium-high heat. Add onion; sauté for 3 minutes, until softened. Add remaining vegetables. Season with 1 teaspoon sea salt and 1/4 teaspoon black pepper. Sauté for 7 minutes, stirring occasionally.
 
     Step 2
-    Rinse potatoes; place potatoes into a medium pot. Cover with water; bring to a boil for 10 minutes; drain. This step ensures that potatoes are completely baked.
+    Add shredded cheese; stir until cheese begins to melt. Add cottage cheese and cream cheese; stir until cheese mixture is completely smooth. Season with additional salt and pepper to taste; add garlic powder. Stir to combine. Remove pan from heat. Cool slightly.
 
     Step 3
-    Place potatoes in a single layer in prepared baking pan. In a small bowl mix together potatoes, toss to coat, honey, and onion soup mix.
+    Prepare the calzones: Preheat oven to 400°F. Line a baking sheet with parchment paper.
 
     Step 4
-    Bake uncovered, for 55-60 minutes, tossing occasionally. Serve warm.
+    Place 1 malawah dough round on your workspace. Place 2-3 tablespoons of filling onto the center of the round. Fold dough in half; seal by pressing edges together. Reinforce the seal by pressing down around edges with a fork. Transfer calzone to prepared baking sheet. Repeat with remaining malawah rounds and filling.
+
+    Step 5
+    Brush each calzone with duck sauce. Garnish with sesame seeds if desired.
+
+    Step 6
+    Bake on center rack for 20-25 minutes, until golden. Serve hot.
     """
     )
 
-    db.session.add(honey_mustard_potatoes_recipe)
+    db.session.add(malawah_calzones_recipe)
     db.session.commit()
 
-    honey_mustard_potatoes_recipe_id = honey_mustard_potatoes_recipe.id
+    malawah_calzones_recipe_id = malawah_calzones_recipe.id
 
-    honey_mustard_potatoes_ingredients = [
-        {"name": "Pebble (mini) potatoes", "quantity": 2, "unit": "lb", "note": ""},
-        {"name": "Yellow mustard", "quantity": 0.5, "unit": "cup", "note": ""},
-        {"name": "Honey", "quantity": 0.5, "unit": "cup", "note": ""},
-        {"name": "Onion soup mix", "quantity": 1, "unit": "Tbsp", "note": ""}
+    malawah_calzones_ingredients = [
+        {"name": "Butter or olive oil", "quantity": 2, "unit": "Tbsp", "note": ""},
+        {"name": "Red onion, finely diced", "quantity": 1, "unit": "small", "note": ""},
+        {"name": "Orange pepper, finely diced", "quantity": 0.5, "unit": "", "note": ""},
+        {"name": "White mushrooms, sliced", "quantity": 4, "unit": "oz", "note": "or canned sliced mushrooms, drained"},
+        {"name": "Frozen chopped spinach, defrosted and squeezed dry", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Shredded cheese", "quantity": 0.25, "unit": "cup", "note": "Muenster, mozzarella, or Mexican blend"},
+        {"name": "Cottage cheese", "quantity": 0.25, "unit": "cup", "note": ""},
+        {"name": "Cream cheese or sour cream", "quantity": 2, "unit": "Tbsp", "note": ""},
+        {"name": "Garlic powder", "quantity": 0.5, "unit": "tsp", "note": ""},
+        {"name": "Scallion, sliced", "quantity": 1, "unit": "clove", "note": ""},
+        {"name": "Sea salt, divided", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Black pepper, divided", "quantity": 0.5, "unit": "tsp", "note": ""},
+        {"name": "Malawah dough", "quantity": 1, "unit": "package", "note": "6 rounds, defrosted"},
+        {"name": "Duck sauce", "quantity": 3, "unit": "Tbsp", "note": "for brushing"},
+        {"name": "Sesame seeds, optional", "quantity": 0, "unit": "", "note": "for garnish"}
     ]
 
-    for ing in honey_mustard_potatoes_ingredients:
+    for ing in malawah_calzones_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=honey_mustard_potatoes_recipe_id,
+            recipe_id=malawah_calzones_recipe_id,
+            ingredient_name=ing["name"],
+            ingredient_quantity=ing["quantity"],
+            ingredient_unit=ing["unit"],
+            ingredient_note=ing["note"]
+        )
+        db.session.add(ingredient_entry)
+
+    # Recipe 3: Maple Pecan Granola
+    maple_pecan_granola_recipe = Recipe(
+        name="Maple Pecan Granola",
+        picture="/recipes/maple_pecan_granola.jpeg",
+        source_category_id=2,
+        source="Simply Gourmet",
+        reference="44",
+        instructions="""
+    Step 1
+    Preheat oven to 350°F. Line a stainless steel baking sheet with parchment paper or coat with cooking spray.
+
+    Step 2
+    Combine all ingredients on prepared baking sheet. Toss gently to evenly coat. Spread into a single layer.
+
+    Step 3
+    Bake for 15 minutes, stirring once halfway through baking.
+
+    Step 4
+    Remove from oven; cool.
+
+    Step 5
+    Store in a resealable bag or airtight container.
+    """
+    )
+
+    db.session.add(maple_pecan_granola_recipe)
+    db.session.commit()
+
+    maple_pecan_granola_recipe_id = maple_pecan_granola_recipe.id
+
+    maple_pecan_granola_ingredients = [
+        {"name": "Old-fashioned oats", "quantity": 1, "unit": "cup", "note": ""},
+        {"name": "Coconut flakes (large chips)", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Chopped pecans", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Turbinado sugar", "quantity": 0.25, "unit": "cup", "note": ""},
+        {"name": "Dark brown sugar, packed", "quantity": 0.25, "unit": "cup", "note": ""},
+        {"name": "Pure maple syrup", "quantity": 2, "unit": "Tbsp", "note": ""},
+        {"name": "Canola oil", "quantity": 2, "unit": "Tbsp", "note": ""}
+    ]
+
+    for ing in maple_pecan_granola_ingredients:
+        ingredient_entry = Recipe_Ingredient(
+            recipe_id=maple_pecan_granola_recipe_id,
+            ingredient_name=ing["name"],
+            ingredient_quantity=ing["quantity"],
+            ingredient_unit=ing["unit"],
+            ingredient_note=ing["note"]
+        )
+        db.session.add(ingredient_entry)
+
+    # Recipe 4: Sunny-Side-Up Boats
+    sunny_side_up_boats_recipe = Recipe(
+        name="Sunny-Side-Up Boats",
+        picture="/recipes/sunny_side_up_boats.jpeg",
+        source_category_id=2,
+        source="Simply Gourmet",
+        reference="38",
+        instructions="""
+    Step 1
+    Preheat oven to 350°F. Line a baking sheet with parchment paper.
+
+    Step 2
+    Cut a thin slice off the top of each roll. Carefully remove the center of each roll, leaving a 1/2-inch shell. (You can use the bread you remove for a stuffing or to make croutons.) Place sandwich boats onto the prepared baking sheet.
+
+    Step 3
+    Place 1 teaspoon diced onion inside a boat cavity; sprinkle with salt and pepper. Place 1/2 teaspoon butter into the center. Carefully crack an egg; pour it over the onion (without breaking the yolk). Sprinkle with additional salt and pepper and 1 teaspoon Parmesan cheese. Repeat with remaining boats.
+
+    Step 4
+    Bake for 15-17 minutes, until the egg whites are set and the yolks are still runny.
+
+    Step 5
+    Serve immediately.
+    """
+    )
+
+    db.session.add(sunny_side_up_boats_recipe)
+    db.session.commit()
+
+    sunny_side_up_boats_recipe_id = sunny_side_up_boats_recipe.id
+
+    sunny_side_up_boats_ingredients = [
+        {"name": "Pretzel rolls or any hard bread rolls", "quantity": 8, "unit": "", "note": ""},
+        {"name": "Onion, diced finely", "quantity": 1, "unit": "small", "note": ""},
+        {"name": "Kosher salt, to taste", "quantity": 0, "unit": "", "note": ""},
+        {"name": "Black pepper, to taste", "quantity": 0, "unit": "", "note": ""},
+        {"name": "Butter", "quantity": 4, "unit": "tsp", "note": ""},
+        {"name": "Eggs", "quantity": 8, "unit": "", "note": ""},
+        {"name": "Parmesan cheese, for sprinkling", "quantity": 8, "unit": "tsp", "note": ""}
+    ]
+
+    for ing in sunny_side_up_boats_ingredients:
+        ingredient_entry = Recipe_Ingredient(
+            recipe_id=sunny_side_up_boats_recipe_id,
+            ingredient_name=ing["name"],
+            ingredient_quantity=ing["quantity"],
+            ingredient_unit=ing["unit"],
+            ingredient_note=ing["note"]
+        )
+        db.session.add(ingredient_entry)
+
+    # Recipe 5: Brussels Sprouts Fritters
+    brussels_sprouts_fritters_recipe = Recipe(
+        name="Brussels Sprouts Fritters",
+        picture="/recipes/brussels_sprouts_fritters.jpeg",
+        source_category_id=2,
+        source="Simply Gourmet",
+        reference="226",
+        instructions="""
+    Step 1
+    Prepare the fritters: In a medium bowl, mix seasoned breadcrumbs, onion powder, baking powder, and nondairy milk. Stir in grated Brussels sprouts and garlic.
+
+    Step 2
+    Prepare the batter: In a separate small bowl, whisk together flour and egg. Stir into Brussels sprouts mixture until well combined.
+
+    Step 3
+    Heat canola oil in a medium heat frying pan. Drop batter by tablespoonfuls into the pan. Fry each side until golden, about 4 minutes. Remove fritters and drain on paper towel.
+
+    Step 4
+    Sprinkle fritters with remaining 1/4 teaspoon salt and lemon juice. Serve with mayonnaise.
+    """
+    )
+
+    db.session.add(brussels_sprouts_fritters_recipe)
+    db.session.commit()
+
+    brussels_sprouts_fritters_recipe_id = brussels_sprouts_fritters_recipe.id
+
+    brussels_sprouts_fritters_ingredients = [
+        {"name": "Seasoned breadcrumbs", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Onion powder", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Baking powder", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Nondairy milk", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Brussels sprouts, grated", "quantity": 2, "unit": "cups", "note": ""},
+        {"name": "Garlic, crushed", "quantity": 1, "unit": "clove", "note": ""},
+        {"name": "Flour", "quantity": 2, "unit": "Tbsp", "note": ""},
+        {"name": "Egg, beaten", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Canola oil, for frying", "quantity": 0.5, "unit": "cup", "note": ""},
+        {"name": "Salt, divided", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Lemon juice", "quantity": 2, "unit": "tsp", "note": ""},
+        {"name": "Mayonnaise", "quantity": 0.25, "unit": "cup", "note": ""}
+    ]
+
+    for ing in brussels_sprouts_fritters_ingredients:
+        ingredient_entry = Recipe_Ingredient(
+            recipe_id=brussels_sprouts_fritters_recipe_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
