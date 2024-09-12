@@ -5,7 +5,7 @@ import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
 import SearchBar from "./SearchBar";
 import Filter from "./Filter";
-import { Button, Card, CardHeader, CardMedia, Container, Chip, IconButton, Divider, BottomNavigation, BottomNavigationAction, Typography } from "@mui/material";
+import { Button, Card, CardHeader, CardMedia, Container, Chip, IconButton, Divider, BottomNavigation, BottomNavigationAction, Typography, CardContent } from "@mui/material";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -549,6 +549,7 @@ function RecipeDirectory() {
                                 {user && <UserRecipeTagsMenu recipeId={recipe.id} tags={userTags} handleTagSelect={handleTagSelect} color="secondary"/>}
                                 <Divider/>
                                 <AddToMealPrep user={user} recipeId={recipe.id}/>
+                                <Divider/>                                
                             </Card>
                         </a>
                     ))}

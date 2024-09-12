@@ -83,6 +83,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                     <FavoriteIcon color="action" />
                 </Badge>
             </Container>
+            {recipe.source_category_id === 2 ? <div>This recipe is from {recipe.source} and can be found on Page {recipe.reference}.</div> : <div>This recipe was sourced from {recipe.source}</div>}
             <Container disableGutters maxWidth={false}>
                 {recipe.recipe_tags && recipe.recipe_tags.map(tag => {
                     if (tag && tag.tag) {
