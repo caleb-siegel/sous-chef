@@ -61,13 +61,18 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     const handleDeleteRecipe = (event, id) => {
         event.preventDefault();
-        fetch(`/api/recipes/${id}`, {
-            method: "DELETE",
-        })
-        .then((data) => {
-            alert("You have deleted the recipe")
-            navigate('/recipes')
-        })
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this item?"
+        );
+        if (confirmed) {
+            fetch(`/api/recipes/${id}`, {
+                method: "DELETE",
+            })
+            .then((data) => {
+                alert("You have deleted the recipe")
+                navigate('/recipes')
+            })
+        }
     }
 
     const properComment = recipe.user_recipes && recipe.user_recipes.filter(comment => comment && user && comment.user_id === user.id);
