@@ -14,6 +14,7 @@ import IndividualRecipe from './components/IndividualRecipe';
 import RandomizeRecipe from './components/RandomizeRecipe';
 import ProfilePage from './components/ProfilePage';
 import NewTag from './components/NewTag';
+import { Analytics } from "@vercel/analytics/react"
 
 const router = createBrowserRouter([
   {
@@ -90,6 +91,7 @@ root.render(
   <React.StrictMode>
       <ThemeProvider theme={theme}>
         <RouterProvider router={router} />
+        <Analytics />
       </ThemeProvider>
   </React.StrictMode>
 );
