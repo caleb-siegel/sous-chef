@@ -22,7 +22,7 @@ function RecipeDirectory() {
     const [loading, setLoading] = useState(true);
     const [recipes, setRecipes] = useState([]);
     useEffect(() => {
-        fetch("/api/recipes")
+        fetch("https://souschef-backend.vercel.app/api/recipes")
         .then((response) => response.json())
         .then((data) => {
             setRecipes(data);
