@@ -14,7 +14,7 @@ function AddToMealPrep({ user, recipeId = "" }) {
 
     const [mealPrep, setMealPrep] = useState([]);
     useEffect(() => {
-        fetch("/api/mealprep")
+        fetch("https://souschef-backend.vercel.app/api/mealprep")
         .then((response) => response.json())
         .then((data) => setMealPrep(data));
     }, []);
@@ -32,7 +32,7 @@ function AddToMealPrep({ user, recipeId = "" }) {
             weekday: weekday,
             meal: meal,
         }
-        fetch("/api/mealprep", {
+        fetch("https://souschef-backend.vercel.app/api/mealprep", {
             method: "POST",
             headers: {
                 "Content-Type": "Application/JSON",

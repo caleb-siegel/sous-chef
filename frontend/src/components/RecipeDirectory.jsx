@@ -32,21 +32,21 @@ function RecipeDirectory() {
 
     const [tags, setTags] = useState([]);
     useEffect(() => {
-        fetch("/api/tags")
+        fetch("https://souschef-backend.vercel.app/api/tags")
         .then((response) => response.json())
         .then((data) => setTags(data));
     }, []);
 
     const [userTags, setUserTags] = useState([]);
     useEffect(() => {
-        fetch("/api/usertags")
+        fetch("https://souschef-backend.vercel.app/api/usertags")
         .then((response) => response.json())
         .then((data) => setUserTags(data));
     }, []);
     
     const [userRecipes, setUserRecipes] = useState([]);
     useEffect(() => {
-        fetch("/api/userrecipes")
+        fetch("https://souschef-backend.vercel.app/api/userrecipes")
         .then((response) => response.json())
         .then((data) => setUserRecipes(data));
     }, []);
@@ -59,7 +59,7 @@ function RecipeDirectory() {
     const [cookbooks, setCookbooks] = useState([]);
     const [chosenCookbook, setChosenCookbook] = useState("")
     useEffect(() => {
-        fetch("/api/recipes")
+        fetch("https://souschef-backend.vercel.app/api/recipes")
         .then((response) => response.json())
         .then((data) => {
             const uniqueCookbooks = [];
@@ -376,7 +376,7 @@ function RecipeDirectory() {
                 not_reorder: false,
                 comments: ''
             };
-            fetch("/api/userrecipes", {
+            fetch("https://souschef-backend.vercel.app/api/userrecipes", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -394,7 +394,7 @@ function RecipeDirectory() {
         } else {
             const userRecipeIdToRemove = userRecipes.find(userRecipe => userRecipe.recipe_id === recipeId).id;
 
-            fetch(`/api/userrecipes/${userRecipeIdToRemove}`, {
+            fetch(`https://souschef-backend.vercel.app/api/userrecipes/${userRecipeIdToRemove}`, {
                 method: "DELETE",
             })
             .then(() => {
@@ -417,7 +417,7 @@ function RecipeDirectory() {
 
     const handleTagSelect = (recipeIdTag, userTagId) => {
         if (userTagId !== null) {
-            fetch('/api/userrecipetags', {
+            fetch('https://souschef-backend.vercel.app/api/userrecipetags', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -443,7 +443,7 @@ function RecipeDirectory() {
 
     const handleDeleteUserTag = (event, id) => {
         event.preventDefault();
-        fetch(`/api/userrecipetags/${id}`, {
+        fetch(`https://souschef-backend.vercel.app/api/userrecipetags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {})

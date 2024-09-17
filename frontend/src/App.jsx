@@ -11,7 +11,7 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/api/check_session`).then((res) => {
+    fetch(`https://souschef-backend.vercel.app/api/check_session`).then((res) => {
         if (res.ok) {
             res.json().then((user) => setUser(user));
         }
@@ -19,7 +19,7 @@ function App() {
   }, []);
 
   function attemptLogin(userInfo) {
-    fetch(`/api/login`, {
+    fetch(`https://souschef-backend.vercel.app/api/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -44,7 +44,7 @@ function App() {
         });
   }
   function logout() {
-    fetch(`/api/logout`, { method: "DELETE" }).then((res) => {
+    fetch(`https://souschef-backend.vercel.app/api/logout`, { method: "DELETE" }).then((res) => {
         if (res.ok) {
             setUser(null);
         }

@@ -19,7 +19,7 @@ function Login() {
             name: newName,
             password_hash: newPassword
         };
-        fetch("/api/user", {
+        fetch("https://souschef-backend.vercel.app/api/user", {
         method: "POST",
         headers: {
             "Content-Type": "Application/JSON",

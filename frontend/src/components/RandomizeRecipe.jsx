@@ -11,7 +11,7 @@ function RandomizeRecipe() {
 
     const handleRandom = () => {
         setShowRecipe(true)
-        fetch(`/api/random_recipe`)
+        fetch(`https://souschef-backend.vercel.app/api/random_recipe`)
             .then((response) => response.json())
             .then((data) => setRandomRecipe(data))
     }
