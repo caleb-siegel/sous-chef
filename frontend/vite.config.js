@@ -9,13 +9,13 @@ export default defineConfig(() => {
           outDir: 'dist',
       },
       server: {
-          proxy: {
-              "/api":{
-                target:'https://souschef-backend.vercel.app',
-                changeOrigin: true,
-                secure: true,
-              }
-          }
+          // proxy: {
+          //     "/api":{
+          //       target:'https://souschef-backend.vercel.app',
+          //       changeOrigin: true,
+          //       secure: true,
+          //     }
+          // }
       },
       plugins: [react()],
   };
