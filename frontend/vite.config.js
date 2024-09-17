@@ -11,9 +11,9 @@ export default defineConfig(() => {
       server: {
           proxy: {
               "/api":{
-                target:'http://localhost:5555',
+                target:'https://souschef-backend.vercel.app',
                 changeOrigin: true,
-                secure: false,
+                secure: true,
               }
           }
       },
