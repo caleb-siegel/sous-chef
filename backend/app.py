@@ -146,7 +146,7 @@ def delete_user_recipe_tags(id):
 def recipes():
     if request.method == 'GET':
         recipes = []
-        for recipe in Recipe.query.order_by(Recipe.id.desc()).all():
+        for recipe in Recipe.query.order_by(Recipe.id.desc()).first():
             recipe_dict = recipe.to_dict()
             recipes.append(recipe_dict)
 
