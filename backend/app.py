@@ -45,6 +45,7 @@ def login():
         response.headers["Access-Control-Allow-Origin"] = "https://souschef2.vercel.app"
         response.headers["Access-Control-Allow-Methods"] = "POST"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
         return response
     
     elif request.method == 'POST':
