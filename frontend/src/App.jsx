@@ -11,12 +11,14 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`https://souschef-backend.vercel.app/api/check_session`).then((res) => {
+    fetch('https://souschef-backend.vercel.app/api/check_session', {
+        credentials: 'include'
+    }).then((res) => {
         if (res.ok) {
             res.json().then((user) => setUser(user));
         }
     });
-  }, []);
+}, []);
 
   function attemptLogin(userInfo) {
     fetch(`https://souschef-backend.vercel.app/api/login`, {
@@ -26,6 +28,7 @@ function App() {
             "Accepts": "application/json",
         },
         body: JSON.stringify(userInfo),
+        credentials: 'include'
     })
         .then((res) => {
             if (res.ok) {
