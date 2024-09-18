@@ -38,17 +38,25 @@ def logout():
     session.pop('user_id')
     return { "message": "Logged out"}, 200
 
-@app.post('/api/login')
+@app.post('/api/login', methods=['POST', 'OPTIONS'])
 def login():
-    print('login')
-    data = request.json
-    user = User.query.filter(User.name == data.get('name')).first()
-    if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
-        session["user_id"] = user.id
-        print("success")
-        return user.to_dict(), 200
-    else:
-        return { "error": "Invalid username or password" }, 401
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+        response.headers["Access-Control-Allow-Methods"] = "POST"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        return response
+    
+    elif request.method == 'POST':
+        print('login')
+        data = request.json
+        user = User.query.filter(User.name == data.get('name')).first()
+        if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
+            session["user_id"] = user.id
+            print("success")
+            return user.to_dict(), 200
+        else:
+            return { "error": "Invalid username or password" }, 401
     
 @app.route('/api/user', methods=['GET', 'POST'])
 def user():
