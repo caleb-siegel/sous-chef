@@ -12,7 +12,7 @@ config = dotenv_values(".env")
 app = Flask(__name__)
 app.secret_key = config['FLASK_SECRET_KEY']
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "https://souschef2.vercel.app"}})
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres.kftlryhbgzobodejoqie:sous-chef-database@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.json.compact = False
 bcrypt = Bcrypt(app)
