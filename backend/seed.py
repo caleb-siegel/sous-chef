@@ -56,42 +56,45 @@ with app.app_context():
 
     # db.session.commit()
 
-    # Recipe 1: Cornbread Funnel Cakes
-    cornbread_funnel_cakes_recipe = Recipe(
-        name="Cornbread Funnel Cakes",
-        picture="/recipes/cornbread_funnel_cakes.jpeg",
+    # Recipe 9: Chunky Peanut Butter Cookies
+    chunky_peanut_butter_cookies_recipe = Recipe(
+        name="Chunky Peanut Butter Cookies",
+        picture="/recipes/chunky_peanut_butter_cookies.jpeg",
         source_category_id=2,
-        source="Millennial Kosher",
-        reference="280",
+        source="Sally's Baking Addiction",
+        reference="105",
         instructions="""
-    1. In a mixing bowl, combine flour, cornmeal, sugar, salt, and baking powder. Add eggs and milk; stir to combine. Place the batter into a piping or ziplock bag with one corner snipped off.
-    2. Heat a few inches of oil in a deep skillet. Squeeze a bit of batter into the oil to test for readiness. If batter rises to the top, the oil is hot enough.
-    3. Pipe about ⅓ cup batter into the hot oil in a circular motion to create a spiral pattern. Fry until golden; flip to fry the other side. Drain on paper towels. Repeat with remaining batter.
-    4. Dust funnel cakes with powdered sugar; serve immediately, with maple syrup for dipping.
-        """,
+    1. Whisk the flour, baking powder, and baking soda together in a large bowl. Set aside.
+    2. Using a handheld or stand mixer fitted with a paddle attachment, beat the butter, brown sugar, and granulated sugar together in a large bowl on medium speed until creamed, about 2–3 minutes. Add the egg and vanilla. Beat on medium speed for 1 minute, scraping down the sides as needed. Add the peanut butter and beat for 1 minute. Slowly add the dry ingredients into the wet ingredients using the mixer on low speed until combined. Do not overmix. With a large spoon or rubber spatula, fold the peanuts into the dough. Cover the dough and chill for at least 2 hours (or up to 3 days).
+    3. Remove the chilled dough from the refrigerator and allow to soften at room temperature for 10 minutes.
+    4. Preheat the oven to 350°F (175°C). Line two large cookie sheets with parchment paper or silicone baking mats.
+    5. Roll the dough into balls, about 2 tablespoons of dough each. Place on the cookie sheet about 3in (7.5cm) apart and, using a fork, lightly press down on the cookies, creating a criss-cross pattern on top.
+    6. Bake each batch for 12–13 minutes, until lightly browned on the edges. The cookies will look very soft and underbaked. Allow to cool on the cookie sheet for 10 minutes before transferring to a wire rack to cool completely. The cookies will stay fresh in an airtight container at room temperature for up to 7 days.
+    Sally Says: Making those iconic criss-cross patterns on top of these peanut butter cookies is much easier with chilled cookie dough; don’t forget to let the dough chill for at least 2 hours in the refrigerator first.
+    """
     )
 
-    db.session.add(cornbread_funnel_cakes_recipe)
+    db.session.add(chunky_peanut_butter_cookies_recipe)
     db.session.commit()
 
-    cornbread_funnel_cakes_recipe_id = cornbread_funnel_cakes_recipe.id
+    chunky_peanut_butter_cookies_recipe_id = chunky_peanut_butter_cookies_recipe.id
 
-    cornbread_funnel_cakes_ingredients = [
-        {"name": "Flour", "quantity": 1.25, "unit": "cups", "note": ""},
-        {"name": "Cornmeal", "quantity": 0.75, "unit": "cup", "note": ""},
-        {"name": "Sugar", "quantity": 0.25, "unit": "cup", "note": ""},
-        {"name": "Kosher salt", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Baking powder", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Eggs", "quantity": 2, "unit": "", "note": "lightly beaten"},
-        {"name": "Whole milk or nondairy milk", "quantity": 1, "unit": "cup", "note": ""},
-        {"name": "Canola oil", "quantity": 0, "unit": "", "note": "for frying"},
-        {"name": "Powdered sugar", "quantity": 0, "unit": "", "note": "for dusting"},
-        {"name": "Pure maple syrup", "quantity": 0, "unit": "", "note": "for dipping"},
+    chunky_peanut_butter_cookies_ingredients = [
+        {"name": "All-purpose flour", "quantity": 1.25, "unit": "cups", "note": "(160g)"},
+        {"name": "Baking powder", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Baking soda", "quantity": 0.25, "unit": "tsp", "note": ""},
+        {"name": "Salted butter", "quantity": 0.5, "unit": "cup", "note": "(115g) softened to room temperature"},
+        {"name": "Light or dark brown sugar", "quantity": 0.75, "unit": "cup", "note": "(150g)"},
+        {"name": "Granulated sugar", "quantity": 0.25, "unit": "cup", "note": "(50g)"},
+        {"name": "Egg", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Vanilla extract", "quantity": 1, "unit": "tsp", "note": ""},
+        {"name": "Crunchy peanut butter", "quantity": 0.5, "unit": "cup", "note": "(125g)"},
+        {"name": "Salted peanuts or honey roasted peanuts", "quantity": 0.33, "unit": "cup", "note": "(85g)"}
     ]
 
-    for ing in cornbread_funnel_cakes_ingredients:
+    for ing in chunky_peanut_butter_cookies_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=cornbread_funnel_cakes_recipe_id,
+            recipe_id=chunky_peanut_butter_cookies_recipe_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
@@ -99,33 +102,52 @@ with app.app_context():
         )
         db.session.add(ingredient_entry)
 
-    # Recipe 2: Ice Cream Cone Bark
-    ice_cream_cone_bark_recipe = Recipe(
-        name="Ice Cream Cone Bark",
-        picture="/recipes/ice_cream_cone_bark.jpeg",
+    # Add tag to the recipe
+    recipe_tag_entry = Recipe_Tag(
+        recipe_id=chunky_peanut_butter_cookies_recipe_id,
+        tag_id=12
+    )
+    db.session.add(recipe_tag_entry)
+
+    # Recipe 10: Cake Batter Chocolate Chip Cookies
+    cake_batter_chocolate_chip_cookies_recipe = Recipe(
+        name="Cake Batter Chocolate Chip Cookies",
+        picture="/recipes/cake_batter_chocolate_chip_cookies.jpeg",
         source_category_id=2,
-        source="Millennial Kosher",
-        reference="296",
+        source="Sally's Baking Addiction",
+        reference="106",
         instructions="""
-    1. Melt chocolate over a double boiler; using an offset spatula, spread it into an even layer on a parchment-lined baking sheet. Sprinkle chocolate with colored sprinkles and crushed sugar cones; chill until set.
-    2. Break chocolate into pieces. Store in an airtight container for up to two weeks.
-        """,
+    1. In a large bowl, sift the flour, cake mix, and baking soda together. Set aside.
+    2. Using a handheld or stand mixer fitted with a paddle attachment, beat the butter, granulated sugar, and brown sugar together in a large bowl on medium speed until creamed, about 2–3 minutes. Add the egg and vanilla. Beat on medium speed for 1 minute, scraping down the sides as needed. Using the mixer on low speed, slowly add the dry ingredients into the wet ingredients until combined. Do not overmix. With a large spoon or rubber spatula, fold the chocolate chips, white chocolate chips, and sprinkles into the dough. Cover the dough and chill for at least 2 hours (or up to 3 days).
+    3. Remove the chilled dough from the refrigerator and allow to soften at room temperature for 10 minutes.
+    4. Preheat the oven to 350°F (175°C). Line two large cookie sheets with parchment paper or silicone baking mats.
+    5. Roll the dough into balls, about 1½ tablespoons of dough per cookie. Roll the cookie dough balls to be taller rather than wide. Place 3in (7.5cm) apart onto each cookie sheet and bake each batch for 10–12 minutes, or until the edges are slightly browned. The cookies will look very soft and underbaked. Remove from the oven and allow to cool on the cookie sheet for 5 minutes before transferring to a wire rack to cool completely. The cookies will stay fresh in an airtight container at room temperature for up to 7 days.
+    Sally Says: Dry cake mix is used to replace flour in this recipe to give the cookies their distinct “cake batter” taste. Make sure you sift the dry cake mix in with the flour and baking soda—cake mix tends to be lumpy, and the last thing you want are powdery lumps in your baked cookies. Trust me, it’s not pretty!
+    """
     )
 
-    db.session.add(ice_cream_cone_bark_recipe)
+    db.session.add(cake_batter_chocolate_chip_cookies_recipe)
     db.session.commit()
 
-    ice_cream_cone_bark_recipe_id = ice_cream_cone_bark_recipe.id
+    cake_batter_chocolate_chip_cookies_recipe_id = cake_batter_chocolate_chip_cookies_recipe.id
 
-    ice_cream_cone_bark_ingredients = [
-        {"name": "Dairy white chocolate", "quantity": 12, "unit": "oz", "note": ""},
-        {"name": "Colored sprinkles", "quantity": 3, "unit": "Tbsp", "note": ""},
-        {"name": "Sugar cones", "quantity": 3, "unit": "", "note": "crushed"},
+    cake_batter_chocolate_chip_cookies_ingredients = [
+        {"name": "All-purpose flour", "quantity": 1.25, "unit": "cups", "note": "(160g)"},
+        {"name": "Yellow or white boxed dry cake mix", "quantity": 1.25, "unit": "cups", "note": "(190g)"},
+        {"name": "Baking soda", "quantity": 0.5, "unit": "tsp", "note": ""},
+        {"name": "Butter", "quantity": 0.75, "unit": "cup", "note": "(170g) softened to room temperature"},
+        {"name": "Granulated sugar", "quantity": 0.5, "unit": "cup", "note": "(100g)"},
+        {"name": "Light brown sugar", "quantity": 0.5, "unit": "cup", "note": "(100g)"},
+        {"name": "Egg", "quantity": 1, "unit": "", "note": ""},
+        {"name": "Vanilla extract", "quantity": 0.5, "unit": "tsp", "note": ""},
+        {"name": "Semi-sweet chocolate chips", "quantity": 0.5, "unit": "cup", "note": "(90g)"},
+        {"name": "White chocolate chips", "quantity": 0.5, "unit": "cup", "note": "(90g)"},
+        {"name": "Sprinkles", "quantity": 0.5, "unit": "cup", "note": "(80g)"}
     ]
 
-    for ing in ice_cream_cone_bark_ingredients:
+    for ing in cake_batter_chocolate_chip_cookies_ingredients:
         ingredient_entry = Recipe_Ingredient(
-            recipe_id=ice_cream_cone_bark_recipe_id,
+            recipe_id=cake_batter_chocolate_chip_cookies_recipe_id,
             ingredient_name=ing["name"],
             ingredient_quantity=ing["quantity"],
             ingredient_unit=ing["unit"],
@@ -133,63 +155,15 @@ with app.app_context():
         )
         db.session.add(ingredient_entry)
 
-    # Recipe 3: Roasted Chickpeas, Three Ways
-    roasted_chickpeas_three_ways_recipe = Recipe(
-        name="Roasted Chickpeas, Three Ways",
-        picture="/recipes/roasted_chickpeas_three_ways.jpeg",
-        source_category_id=2,
-        source="Millennial Kosher",
-        reference="304",
-        instructions="""
-    1. Preheat oven to 400°F. Spread chickpeas on a baking sheet; toss with oil and desired spice mix.
-    2. Bake for about 40-45 minutes, shaking the pan once or twice during baking, until crispy.
-    3. Before serving, cool for a few minutes to crisp.
-
-    Note: For best results, do not line baking sheet with parchment paper.
-        """,
+    # Add tag to the recipe
+    recipe_tag_entry = Recipe_Tag(
+        recipe_id=cake_batter_chocolate_chip_cookies_recipe_id,
+        tag_id=12
     )
+    db.session.add(recipe_tag_entry)
 
-    db.session.add(roasted_chickpeas_three_ways_recipe)
-    db.session.commit()
+    # Continue with other recipes in a similar structure...
 
-    roasted_chickpeas_three_ways_recipe_id = roasted_chickpeas_three_ways_recipe.id
-
-    roasted_chickpeas_three_ways_ingredients = [
-        {"name": "Chickpeas", "quantity": 1, "unit": "can", "note": "15-oz, drained, rinsed, and patted dry"},
-        {"name": "Olive oil", "quantity": 1, "unit": "Tbsp", "note": ""},
-        {"name": "Flavoring of choice", "quantity": 0, "unit": "", "note": "see below"},
-        # Taco Spice Mix (Pareve)
-        {"name": "Chili powder", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Cumin", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Smoked paprika", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Garlic powder", "quantity": 0.25, "unit": "tsp", "note": ""},
-        {"name": "Cayenne pepper", "quantity": 1, "unit": "pinch", "note": ""},
-        {"name": "Kosher salt", "quantity": 0, "unit": "", "note": "to taste"},
-        # Falafel Spice Mix (Pareve)
-        {"name": "Cumin", "quantity": 1.5, "unit": "tsp", "note": ""},
-        {"name": "Coriander", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Onion powder", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Garlic powder", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Kosher salt", "quantity": 0, "unit": "", "note": "to taste"},
-        # Pizza Spice Mix (Dairy or Pareve)
-        {"name": "Parmesan cheese or nutritional yeast", "quantity": 1, "unit": "Tbsp", "note": "plus more for dusting"},
-        {"name": "Oregano", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Garlic powder", "quantity": 1, "unit": "tsp", "note": ""},
-        {"name": "Tomato paste", "quantity": 2, "unit": "Tbsp", "note": ""},
-        {"name": "Freshly ground black pepper", "quantity": 0.5, "unit": "tsp", "note": ""},
-        {"name": "Kosher salt", "quantity": 0, "unit": "", "note": "to taste"},
-    ]
-
-    for ing in roasted_chickpeas_three_ways_ingredients:
-        ingredient_entry = Recipe_Ingredient(
-            recipe_id=roasted_chickpeas_three_ways_recipe_id,
-            ingredient_name=ing["name"],
-            ingredient_quantity=ing["quantity"],
-            ingredient_unit=ing["unit"],
-            ingredient_note=ing["note"]
-        )
-        db.session.add(ingredient_entry)
-    
     db.session.commit()
 
 
