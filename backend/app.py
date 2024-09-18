@@ -12,7 +12,7 @@ config = dotenv_values(".env")
 app = Flask(__name__)
 app.secret_key = config['FLASK_SECRET_KEY']
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["https://souschef2.vercel.app", "http://localhost:5173"]}})
-app.config["SQLALCHEMY_DATABASE_URI"] = config["SQLALCHEMY_DATABASE_URI"]
+app.config["SQLALCHEMY_DATABASE_URI"] = config.get("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.json.compact = False
 bcrypt = Bcrypt(app)
@@ -38,7 +38,7 @@ def logout():
     session.pop('user_id')
     return { "message": "Logged out"}, 200
 
-@app.post('/api/login', methods=['POST', 'OPTIONS'])
+@app.route('/api/login', methods=['POST', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':
         response = make_response()
