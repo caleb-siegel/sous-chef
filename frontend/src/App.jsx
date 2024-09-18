@@ -25,7 +25,7 @@ function App() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Accepts": "application/json",
+            "Accept": "application/json",
         },
         body: JSON.stringify(userInfo),
         credentials: 'include'
