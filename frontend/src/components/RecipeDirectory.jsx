@@ -30,6 +30,16 @@ function RecipeDirectory() {
         });
     }, []);
 
+    const [newRecipes, setNewRecipes] = useState([]);
+    useEffect(() => {
+        fetch("/api/recipe_info")
+        .then((response) => response.json())
+        .then((data) => {
+            setNewRecipes(data);
+            setLoading(false);
+        });
+    }, []);
+
     const [tags, setTags] = useState([]);
     useEffect(() => {
         fetch("/api/tag_names")
@@ -502,7 +512,7 @@ function RecipeDirectory() {
             </Container>
             {!loading ?
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    {filteredRecipes.map((recipe) => (
+                    {newRecipes?.map((recipe) => (
                         <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>
                             <Card key={recipe.id} sx={{ maxWidth: 345, margin: '10px', padding: '10px' }}>
                                 <CardHeader
@@ -543,7 +553,7 @@ function RecipeDirectory() {
                                 }
                                 {user && <UserRecipeTagsMenu recipeId={recipe.id} tags={userTags} handleTagSelect={handleTagSelect} color="secondary"/>}
                                 <Divider/>
-                                <AddToMealPrep user={user} recipeId={recipe.id}/>
+                                <AddToMealPrep user={user} recipe={recipe}/>
                                 <Divider/>                                
                             </Card>
                         </a>
