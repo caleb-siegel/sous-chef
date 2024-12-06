@@ -11,8 +11,10 @@ config = dotenv_values(".env")
 
 app = Flask(__name__)
 app.secret_key = config['FLASK_SECRET_KEY']
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["https://souschef2.vercel.app", "http://localhost:5173"]}})
-app.config["SQLALCHEMY_DATABASE_URI"] = config.get("SQLALCHEMY_DATABASE_URI")
+# CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["https://souschef2.vercel.app", "http://localhost:5173"]}})
+CORS(app)
+# app.config["SQLALCHEMY_DATABASE_URI"] = config.get("SQLALCHEMY_DATABASE_URI")
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.json.compact = False
 bcrypt = Bcrypt(app)
@@ -39,16 +41,8 @@ def logout():
     return { "message": "Logged out"}, 200
 
 @app.route('/api/login', methods=['POST', 'OPTIONS'])
-def login():
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers["Access-Control-Allow-Origin"] = "https://souschef2.vercel.app"
-        response.headers["Access-Control-Allow-Methods"] = "POST"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Accept, Accepts"
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        return response
-    
-    elif request.method == 'POST':
+def login():    
+    if request.method == 'POST':
         print('login')
         data = request.json
         user = User.query.filter(User.name == data.get('name')).first()
@@ -466,6 +460,68 @@ def meal_prep_id(id):
         db.session.delete(meal_prep)
         db.session.commit()
         return {}, 202
+    
+@app.route('/api/cookbooks', methods=['GET'])
+def cookbooks():
+    distinct_recipes = Recipe.query.group_by(Recipe.source).all()
+    cookbooks = []
+    for recipe in distinct_recipes:
+        cookbooks.append(recipe.source)
+
+    response = make_response(
+        cookbooks,
+        200
+    )
+
+    return response
+
+@app.route('/api/category_names')
+def category_names():
+    distinct_categories = Source_Category.query.group_by(Source_Category.name).all()
+    categories = []
+    for category in distinct_categories:
+        category_dict = {
+            "id": category.id,
+            "name": category.name
+        }
+        categories.append(category_dict)
+    return make_response( categories, 200 )
+
+@app.route('/api/tag_names')
+def tag_names():
+    distinct_tags = Tag.query.group_by(Tag.name).all()
+    tags = []
+    for tag in distinct_tags:
+        tag_dict = {
+            "id": tag.id,
+            "name": tag.name
+        }
+        tags.append(tag_dict)
+
+    response = make_response(
+        tags,
+        200
+    )
+
+    return response
+
+@app.route('/api/user_tag_names')
+def user_tag_names():
+    distinct_user_tags = User_Tag.query.group_by(User_Tag.name).all()
+    user_tags = []
+    for user_tag in distinct_user_tags:
+        user_tag_dict = {
+            "id": user_tag.id,
+            "name": user_tag.name
+        }
+        user_tags.append(user_tag_dict)
+
+    response = make_response(
+        user_tags,
+        200
+    )
+
+    return response
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
