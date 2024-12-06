@@ -33,7 +33,7 @@ function RecipeEditPage({ recipe, user }) {
 
     const [tags, setTags] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/tags")
+        fetch("/api/tags")
         .then((response) => response.json())
         .then((data) => setTags(data));
     }, []);
@@ -44,7 +44,7 @@ function RecipeEditPage({ recipe, user }) {
 
     const handleTagSelect = (recipeIdTag, tagId) => {
         if (tagId !== null) {
-            fetch('https://souschef-backend.vercel.app/api/recipetags', {
+            fetch('/api/recipetags', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ function RecipeEditPage({ recipe, user }) {
 
     const handleDeleteTag = (event, id) => {
         event.preventDefault();
-        fetch(`https://souschef-backend.vercel.app/api/recipetags/${id}`, {
+        fetch(`/api/recipetags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {})
@@ -76,7 +76,7 @@ function RecipeEditPage({ recipe, user }) {
 
     const [sourceCategories, setSourceCategories] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/sourcecategories")
+        fetch("/api/sourcecategories")
         .then((response) => response.json())
         .then((data) => setSourceCategories(data));
     }, []);
@@ -106,7 +106,7 @@ function RecipeEditPage({ recipe, user }) {
     };
 
     const handlePatch = (id) => {
-        fetch(`https://souschef-backend.vercel.app/api/recipes/${id}`, {
+        fetch(`/api/recipes/${id}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -130,7 +130,7 @@ function RecipeEditPage({ recipe, user }) {
                 ingredient_unit: ingredient.ingredient_unit,
                 ingredient_note: ingredient.ingredient_note
             };
-            fetch(`https://souschef-backend.vercel.app/api/recipeingredients/${ingredient.id}`, {
+            fetch(`/api/recipeingredients/${ingredient.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "Application/JSON",
@@ -147,7 +147,7 @@ function RecipeEditPage({ recipe, user }) {
         }
         recipe.user_recipes && recipe.user_recipes.filter(userRecipe => {
             userRecipe.user_id === user.id &&
-            fetch(`https://souschef-backend.vercel.app/api/userrecipes/${userRecipe.id}`, {
+            fetch(`/api/userrecipes/${userRecipe.id}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "Application/JSON",
@@ -171,7 +171,7 @@ function RecipeEditPage({ recipe, user }) {
             ingredient_unit: newIngredient[0].unit,
             ingredient_note: newIngredient[0].note
         };
-        fetch("https://souschef-backend.vercel.app/api/recipeingredients", {
+        fetch("/api/recipeingredients", {
             method: "POST",
             headers: {
                 "Content-Type": "Application/JSON",
@@ -188,7 +188,7 @@ function RecipeEditPage({ recipe, user }) {
 
     const handleDelete = (event, id) => {
         event.preventDefault();
-        fetch(`https://souschef-backend.vercel.app/api/recipeingredients/${id}`, {
+        fetch(`/api/recipeingredients/${id}`, {
             method: "DELETE",
         })
         .then((data) => {

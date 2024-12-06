@@ -10,7 +10,7 @@ function IndividualRecipe() {
     
     const [recipe, setRecipe] = useState([]);
     useEffect(() => {
-        fetch(`https://souschef-backend.vercel.app/api/recipes/${id}`)
+        fetch(`/api/recipes/${id}`)
         .then((response) => response.json())
         .then((data) => setRecipe(data));
     }, []);

@@ -17,7 +17,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     const [userTags, setUserTags] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/usertags")
+        fetch("/api/usertags")
         .then((response) => response.json())
         .then((data) => setUserTags(data));
     }, []);
@@ -28,7 +28,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     const handleTagSelect = (recipeIdTag, userTagId) => {
         if (userTagId !== null) {
-            fetch('https://souschef-backend.vercel.app/api/userrecipetags', {
+            fetch('/api/userrecipetags', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     const handleDeleteUserTag = (event, id) => {
         event.preventDefault();
-        fetch(`https://souschef-backend.vercel.app/api/userrecipetags/${id}`, {
+        fetch(`/api/userrecipetags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {})
@@ -65,7 +65,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
             "Are you sure you want to delete this item?"
         );
         if (confirmed) {
-            fetch(`https://souschef-backend.vercel.app/api/recipes/${id}`, {
+            fetch(`/api/recipes/${id}`, {
                 method: "DELETE",
             })
             .then((data) => {

@@ -10,7 +10,7 @@ function Home() {
 
     const [recipes, setRecipes] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/recipes")
+        fetch("/api/recipes")
         .then((response) => response.json())
         .then((data) => {
             setRecipes(data)

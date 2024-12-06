@@ -18,7 +18,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
 
     const [sourceCategories, setSourceCategories] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/sourcecategories")
+        fetch("/api/category_names")
         .then((response) => response.json())
         .then((data) => setSourceCategories(data));
     }, []);
@@ -48,7 +48,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
             reference: reference,
             instructions: recipeInstructions
         };
-        fetch("https://souschef-backend.vercel.app/api/recipes", {
+        fetch("/api/recipes", {
             method: "POST",
             headers: {
                 "Content-Type": "Application/JSON",
@@ -68,7 +68,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         recipe_id: newRecipeData.id,
                         tag_id: tag.id,
                     };
-                    fetch("https://souschef-backend.vercel.app/api/recipetags", {
+                    fetch("/api/recipetags", {
                         method: "POST",
                         headers: {
                             "Content-Type": "Application/JSON",
@@ -89,7 +89,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         ingredient_unit: ingredient.unit,
                         ingredient_note: ingredient.note
                     };
-                    fetch("https://souschef-backend.vercel.app/api/recipeingredients", {
+                    fetch("/api/recipeingredients", {
                         method: "POST",
                         headers: {
                             "Content-Type": "Application/JSON",

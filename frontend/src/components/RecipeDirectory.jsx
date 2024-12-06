@@ -22,7 +22,7 @@ function RecipeDirectory() {
     const [loading, setLoading] = useState(true);
     const [recipes, setRecipes] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/recipes")
+        fetch("/api/recipes")
         .then((response) => response.json())
         .then((data) => {
             setRecipes(data);
@@ -32,21 +32,21 @@ function RecipeDirectory() {
 
     const [tags, setTags] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/tags")
+        fetch("/api/tag_names")
         .then((response) => response.json())
         .then((data) => setTags(data));
     }, []);
 
     const [userTags, setUserTags] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/usertags")
+        fetch("/api/user_tag_names")
         .then((response) => response.json())
         .then((data) => setUserTags(data));
     }, []);
     
     const [userRecipes, setUserRecipes] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/userrecipes")
+        fetch("/api/userrecipes")
         .then((response) => response.json())
         .then((data) => setUserRecipes(data));
     }, []);
@@ -59,16 +59,10 @@ function RecipeDirectory() {
     const [cookbooks, setCookbooks] = useState([]);
     const [chosenCookbook, setChosenCookbook] = useState("")
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/recipes")
+        fetch("/api/cookbooks")
         .then((response) => response.json())
         .then((data) => {
-            const uniqueCookbooks = [];
-            data.forEach(cookbook => {
-                if (!uniqueCookbooks.includes(cookbook.source) && cookbook.source !== "") {
-                    uniqueCookbooks.push(cookbook.source);
-                }
-            });
-            setCookbooks(uniqueCookbooks);
+            setCookbooks(data);
         });
     }, []);
 
@@ -376,7 +370,7 @@ function RecipeDirectory() {
                 not_reorder: false,
                 comments: ''
             };
-            fetch("https://souschef-backend.vercel.app/api/userrecipes", {
+            fetch("/api/userrecipes", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -394,7 +388,7 @@ function RecipeDirectory() {
         } else {
             const userRecipeIdToRemove = userRecipes.find(userRecipe => userRecipe.recipe_id === recipeId).id;
 
-            fetch(`https://souschef-backend.vercel.app/api/userrecipes/${userRecipeIdToRemove}`, {
+            fetch(`/api/userrecipes/${userRecipeIdToRemove}`, {
                 method: "DELETE",
             })
             .then(() => {
@@ -417,7 +411,7 @@ function RecipeDirectory() {
 
     const handleTagSelect = (recipeIdTag, userTagId) => {
         if (userTagId !== null) {
-            fetch('https://souschef-backend.vercel.app/api/userrecipetags', {
+            fetch('/api/userrecipetags', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -443,7 +437,7 @@ function RecipeDirectory() {
 
     const handleDeleteUserTag = (event, id) => {
         event.preventDefault();
-        fetch(`https://souschef-backend.vercel.app/api/userrecipetags/${id}`, {
+        fetch(`/api/userrecipetags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {})
@@ -468,8 +462,9 @@ function RecipeDirectory() {
             <br/>
             {!loading ? 
                 <Typography variant="h3" color="secondary" >There are {filteredRecipes.length} results.</Typography> 
-                : 
-                <Typography variant="h3" color="secondary" >Recipes are loading...</Typography>}
+            : 
+                <Typography variant="h3" color="secondary" >Recipes are loading...</Typography>
+            }
             <br/>
             <Container disableGutters maxWidth={false}>
                 <Button variant={outlinedVariant === "allrecipes" ? "outlined" : "contained"} color="primary" size="small" value="allrecipes" onClick={(event) => handleCategorizationButtons(event.target.value)}>All Recipes</Button>
@@ -525,7 +520,7 @@ function RecipeDirectory() {
                                 component="img"
                                 height="194"
                                 image={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"}
-                                alt={recipe.name}
+                                alt="Image not available"
                                 />
                                 {recipe.recipe_tags.map(tag => {
                                     if (tag && tag.tag) {

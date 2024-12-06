@@ -13,7 +13,7 @@ function MealPrep() {
 
     const [mealPrep, setMealPrep] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/mealprep")
+        fetch("/api/mealprep")
         .then((response) => response.json())
         .then((data) => {
             setMealPrep(data);
@@ -23,7 +23,7 @@ function MealPrep() {
 
     const handleDelete = (event, id) => {
         event.preventDefault();
-        fetch(`https://souschef-backend.vercel.app/api/mealprep/${id}`, {
+        fetch(`/api/mealprep/${id}`, {
             method: "DELETE",
         })
         .then((data) => {

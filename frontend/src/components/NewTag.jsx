@@ -7,7 +7,7 @@ function NewTag() {
 
     const [userTags, setUserTags] = useState([]);
     useEffect(() => {
-        fetch("https://souschef-backend.vercel.app/api/usertags")
+        fetch("/api/usertags")
         .then((response) => response.json())
         .then((data) => setUserTags(data));
     }, []);
@@ -17,7 +17,7 @@ function NewTag() {
         const newTagData = {
             name: newTag
         }
-        fetch("https://souschef-backend.vercel.app/api/usertags", {
+        fetch("/api/usertags", {
             method: "POST",
             headers: {
                 "Content-Type": "Application/JSON",
@@ -34,7 +34,7 @@ function NewTag() {
 
     const handleDeleteUserTag = (event, id) => {
         event.preventDefault();
-        fetch(`https://souschef-backend.vercel.app/api/usertags/${id}`, {
+        fetch(`/api/usertags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {
