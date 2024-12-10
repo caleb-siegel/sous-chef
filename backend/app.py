@@ -3,26 +3,35 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 from flask_migrate import Migrate
 from flask_cors import CORS
-from models import db, User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category
-from dotenv import dotenv_values
+from dotenv import dotenv_values, load_dotenv
 from flask_bcrypt import Bcrypt
 import json
+import os
 import random
 from helpers import get_recipe_dict
-config = dotenv_values(".env")
+from db import db, app
 
-app = Flask(__name__)
-app.secret_key = config['FLASK_SECRET_KEY']
-# CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["https://souschef2.vercel.app", "http://localhost:5173"]}})
-CORS(app)
-# app.config["SQLALCHEMY_DATABASE_URI"] = config.get("SQLALCHEMY_DATABASE_URI")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.json.compact = False
+load_dotenv()
+
+app.secret_key = os.getenv('FLASK_SECRET_KEY')
+
+CORS(app, 
+    supports_credentials=True, 
+    resources={r"/*": {
+        "origins": ["https://souschef2.vercel.app", "http://localhost:5173"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Accept", "Authorization", "Origin"],
+        "supports_credentials": True,
+    }},
+)
+
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Allows cross-origin cookies
+app.config['SESSION_COOKIE_SECURE'] = False  # Ensures cookies are only sent over HTTPS (recommended for production)
+
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
-db.init_app(app)
+from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category
 
 @app.route("/")
 def root():
@@ -465,21 +474,16 @@ def meal_prep_id(id):
     
 @app.route('/api/cookbooks', methods=['GET'])
 def cookbooks():
-    distinct_recipes = Recipe.query.group_by(Recipe.source).all()
-    cookbooks = []
-    for recipe in distinct_recipes:
-        cookbooks.append(recipe.source)
+    distinct_recipes = Recipe.query.with_entities(Recipe.source).distinct().all()
+    # Extract the sources from the result and format them as a list
+    cookbooks = [recipe.source for recipe in distinct_recipes]
 
-    response = make_response(
-        cookbooks,
-        200
-    )
-
-    return response
+    # Return the response as JSON
+    return jsonify(cookbooks), 200
 
 @app.route('/api/category_names')
 def category_names():
-    distinct_categories = Source_Category.query.group_by(Source_Category.name).all()
+    distinct_categories = Source_Category.query.all()
     categories = []
     for category in distinct_categories:
         category_dict = {
@@ -487,11 +491,11 @@ def category_names():
             "name": category.name
         }
         categories.append(category_dict)
-    return make_response( categories, 200 )
+    return jsonify(categories), 200
 
 @app.route('/api/tag_names')
 def tag_names():
-    distinct_tags = Tag.query.group_by(Tag.name).all()
+    distinct_tags = Tag.query.all()
     tags = []
     for tag in distinct_tags:
         tag_dict = {
@@ -500,16 +504,11 @@ def tag_names():
         }
         tags.append(tag_dict)
 
-    response = make_response(
-        tags,
-        200
-    )
-
-    return response
+    return jsonify(tags), 200
 
 @app.route('/api/user_tag_names')
 def user_tag_names():
-    distinct_user_tags = User_Tag.query.group_by(User_Tag.name).all()
+    distinct_user_tags = User_Tag.query.all()
     user_tags = []
     for user_tag in distinct_user_tags:
         user_tag_dict = {
@@ -518,12 +517,7 @@ def user_tag_names():
         }
         user_tags.append(user_tag_dict)
 
-    response = make_response(
-        user_tags,
-        200
-    )
-
-    return response
+    return jsonify(user_tags), 200
 
 @app.route('/api/recipe_info')
 def recipe_info():
