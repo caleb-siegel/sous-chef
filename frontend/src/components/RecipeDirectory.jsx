@@ -20,22 +20,22 @@ function RecipeDirectory() {
     const {user} = useOutletContext();
 
     const [loading, setLoading] = useState(true);
-    const [recipes, setRecipes] = useState([]);
-    useEffect(() => {
-        fetch("/api/recipes")
-        .then((response) => response.json())
-        .then((data) => {
-            setRecipes(data);
-            setLoading(false);
-        });
-    }, []);
+    // const [recipes, setRecipes] = useState([]);
+    // useEffect(() => {
+    //     fetch("/api/recipes")
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //         setRecipes(data);
+    //         setLoading(false);
+    //     });
+    // }, []);
 
-    const [newRecipes, setNewRecipes] = useState([]);
+    const [recipes, setRecipes] = useState([]);
     useEffect(() => {
         fetch("/api/recipe_info")
         .then((response) => response.json())
         .then((data) => {
-            setNewRecipes(data);
+            setRecipes(data);
             setLoading(false);
         });
     }, []);
@@ -54,11 +54,21 @@ function RecipeDirectory() {
         .then((data) => setUserTags(data));
     }, []);
     
-    const [userRecipes, setUserRecipes] = useState([]);
+    // const [oldUserRecipes, setOldUserRecipes] = useState([]);
+    // useEffect(() => {
+    //     fetch("/api/userrecipes")
+    //     .then((response) => response.json())
+    //     .then((data) => setOldUserRecipes(data));
+    // }, []);
+
+    const [userRecipes, setUserRecipes] = useState({});
     useEffect(() => {
-        fetch("/api/userrecipes")
+        user && user.id &&
+        fetch(`/api/user_recipe_ids/${user.id}`)
         .then((response) => response.json())
-        .then((data) => setUserRecipes(data));
+        .then((data) => {
+            setUserRecipes(data)
+        });
     }, []);
 
     const [toggleRecipes, setToggleRecipes] = useState("allrecipes");
@@ -115,142 +125,16 @@ function RecipeDirectory() {
         })    
     }
 
-
     const [categorizationButtons, setCategorizationButtons] = useState("allrecipes");
-    const handleCategorizationButtons = (event) => {
-        setCategorizationButtons(event)
+    const handleCategorizationButtons = (category) => {
+        setCategorizationButtons(category)
+        fetch(`/api/category_button/${category}`)
+        .then((response) => response.json())
+        .then((data) => {
+            setRecipes(data)
+        });
+        
     }
-
-    let outlinedVariant;
-    if (categorizationButtons === "allrecipes") {
-        outlinedVariant = "allrecipes"
-        recipeList = recipeList
-    } else if (categorizationButtons === "breakfast") {
-        outlinedVariant = "breakfast"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "breakfast"))
-            )
-        })
-    } else if (categorizationButtons === "chicken") {
-        outlinedVariant = "chicken"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe && 
-                recipe.recipe_ingredients &&
-                recipe.recipe_ingredients.some(ingredient => {
-                    return (
-                        ingredient && ingredient.ingredient_name &&
-                        ingredient.ingredient_name.toLowerCase().includes("chicken")
-                        // && !ingredient.ingredient_name.toLowerCase().includes("chicken stock")
-                    )
-                })
-            );
-        })
-    } else if (categorizationButtons === "meat") {
-        outlinedVariant = "meat"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "meat")) &&
-                !recipe.recipe_ingredients.some(ingredient => {
-                    return (
-                        ingredient &&
-                        ingredient.ingredient_name.toLowerCase().includes("chicken")
-                    )
-                })
-            )
-        })    
-    } else if (categorizationButtons === "fish") {
-        outlinedVariant = "fish"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe && 
-                recipe.recipe_ingredients &&
-                recipe.recipe_ingredients.some(ingredient => {
-                    return (
-                        ingredient && ingredient.ingredient_name &&
-                        (
-                            ingredient.ingredient_name.toLowerCase().includes("salmon") ||
-                            ingredient.ingredient_name.toLowerCase().includes("tilapia") ||
-                            ingredient.ingredient_name.toLowerCase().includes("crab") ||
-                            ingredient.ingredient_name.toLowerCase().includes("flounder") ||
-                            ingredient.ingredient_name.toLowerCase().includes("sea bass") ||
-                            ingredient.ingredient_name.toLowerCase().includes("tuna") ||
-                            ingredient.ingredient_name.toLowerCase().includes("snapper") ||
-                            ingredient.ingredient_name.toLowerCase().includes("fish") && !ingredient.ingredient_name.toLowerCase().includes("fish-free")
-                        )
-                    )
-                })
-            );
-        })
-    } else if (categorizationButtons === "dairy") {
-        outlinedVariant = "dairy"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "dairy"))
-            )
-        })    
-    } else if (categorizationButtons === "salad") {
-        outlinedVariant = "salad"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "salad"))
-            )
-        })    
-    } else if (categorizationButtons === "soup") {
-        outlinedVariant = "soup"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "soup"))
-            )
-        })    
-    } else if (categorizationButtons === "sides") {
-        outlinedVariant = "sides"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "side"))
-            )
-        })    
-    } else if (categorizationButtons === "condiments") {
-        outlinedVariant = "condiments"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "condiment"))
-            )
-        })    
-    } else if (categorizationButtons === "dessert") {
-        outlinedVariant = "dessert"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "dessert"))
-            )
-        })    
-    } else if (categorizationButtons === "drinks") {
-        outlinedVariant = "drinks"
-        recipeList = recipeList.filter(recipe => {
-            return (
-                recipe &&
-                recipe.recipe_tags &&
-                recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === "drinks"))
-            )
-        })    
-    }    
 
     const [addRecipe, setAddRecipe] = useState(false)
     let addRecipeButtonText;
@@ -301,7 +185,7 @@ function RecipeDirectory() {
         setFilterValue(event.target.value);
     };
 
-    const filteredRecipes = recipeList.filter(recipe => {
+    recipeList = recipeList.filter(recipe => {
         if (filterType === "include") {
             if (filterBy === "recipeName") {
                 return (
@@ -341,8 +225,8 @@ function RecipeDirectory() {
                     recipe.recipe_ingredients &&
                     recipe.recipe_ingredients.some(ingredient => {
                         return (
-                            ingredient && ingredient.ingredient_name &&
-                            ingredient.ingredient_name.toLowerCase().includes(filterValue.toLowerCase())
+                            ingredient &&
+                            ingredient.toLowerCase().includes(filterValue.toLowerCase())
                         )
                     })
                 );
@@ -371,9 +255,8 @@ function RecipeDirectory() {
     
     const handleFavorites = (event, recipeId) => {
         event.preventDefault();
-        const isFavorite = userRecipes.some(userRecipe => userRecipe.recipe_id === recipeId);
 
-        if (!isFavorite) {
+        if (!userRecipes.hasOwnProperty(recipeId)) {
             const userRecipeData = {
                 user_id: user.id,
                 recipe_id: recipeId,
@@ -389,21 +272,26 @@ function RecipeDirectory() {
             })
             .then((response) => response.json())
             .then((newUserRecipe) => {
-                setUserRecipes([...userRecipes, newUserRecipe]);
-                setRecipes([...recipes, newUserRecipe]);
+                setUserRecipes((prevUserRecipes) => ({
+                    ...prevUserRecipes,
+                    [newUserRecipe.recipe_id]: newUserRecipe.id,
+                }));
+                // setRecipes([...recipes, newUserRecipe]);
             })
             .catch((error) => {
                 console.error("Error adding recipe to favorites:", error);
             });
         } else {
-            const userRecipeIdToRemove = userRecipes.find(userRecipe => userRecipe.recipe_id === recipeId).id;
-
-            fetch(`/api/userrecipes/${userRecipeIdToRemove}`, {
+            fetch(`/api/userrecipes/${userRecipes[recipeId]}`, {
                 method: "DELETE",
             })
             .then(() => {
-                setUserRecipes(userRecipes.filter(userRecipe => userRecipe.id !== userRecipeIdToRemove));
-                setRecipes(recipes.filter(recipe => recipe.id !== userRecipeIdToRemove));
+                setUserRecipes((prevUserRecipes) => {
+                    // Create a new object without the key that matches recipeId
+                    const { [recipeId]: _, ...updatedRecipes } = prevUserRecipes;
+                    return updatedRecipes;
+                });
+                // setRecipes(recipes.filter(recipe => recipe.id !== userRecipeIdToRemove));
             })
             .catch((error) => {
                 console.error("Error removing recipe from favorites:", error);
@@ -471,24 +359,24 @@ function RecipeDirectory() {
             }
             <br/>
             {!loading ? 
-                <Typography variant="h3" color="secondary" >There are {filteredRecipes.length} results.</Typography> 
+                <Typography variant="h3" color="secondary" >There are {recipeList.length} results.</Typography> 
             : 
                 <Typography variant="h3" color="secondary" >Recipes are loading...</Typography>
             }
             <br/>
             <Container disableGutters maxWidth={false}>
-                <Button variant={outlinedVariant === "allrecipes" ? "outlined" : "contained"} color="primary" size="small" value="allrecipes" onClick={(event) => handleCategorizationButtons(event.target.value)}>All Recipes</Button>
-                { user && <Button variant={outlinedVariant === "breakfast" ? "outlined" : "contained"} color="primary" size="small" value="breakfast" onClick={(event) => handleCategorizationButtons(event.target.value)}>Breakfast</Button>}
-                { user && <Button variant={outlinedVariant === "chicken" ? "outlined" : "contained"} color="primary" size="small" value="chicken" onClick={(event) => handleCategorizationButtons(event.target.value)}>Chicken</Button>}
-                { user && <Button variant={outlinedVariant === "meat" ? "outlined" : "contained"} color="primary" size="small" value="meat" onClick={(event) => handleCategorizationButtons(event.target.value)}>Meat</Button>}
-                { user && <Button variant={outlinedVariant === "fish" ? "outlined" : "contained"} color="primary" size="small" value="fish" onClick={(event) => handleCategorizationButtons(event.target.value)}>Fish</Button>}
-                { user && <Button variant={outlinedVariant === "dairy" ? "outlined" : "contained"} color="primary" size="small" value="dairy" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dairy</Button>}
-                { user && <Button variant={outlinedVariant === "salad" ? "outlined" : "contained"} color="primary" size="small" value="salad" onClick={(event) => handleCategorizationButtons(event.target.value)}>Salad</Button>}
-                { user && <Button variant={outlinedVariant === "soup" ? "outlined" : "contained"} color="primary" size="small" value="soup" onClick={(event) => handleCategorizationButtons(event.target.value)}>Soup</Button>}
-                { user && <Button variant={outlinedVariant === "sides" ? "outlined" : "contained"} color="primary" size="small" value="sides" onClick={(event) => handleCategorizationButtons(event.target.value)}>Sides</Button>}
-                { user && <Button variant={outlinedVariant === "condiments" ? "outlined" : "contained"} color="primary" size="small" value="condiments" onClick={(event) => handleCategorizationButtons(event.target.value)}>Condiments</Button>}
-                { user && <Button variant={outlinedVariant === "dessert" ? "outlined" : "contained"} color="primary" size="small" value="dessert" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dessert</Button>}
-                { user && <Button variant={outlinedVariant === "drinks" ? "outlined" : "contained"} color="primary" size="small" value="drinks" onClick={(event) => handleCategorizationButtons(event.target.value)}>Drinks</Button>}
+                <Button variant={categorizationButtons === "all" ? "outlined" : "contained"} color="primary" size="small" value="all" onClick={(event) => handleCategorizationButtons(event.target.value)}>All Recipes</Button>
+                {<Button variant={categorizationButtons === "breakfast" ? "outlined" : "contained"} color="primary" size="small" value="breakfast" onClick={(event) => handleCategorizationButtons(event.target.value)}>Breakfast</Button>}
+                { user && <Button variant={categorizationButtons === "chicken" ? "outlined" : "contained"} color="primary" size="small" value="chicken" onClick={(event) => handleCategorizationButtons(event.target.value)}>Chicken</Button>}
+                { user && <Button variant={categorizationButtons === "meat" ? "outlined" : "contained"} color="primary" size="small" value="meat" onClick={(event) => handleCategorizationButtons(event.target.value)}>Meat</Button>}
+                { user && <Button variant={categorizationButtons === "fish" ? "outlined" : "contained"} color="primary" size="small" value="fish" onClick={(event) => handleCategorizationButtons(event.target.value)}>Fish</Button>}
+                { user && <Button variant={categorizationButtons === "dairy" ? "outlined" : "contained"} color="primary" size="small" value="dairy" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dairy</Button>}
+                { user && <Button variant={categorizationButtons === "salad" ? "outlined" : "contained"} color="primary" size="small" value="salad" onClick={(event) => handleCategorizationButtons(event.target.value)}>Salad</Button>}
+                { user && <Button variant={categorizationButtons === "soup" ? "outlined" : "contained"} color="primary" size="small" value="soup" onClick={(event) => handleCategorizationButtons(event.target.value)}>Soup</Button>}
+                { user && <Button variant={categorizationButtons === "side" ? "outlined" : "contained"} color="primary" size="small" value="side" onClick={(event) => handleCategorizationButtons(event.target.value)}>Side</Button>}
+                { user && <Button variant={categorizationButtons === "condiment" ? "outlined" : "contained"} color="primary" size="small" value="condiment" onClick={(event) => handleCategorizationButtons(event.target.value)}>Condiment</Button>}
+                { user && <Button variant={categorizationButtons === "dessert" ? "outlined" : "contained"} color="primary" size="small" value="dessert" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dessert</Button>}
+                { user && <Button variant={categorizationButtons === "drinks" ? "outlined" : "contained"} color="primary" size="small" value="drinks" onClick={(event) => handleCategorizationButtons(event.target.value)}>Drinks</Button>}
             </Container>
             <br/>
             <Container style={{
@@ -512,16 +400,16 @@ function RecipeDirectory() {
             </Container>
             {!loading ?
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    {newRecipes?.map((recipe) => (
+                    {recipeList?.map((recipe) => (
                         <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>
-                            <Card key={recipe.id} sx={{ maxWidth: 345, margin: '10px', padding: '10px' }}>
+                            <Card key={recipe.id} sx={{ maxWidth: 345, margin: '10px', padding: '10px', borderRadius: "1rem" }}>
                                 <CardHeader
                                 title={recipe.name}
                                 action={
                                     user && 
                                         <Container sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                                             <IconButton size="small" onClick={(event) => {handleFavorites(event, recipe.id)}}>
-                                                {userRecipes.some(userRecipe => userRecipe.recipe_id === recipe.id) ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
+                                                {userRecipes && userRecipes[recipe.id] > 0 ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
                                             </IconButton>
                                         </Container>
                                 }
