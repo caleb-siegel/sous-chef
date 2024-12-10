@@ -10,8 +10,8 @@ function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // const backendUrl = "https://souschef-backend.vercel.app"
-  const backendUrl = "http://127.0.0.1:5555"
+  const backendUrl = "https://souschef-backend.vercel.app"
+  // const backendUrl = "http://127.0.0.1:5555"
 
   useEffect(() => {
     fetch(`${backendUrl}/api/check_session`, {
