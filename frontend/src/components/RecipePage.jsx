@@ -5,8 +5,10 @@ import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import AddToMealPrep from './AddToMealPrep';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import RecipeCardsOptions from './RecipeCardsOptions';
+import { useOutletContext } from "react-router-dom";
 
 function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
+    const { backendUrl } = useOutletContext();
     const navigate = useNavigate();
     
     const [dimensions, setDimensions] = useState(1)
@@ -17,7 +19,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     const [userTags, setUserTags] = useState([]);
     useEffect(() => {
-        fetch("/api/usertags")
+        fetch(`${backendUrl}/api/usertags`)
         .then((response) => response.json())
         .then((data) => setUserTags(data));
     }, []);
@@ -28,7 +30,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     const handleTagSelect = (recipeIdTag, userTagId) => {
         if (userTagId !== null) {
-            fetch('/api/userrecipetags', {
+            fetch(`${backendUrl}/api/userrecipetags`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,7 +55,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     const handleDeleteUserTag = (event, id) => {
         event.preventDefault();
-        fetch(`/api/userrecipetags/${id}`, {
+        fetch(`${backendUrl}/api/userrecipetags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {})
@@ -65,7 +67,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
             "Are you sure you want to delete this item?"
         );
         if (confirmed) {
-            fetch(`/api/recipes/${id}`, {
+            fetch(`${backendUrl}/api/recipes/${id}`, {
                 method: "DELETE",
             })
             .then((data) => {

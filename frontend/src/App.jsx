@@ -10,8 +10,11 @@ function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  // const backendUrl = "https://souschef-backend.vercel.app"
+  const backendUrl = "http://127.0.0.1:5555"
+
   useEffect(() => {
-    fetch('/api/check_session', {
+    fetch(`${backendUrl}/api/check_session`, {
         credentials: 'include'
     }).then((res) => {
         if (res.ok) {
@@ -21,7 +24,7 @@ function App() {
 }, []);
 
   function attemptLogin(userInfo) {
-    fetch(`/api/login`, {
+    fetch(`${backendUrl}/api/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -47,7 +50,7 @@ function App() {
         });
   }
   function logout() {
-    fetch(`/api/logout`, { method: "DELETE" }).then((res) => {
+    fetch(`${backendUrl}/api/logout`, { method: "DELETE" }).then((res) => {
         if (res.ok) {
             setUser(null);
         }
@@ -65,7 +68,7 @@ function App() {
       <Container disableGutters maxWidth={false} sx={{ height: '100vh', width: '100%', padding: '0px'}}>
         <Typography component={'span'}>
           <Navbar logout={logout} user={user} toggleDarkMode={toggleDarkMode} darkMode={darkMode}/>
-          <Outlet context={{ user, attemptLogin, logout }}/>
+          <Outlet context={{ user, attemptLogin, logout, backendUrl }}/>
         </Typography>
       </Container>
   );

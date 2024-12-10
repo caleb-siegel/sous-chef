@@ -18,21 +18,12 @@ import { useOutletContext } from "react-router-dom";
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
+    const { backendUrl } = useOutletContext();
 
     const [loading, setLoading] = useState(true);
-    // const [recipes, setRecipes] = useState([]);
-    // useEffect(() => {
-    //     fetch("/api/recipes")
-    //     .then((response) => response.json())
-    //     .then((data) => {
-    //         setRecipes(data);
-    //         setLoading(false);
-    //     });
-    // }, []);
-
     const [recipes, setRecipes] = useState([]);
     useEffect(() => {
-        fetch("/api/recipe_info")
+        fetch(`${backendUrl}/api/recipe_info`)
         .then((response) => response.json())
         .then((data) => {
             setRecipes(data);
@@ -42,29 +33,22 @@ function RecipeDirectory() {
 
     const [tags, setTags] = useState([]);
     useEffect(() => {
-        fetch("/api/tag_names")
+        fetch(`${backendUrl}/api/tag_names`)
         .then((response) => response.json())
         .then((data) => setTags(data));
     }, []);
 
     const [userTags, setUserTags] = useState([]);
     useEffect(() => {
-        fetch("/api/user_tag_names")
+        fetch(`${backendUrl}/api/user_tag_names`)
         .then((response) => response.json())
         .then((data) => setUserTags(data));
     }, []);
-    
-    // const [oldUserRecipes, setOldUserRecipes] = useState([]);
-    // useEffect(() => {
-    //     fetch("/api/userrecipes")
-    //     .then((response) => response.json())
-    //     .then((data) => setOldUserRecipes(data));
-    // }, []);
 
     const [userRecipes, setUserRecipes] = useState({});
     useEffect(() => {
         user && user.id &&
-        fetch(`/api/user_recipe_ids/${user.id}`)
+        fetch(`${backendUrl}/api/user_recipe_ids/${user.id}`)
         .then((response) => response.json())
         .then((data) => {
             setUserRecipes(data)
@@ -79,7 +63,7 @@ function RecipeDirectory() {
     const [cookbooks, setCookbooks] = useState([]);
     const [chosenCookbook, setChosenCookbook] = useState("")
     useEffect(() => {
-        fetch("/api/cookbooks")
+        fetch(`${backendUrl}/api/cookbooks`)
         .then((response) => response.json())
         .then((data) => {
             setCookbooks(data);
@@ -128,7 +112,7 @@ function RecipeDirectory() {
     const [categorizationButtons, setCategorizationButtons] = useState("allrecipes");
     const handleCategorizationButtons = (category) => {
         setCategorizationButtons(category)
-        fetch(`/api/category_button/${category}`)
+        fetch(`${backendUrl}/api/category_button/${category}`)
         .then((response) => response.json())
         .then((data) => {
             setRecipes(data)
@@ -263,7 +247,7 @@ function RecipeDirectory() {
                 not_reorder: false,
                 comments: ''
             };
-            fetch("/api/userrecipes", {
+            fetch(`${backendUrl}/api/userrecipes`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -282,7 +266,7 @@ function RecipeDirectory() {
                 console.error("Error adding recipe to favorites:", error);
             });
         } else {
-            fetch(`/api/userrecipes/${userRecipes[recipeId]}`, {
+            fetch(`${backendUrl}/api/userrecipes/${userRecipes[recipeId]}`, {
                 method: "DELETE",
             })
             .then(() => {
@@ -309,7 +293,7 @@ function RecipeDirectory() {
 
     const handleTagSelect = (recipeIdTag, userTagId) => {
         if (userTagId !== null) {
-            fetch('/api/userrecipetags', {
+            fetch(`${backendUrl}/api/userrecipetags`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -335,7 +319,7 @@ function RecipeDirectory() {
 
     const handleDeleteUserTag = (event, id) => {
         event.preventDefault();
-        fetch(`/api/userrecipetags/${id}`, {
+        fetch(`${backendUrl}/api/userrecipetags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {})

@@ -6,11 +6,12 @@ import RecipeEditPage from './RecipeEditPage';
 
 function IndividualRecipe() {
     const { user } = useOutletContext();
+    const { backendUrl } = useOutletContext();
     const { id } = useParams();
     
     const [recipe, setRecipe] = useState([]);
     useEffect(() => {
-        fetch(`/api/recipes/${id}`)
+        fetch(`${backendUrl}/api/recipes/${id}`)
         .then((response) => response.json())
         .then((data) => setRecipe(data));
     }, []);

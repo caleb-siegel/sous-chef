@@ -6,11 +6,12 @@ import HomeSkeleton from "./HomeSkeleton";
 
 function Home() {
     const {user} = useOutletContext();
+    const { backendUrl } = useOutletContext();
     const [loading, setLoading] = useState(true);
 
     const [recipes, setRecipes] = useState([]);
     useEffect(() => {
-        fetch("/api/recipes")
+        fetch(`${backendUrl}/api/recipes`)
         .then((response) => response.json())
         .then((data) => {
             setRecipes(data)

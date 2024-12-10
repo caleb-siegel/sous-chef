@@ -6,6 +6,7 @@ import AddToMealPrep from './AddToMealPrep';
 
 function MealPrep() {
     const {user} = useOutletContext();
+    const { backendUrl } = useOutletContext();
     const [loading, setLoading] = useState(true);
 
     const weekdayOptions = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -13,7 +14,7 @@ function MealPrep() {
 
     const [mealPrep, setMealPrep] = useState([]);
     useEffect(() => {
-        fetch("/api/mealprep")
+        fetch(`${backendUrl}/api/mealprep`)
         .then((response) => response.json())
         .then((data) => {
             setMealPrep(data);
@@ -23,7 +24,7 @@ function MealPrep() {
 
     const handleDelete = (event, id) => {
         event.preventDefault();
-        fetch(`/api/mealprep/${id}`, {
+        fetch(`${backendUrl}/api/mealprep/${id}`, {
             method: "DELETE",
         })
         .then((data) => {

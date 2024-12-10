@@ -5,13 +5,14 @@ import RecipePage from './RecipePage';
 
 function RandomizeRecipe() {
     const {user} = useOutletContext();
+    const { backendUrl } = useOutletContext();
 
     const [showRecipe, setShowRecipe] = useState(false)
     const [randomRecipe, setRandomRecipe] = useState([]);
 
     const handleRandom = () => {
         setShowRecipe(true)
-        fetch(`/api/random_recipe`)
+        fetch(`${backendUrl}/api/random_recipe`)
             .then((response) => response.json())
             .then((data) => setRandomRecipe(data))
     }

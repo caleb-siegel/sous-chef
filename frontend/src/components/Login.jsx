@@ -5,6 +5,8 @@ import { Paper, Button, Typography } from '@mui/material';
 
 
 function Login() {
+    const { backendUrl } = useOutletContext();
+
     const [accountForm, setAccountForm] = useState(false)
     const [newName, setNewName] = useState("")
     const [newPassword, setNewPassword] = useState("")
@@ -19,7 +21,7 @@ function Login() {
             name: newName,
             password_hash: newPassword
         };
-        fetch("/api/user", {
+        fetch(`${backendUrl}/api/user`, {
         method: "POST",
         headers: {
             "Content-Type": "Application/JSON",

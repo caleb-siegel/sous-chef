@@ -1,7 +1,10 @@
 import { Container, Chip, InputLabel, Select, MenuItem, Button, Stack, TextField } from '@mui/material'
 import React, { useState, useEffect } from 'react'
+import { useOutletContext } from "react-router-dom";
 
 function AddToMealPrep({ user, recipe = "" }) {
+    const { backendUrl } = useOutletContext();
+
     const [showAddMealPrepForm, setShowAddMealPrepForm] = useState(false)
   
     const [weekday, setWeekday] = useState("")
@@ -25,7 +28,7 @@ function AddToMealPrep({ user, recipe = "" }) {
             weekday: weekday,
             meal: meal,
         }
-        fetch("/api/mealprep", {
+        fetch(`${backendUrl}/api/mealprep`, {
             method: "POST",
             headers: {
                 "Content-Type": "Application/JSON",

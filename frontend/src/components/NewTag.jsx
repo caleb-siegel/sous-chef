@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { Paper, TextField, Button, Chip, Alert } from '@mui/material';
+import { useOutletContext } from "react-router-dom";
 
 function NewTag() {
+    const { backendUrl } = useOutletContext();
+
     const [newTag, setNewTag] = useState("")
     const [alertMessage, setAlertMessage] = useState(false);
 
     const [userTags, setUserTags] = useState([]);
     useEffect(() => {
-        fetch("/api/usertags")
+        fetch(`${backendUrl}/api/usertags`)
         .then((response) => response.json())
         .then((data) => setUserTags(data));
     }, []);
@@ -17,7 +20,7 @@ function NewTag() {
         const newTagData = {
             name: newTag
         }
-        fetch("/api/usertags", {
+        fetch(`${backendUrl}/api/usertags`, {
             method: "POST",
             headers: {
                 "Content-Type": "Application/JSON",
@@ -34,7 +37,7 @@ function NewTag() {
 
     const handleDeleteUserTag = (event, id) => {
         event.preventDefault();
-        fetch(`/api/usertags/${id}`, {
+        fetch(`${backendUrl}/api/usertags/${id}`, {
             method: "DELETE",
         })
         .then((data) => {

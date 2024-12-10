@@ -6,6 +6,8 @@ import { Button, TextField, InputLabel, MenuItem, Select, Paper } from '@mui/mat
 import AddIcon from '@mui/icons-material/Add';
 
 function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
+    const { backendUrl } = useOutletContext();
+    
     const [name, setName] = useState("");
     const [picture, setPicture] = useState("");
     const [sourceCategoryInput, setSourceCategoryInput] = useState("");
@@ -18,7 +20,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
 
     const [sourceCategories, setSourceCategories] = useState([]);
     useEffect(() => {
-        fetch("/api/category_names")
+        fetch(`${backendUrl}/api/category_names`)
         .then((response) => response.json())
         .then((data) => setSourceCategories(data));
     }, []);
@@ -48,7 +50,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
             reference: reference,
             instructions: recipeInstructions
         };
-        fetch("/api/recipes", {
+        fetch(`${backendUrl}/api/recipes`, {
             method: "POST",
             headers: {
                 "Content-Type": "Application/JSON",
@@ -68,7 +70,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         recipe_id: newRecipeData.id,
                         tag_id: tag.id,
                     };
-                    fetch("/api/recipetags", {
+                    fetch(`${backendUrl}/api/recipetags`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "Application/JSON",
@@ -89,7 +91,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                         ingredient_unit: ingredient.unit,
                         ingredient_note: ingredient.note
                     };
-                    fetch("/api/recipeingredients", {
+                    fetch(`${backendUrl}/api/recipeingredients`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "Application/JSON",

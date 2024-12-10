@@ -9,13 +9,13 @@ export default defineConfig(() => {
           outDir: 'dist',
       },
       server: {
-          proxy: {
-              "/api":{
-                target:'http://127.0.0.1:5555',
-                changeOrigin: true,
-                secure: true,
-              }
-          }
+          // proxy: {
+          //     "/api":{
+          //       target:'http://127.0.0.1:5555',
+          //       changeOrigin: true,
+          //       secure: true,
+          //     }
+          // }
       },
       plugins: [react()],
   };
