@@ -20,7 +20,7 @@ function RecipeDirectory() {
     const {user} = useOutletContext();
     const { backendUrl } = useOutletContext();
 
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [recipes, setRecipes] = useState([]);
     useEffect(() => {
         fetch(`${backendUrl}/api/recipe_info`)
