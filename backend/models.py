@@ -1,9 +1,11 @@
+# from db import db
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy_serializer import SerializerMixin
 import string
+from datetime import date, time
 
 metadata = MetaData(
     naming_convention={
@@ -14,6 +16,7 @@ metadata = MetaData(
         "pk": "pk_%(table_name)s",
     }
 )
+
 db = SQLAlchemy(metadata=metadata)
 
 class User(db.Model, SerializerMixin):

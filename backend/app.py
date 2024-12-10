@@ -1,5 +1,6 @@
 from flask import Flask, make_response, jsonify, request, session, g
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_, and_
 from flask_migrate import Migrate
 from flask_cors import CORS
 from models import db, User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category
@@ -7,6 +8,7 @@ from dotenv import dotenv_values
 from flask_bcrypt import Bcrypt
 import json
 import random
+from helpers import get_recipe_dict
 config = dotenv_values(".env")
 
 app = Flask(__name__)
@@ -525,72 +527,50 @@ def user_tag_names():
 
 @app.route('/api/recipe_info')
 def recipe_info():
-    recipes = []
-    for recipe in Recipe.query.order_by(Recipe.id.desc()).all():
-        # make meal prep list
-        meal_preps = []
-        for meal_prep in recipe.meal_preps:
-            prep = {
-                "id": meal_prep.id,
-                "meal": meal_prep.meal,
-                "recipe_id": meal_prep.recipe_id,
-                "user_id": meal_prep.user_id,
-                "weekday": meal_prep.weekday,
-            }
-            meal_preps.append(prep)
-
-        # make recipe_tag list
-        recipe_tags = []
-        for tag in recipe.recipe_tags:
-            # make tag object
-            tag_dict = {
-                "id": tag.tag.id,
-                "name": tag.tag.name
-            }
-
-            recipe_tag = {
-                "id": tag.id,
-                "recipe_id": tag.recipe_id,
-                "tag_id": tag.tag_id,
-                "tag": tag_dict,
-            }
-            recipe_tags.append(recipe_tag)
-
-        # make user recipe tag list
-        user_recipe_tags = []
-        for tag in recipe.user_recipe_tags:
-            # make user_tag object
-            user_tag_dict = {
-                "id": tag.user_tag.id,
-                "name": tag.user_tag.name
-            }
-
-            user_recipe_tag = {
-                "id": tag.id,
-                "user_id": tag.user_id,
-                "recipe_id": tag.recipe_id,
-                "user_tag_id": tag.user_tag_id,
-                "user_tag": user_tag_dict,
-                # "user": tag.user,
-            }
-            user_recipe_tags.append(user_recipe_tag)
-        
-        recipe_dict = {
-            "id": recipe.id,
-            "name": recipe.name,
-            "picture": recipe.picture,
-            "meal_preps": meal_preps,
-            "recipe_tags": recipe_tags,
-            "user_recipe_tags": user_recipe_tags,
-        }
-        recipes.append(recipe_dict)
-
-    response = make_response(
-        recipes,
-        200
-    )
-
+    recipes = Recipe.query.order_by(Recipe.id.desc()).all()
+    recipes_dict = get_recipe_dict(recipes)
+    response = make_response(recipes_dict, 200)
     return response
+
+@app.route('/api/category_button/<string:category>')
+def category_button(category):
+    if category == "all":
+        recipes = Recipe.query.order_by(Recipe.id.desc()).all()
+    elif category == "breakfast" or category == "dairy" or category == "salad" or category == "soup" or category == "side" or category == "condiment" or category == "dessert" or category == "drinks":
+        tag = Tag.query.filter_by(name=category).first().id
+        recipes = Recipe.query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag)).order_by(Recipe.id.desc()).all()
+    elif category == "fish":
+        fish_terms = ["salmon", "tilapia", "crab", "flounder","sea bass", "tuna", "snapper", "fish"]
+        fish_conditions = or_(Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in fish_terms)
+        exclude_fish_free = ~Recipe_Ingredient.ingredient_name.ilike("%fish-free%")
+        recipes = Recipe.query.filter(Recipe.recipe_ingredients.any(and_(fish_conditions, exclude_fish_free))).order_by(Recipe.id.desc()).all()
+    elif category == "meat":
+        tag = Tag.query.filter_by(name="meat").first().id
+        recipes = Recipe.query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag),~Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))).order_by(Recipe.id.desc()).all()
+    elif category == "chicken":
+        recipes = (Recipe.query.filter(Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))).order_by(Recipe.id.desc()).all())
+        
+    recipes_dict = get_recipe_dict(recipes)
+    response = make_response(recipes_dict, 200)
+    return response
+
+# get all userrecipes for the signed in user
+@app.route('/api/user_recipe_ids/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
+def user_recipe_ids(id):
+    if request.method == 'GET':
+        user_recipes = User_Recipe.query.filter_by(user_id=id).all()
+
+        if not user_recipes:
+            return {"error": f"user recipe with id {id} not found"}, 404
+        
+        user_recipes_dict = {}
+        for recipe in user_recipes:
+            if recipe.recipe_id is None:
+                continue
+            user_recipes_dict[recipe.recipe_id] = recipe.id
+        return user_recipes_dict
+# return a list of the recipe ids
+
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
