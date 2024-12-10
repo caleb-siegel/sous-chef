@@ -366,17 +366,17 @@ function RecipeDirectory() {
             <br/>
             <Container disableGutters maxWidth={false}>
                 <Button variant={categorizationButtons === "all" ? "outlined" : "contained"} color="primary" size="small" value="all" onClick={(event) => handleCategorizationButtons(event.target.value)}>All Recipes</Button>
-                {<Button variant={categorizationButtons === "breakfast" ? "outlined" : "contained"} color="primary" size="small" value="breakfast" onClick={(event) => handleCategorizationButtons(event.target.value)}>Breakfast</Button>}
-                { user && <Button variant={categorizationButtons === "chicken" ? "outlined" : "contained"} color="primary" size="small" value="chicken" onClick={(event) => handleCategorizationButtons(event.target.value)}>Chicken</Button>}
-                { user && <Button variant={categorizationButtons === "meat" ? "outlined" : "contained"} color="primary" size="small" value="meat" onClick={(event) => handleCategorizationButtons(event.target.value)}>Meat</Button>}
-                { user && <Button variant={categorizationButtons === "fish" ? "outlined" : "contained"} color="primary" size="small" value="fish" onClick={(event) => handleCategorizationButtons(event.target.value)}>Fish</Button>}
-                { user && <Button variant={categorizationButtons === "dairy" ? "outlined" : "contained"} color="primary" size="small" value="dairy" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dairy</Button>}
-                { user && <Button variant={categorizationButtons === "salad" ? "outlined" : "contained"} color="primary" size="small" value="salad" onClick={(event) => handleCategorizationButtons(event.target.value)}>Salad</Button>}
-                { user && <Button variant={categorizationButtons === "soup" ? "outlined" : "contained"} color="primary" size="small" value="soup" onClick={(event) => handleCategorizationButtons(event.target.value)}>Soup</Button>}
-                { user && <Button variant={categorizationButtons === "side" ? "outlined" : "contained"} color="primary" size="small" value="side" onClick={(event) => handleCategorizationButtons(event.target.value)}>Side</Button>}
-                { user && <Button variant={categorizationButtons === "condiment" ? "outlined" : "contained"} color="primary" size="small" value="condiment" onClick={(event) => handleCategorizationButtons(event.target.value)}>Condiment</Button>}
-                { user && <Button variant={categorizationButtons === "dessert" ? "outlined" : "contained"} color="primary" size="small" value="dessert" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dessert</Button>}
-                { user && <Button variant={categorizationButtons === "drinks" ? "outlined" : "contained"} color="primary" size="small" value="drinks" onClick={(event) => handleCategorizationButtons(event.target.value)}>Drinks</Button>}
+                <Button variant={categorizationButtons === "breakfast" ? "outlined" : "contained"} color="primary" size="small" value="breakfast" onClick={(event) => handleCategorizationButtons(event.target.value)}>Breakfast</Button>
+                <Button variant={categorizationButtons === "chicken" ? "outlined" : "contained"} color="primary" size="small" value="chicken" onClick={(event) => handleCategorizationButtons(event.target.value)}>Chicken</Button>
+                <Button variant={categorizationButtons === "meat" ? "outlined" : "contained"} color="primary" size="small" value="meat" onClick={(event) => handleCategorizationButtons(event.target.value)}>Meat</Button>
+                <Button variant={categorizationButtons === "fish" ? "outlined" : "contained"} color="primary" size="small" value="fish" onClick={(event) => handleCategorizationButtons(event.target.value)}>Fish</Button>
+                <Button variant={categorizationButtons === "dairy" ? "outlined" : "contained"} color="primary" size="small" value="dairy" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dairy</Button>
+                <Button variant={categorizationButtons === "salad" ? "outlined" : "contained"} color="primary" size="small" value="salad" onClick={(event) => handleCategorizationButtons(event.target.value)}>Salad</Button>
+                <Button variant={categorizationButtons === "soup" ? "outlined" : "contained"} color="primary" size="small" value="soup" onClick={(event) => handleCategorizationButtons(event.target.value)}>Soup</Button>
+                <Button variant={categorizationButtons === "side" ? "outlined" : "contained"} color="primary" size="small" value="side" onClick={(event) => handleCategorizationButtons(event.target.value)}>Side</Button>
+                <Button variant={categorizationButtons === "condiment" ? "outlined" : "contained"} color="primary" size="small" value="condiment" onClick={(event) => handleCategorizationButtons(event.target.value)}>Condiment</Button>
+                <Button variant={categorizationButtons === "dessert" ? "outlined" : "contained"} color="primary" size="small" value="dessert" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dessert</Button>
+                <Button variant={categorizationButtons === "drinks" ? "outlined" : "contained"} color="primary" size="small" value="drinks" onClick={(event) => handleCategorizationButtons(event.target.value)}>Drinks</Button>
             </Container>
             <br/>
             <Container style={{
