@@ -12,7 +12,7 @@ class User(db.Model, SerializerMixin):
     
     serialize_rules = ["-user_recipes.user", "-user_recipe_tags.user", "-meal_preps", "-recipes.user"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, unique=True)
     password_hash = db.Column(db.String)
 
@@ -26,7 +26,7 @@ class User_Tag(db.Model, SerializerMixin):
     
     serialize_rules = ["-user_recipe_tags.user_tag"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, unique=True)
 
     user_recipe_tags = db.relationship("User_Recipe_Tag", back_populates="user_tag")
@@ -36,7 +36,7 @@ class User_Recipe(db.Model, SerializerMixin):
     
     serialize_rules = ["-user.user_recipes", "-recipe.user_recipes"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     not_reorder = db.Column(db.Boolean)
@@ -51,7 +51,7 @@ class User_Recipe_Tag(db.Model, SerializerMixin):
     
     serialize_rules = ["-user", "-recipe", "-user_tag.user_recipe_tags"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     user_tag_id = db.Column(db.Integer, db.ForeignKey("user_tag.id"))
@@ -65,7 +65,7 @@ class Meal_Prep(db.Model, SerializerMixin):
     
     serialize_rules = ["-user", "-recipe.user_recipes", "-recipe.user_recipe_tags", "-recipe.meal_preps", "-recipe.source_category", "-recipe.recipe_ingredients.recipe", "-recipe.recipe_tags"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     weekday = db.Column(db.String)
@@ -79,7 +79,7 @@ class Recipe(db.Model, SerializerMixin):
     
     serialize_rules = ["-user_recipes.recipe", "-user_recipes.user.user_recipe_tags", "-user_recipe_tags.recipe", "-meal_preps.recipe", "-source_category.recipes", "-recipe_ingredients.recipe", "-recipe_tags.recipe", "-user.recipe"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
     picture = db.Column(db.String)
     source_category_id = db.Column(db.Integer, db.ForeignKey("source_category.id"))
@@ -101,7 +101,7 @@ class Recipe_Ingredient(db.Model, SerializerMixin):
     
     serialize_rules = ["-recipe.recipe_ingredients"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     ingredient_name = db.Column(db.String)
     ingredient_quantity = db.Column(db.Float)
@@ -115,7 +115,7 @@ class Tag(db.Model, SerializerMixin):
     
     serialize_rules = ["-recipe_tags.tag"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, unique=True)
 
     recipe_tags = db.relationship("Recipe_Tag", back_populates="tag")
@@ -125,7 +125,7 @@ class Recipe_Tag(db.Model, SerializerMixin):
     
     serialize_rules = ["-recipe.recipe_tags", "-tag.recipe_tags"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     tag_id = db.Column(db.Integer, db.ForeignKey("tag.id"))
 
@@ -137,7 +137,7 @@ class Source_Category(db.Model, SerializerMixin):
     
     serialize_rules = ["-recipes.source_category"]
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, unique=True)
 
     recipes = db.relationship("Recipe", back_populates="source_category")
