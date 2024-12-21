@@ -198,7 +198,10 @@ def recipes():
     
 @app.route('/api/random_recipe')
 def random_recipe():
-    all_recipes = User_Recipe.query.filter_by(user_id=session.get('user_id')).all()
+    if session.get('user_id'):
+        all_recipes = User_Recipe.query.filter_by(user_id=session.get('user_id')).all()
+    else:
+        all_recipes = User_Recipe.query.all()
     random.shuffle(all_recipes)
 
     random_recipe_dict = all_recipes[0].to_dict()

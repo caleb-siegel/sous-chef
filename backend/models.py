@@ -79,7 +79,7 @@ class Recipe(db.Model, SerializerMixin):
     
     serialize_rules = ["-user_recipes.recipe", "-user_recipes.user.user_recipe_tags", "-user_recipe_tags.recipe", "-meal_preps.recipe", "-source_category.recipes", "-recipe_ingredients.recipe", "-recipe_tags.recipe", "-user.recipe"]
     
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     picture = db.Column(db.String)
     source_category_id = db.Column(db.Integer, db.ForeignKey("source_category.id"))
