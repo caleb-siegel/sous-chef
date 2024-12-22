@@ -371,6 +371,7 @@ function RecipeDirectory() {
                 width: '100%',
                 zIndex: 1000,
             }}>
+            {user &&
                 <BottomNavigation
                     showLabels
                     value={value}
@@ -381,6 +382,7 @@ function RecipeDirectory() {
                     <BottomNavigationAction label="Likes" icon={<ThumbUpOffAltIcon />} onClick={(event) => handleToggleRecipes("interest")}/>
                     <BottomNavigationAction label="Dislikes" icon={<ThumbDownOffAltIcon />} onClick={(event) => handleToggleRecipes("notreorder")}/>
                 </BottomNavigation>
+            }
             </Container>
             {!loading ?
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
