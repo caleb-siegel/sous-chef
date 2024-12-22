@@ -52,18 +52,27 @@ def logout():
     return { "message": "Logged out"}, 200
 
 @app.route('/api/login', methods=['POST', 'OPTIONS'])
-def login():    
+def login():
+    if request.method == 'OPTIONS':
+        # Handle the CORS preflight request
+        response = jsonify({"message": "CORS preflight handled"})
+        response.headers.add("Access-Control-Allow-Origin", request.headers.get("Origin"))
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response, 200
+
     if request.method == 'POST':
-        print('login')
+        print("attempting login")
         data = request.json
         user = User.query.filter(User.name == data.get('name')).first()
         if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
+            print(f'user: {user}')
             session["user_id"] = user.id
-            print("success")
             return user.to_dict(), 200
         else:
             return { "error": "Invalid username or password" }, 401
-    
+        
 @app.route('/api/user', methods=['GET', 'POST'])
 def user():
     if request.method == 'GET':
