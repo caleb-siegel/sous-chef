@@ -122,7 +122,7 @@ def user_tags():
         )
         return response
     
-@app.route('/api/usertags/<int:id>/', methods=['DELETE'])
+@app.route('/api/usertags/<int:id>', methods=['DELETE'])
 def delete_user_tags(id):
     user_tag = db.session.get(User_Tag, id)
     if not user_tag:
@@ -156,7 +156,7 @@ def user_recipe_tags():
 
         return response
     
-@app.route('/api/userrecipetags/<int:id>/', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/userrecipetags/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def delete_user_recipe_tags(id):
     user_recipe_tag = db.session.get(User_Recipe_Tag, id)
     if not user_recipe_tag:
@@ -351,7 +351,7 @@ def recipe_tags():
 
         return response
 
-@app.route('/api/recipetags/<int:id>/', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/recipetags/<int:id>', methods=['GET', 'POST', 'DELETE'])
 def delete_recipe_tags(id):
     if request.method == 'DELETE':
         recipe_tag = db.session.get(Recipe_Tag, id)
