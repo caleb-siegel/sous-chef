@@ -40,9 +40,12 @@ function App() {
             throw res;
         })
         .then((data) => {
+            console.log(`receiving data: ${data}`)
             setUser(data);
-            console.log(data)
+            console.log(`post setting user state: ${data}`)
             navigate("/recipes");
+            console.log(`after navigation: user-${user}`)
+            console.log(`after navigation: data-${data}`)
         })
         .catch((e) => {
             alert('incorrect username or password')
