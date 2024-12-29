@@ -15,7 +15,7 @@ load_dotenv()
 
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
-CORS(app, 
+CORS(app,
     supports_credentials=True, 
     resources={r"/*": {
         "origins": ["https://souschef2.vercel.app", "http://localhost:5173"],
@@ -55,6 +55,7 @@ def logout():
 def login():
     if request.method == 'OPTIONS':
         # Handle the CORS preflight request
+        print("handling preflight")
         response = jsonify({"message": "CORS preflight handled"})
         response.headers.add("Access-Control-Allow-Origin", request.headers.get("Origin"))
         response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
@@ -65,7 +66,9 @@ def login():
     if request.method == 'POST':
         print("attempting login")
         data = request.json
-        user = User.query.filter(User.name == data.get('name')).first()
+        print(f'data: {data}')
+        user = db.session.query(User.id, User.name, User.password_hash).filter(User.name == data.get('name')).first()
+        print(f'user: {user}')
         if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
             print(f'user: {user}')
             session["user_id"] = user.id
