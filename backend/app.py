@@ -66,11 +66,8 @@ def login():
     if request.method == 'POST':
         print("attempting login")
         data = request.json
-        print(f'data: {data}')
         user = db.session.query(User.id, User.name, User.password_hash).filter(User.name == data.get('name')).first()
-        print(f'user: {user}')
         if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
-            print(f'user: {user}')
             session["user_id"] = user.id
             return {
                 "id": user.id,
