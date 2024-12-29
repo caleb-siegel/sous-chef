@@ -548,19 +548,26 @@ def recipe_info():
 def category_button(category):
     if category == "all":
         recipes = Recipe.query.order_by(Recipe.id.desc()).all()
-    elif category == "breakfast" or category == "dairy" or category == "salad" or category == "soup" or category == "side" or category == "condiment" or category == "dessert" or category == "drinks":
+    elif category in ["breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks"]:
         tag = Tag.query.filter_by(name=category).first().id
         recipes = Recipe.query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag)).order_by(Recipe.id.desc()).all()
     elif category == "fish":
-        fish_terms = ["salmon", "tilapia", "crab", "flounder","sea bass", "tuna", "snapper", "fish"]
+        fish_terms = ["salmon", "tilapia", "crab", "flounder", "sea bass", "tuna", "snapper", "fish"]
         fish_conditions = or_(Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in fish_terms)
         exclude_fish_free = ~Recipe_Ingredient.ingredient_name.ilike("%fish-free%")
         recipes = Recipe.query.filter(Recipe.recipe_ingredients.any(and_(fish_conditions, exclude_fish_free))).order_by(Recipe.id.desc()).all()
     elif category == "meat":
         tag = Tag.query.filter_by(name="meat").first().id
-        recipes = Recipe.query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag),~Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))).order_by(Recipe.id.desc()).all()
+        recipes = Recipe.query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag), ~Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))).order_by(Recipe.id.desc()).all()
     elif category == "chicken":
-        recipes = (Recipe.query.filter(Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))).order_by(Recipe.id.desc()).all())
+        recipes = Recipe.query.filter(Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))).order_by(Recipe.id.desc()).all()
+    else:  # If no category matches, return all recipes that do not belong to the above categories.
+        recipes = Recipe.query.filter(
+            ~or_(
+                Recipe.recipe_tags.any(Recipe_Tag.tag_id == Tag.query.filter_by(name=tag).first().id) 
+                for tag in ["breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "fish", "meat", "chicken"]
+            )
+        ).order_by(Recipe.id.desc()).all()
         
     recipes_dict = get_recipe_dict(recipes)
     response = make_response(recipes_dict, 200)
