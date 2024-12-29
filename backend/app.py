@@ -564,8 +564,24 @@ def category_button(category):
     else:  # If no category matches, return all recipes that do not belong to the above categories.
         recipes = Recipe.query.filter(
             ~or_(
-                Recipe.recipe_tags.any(Recipe_Tag.tag_id == Tag.query.filter_by(name=tag).first().id) 
-                for tag in ["breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "fish", "meat", "chicken"]
+                Recipe.recipe_tags.any(
+                    Recipe_Tag.tag_id == Tag.query.filter_by(name=tag).first().id
+                ) for tag in [
+                    "breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "meat"
+                ]
+            ),
+            ~Recipe.recipe_ingredients.any(
+                or_(
+                    Recipe_Ingredient.ingredient_name.ilike("%chicken%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%salmon%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%tilapia%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%crab%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%flounder%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%sea bass%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%tuna%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%snapper%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%fish%")
+                )
             )
         ).order_by(Recipe.id.desc()).all()
         
