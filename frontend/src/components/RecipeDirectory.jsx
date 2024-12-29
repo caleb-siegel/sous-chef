@@ -361,6 +361,7 @@ function RecipeDirectory() {
                 <Button variant={categorizationButtons === "condiment" ? "outlined" : "contained"} color="primary" size="small" value="condiment" onClick={(event) => handleCategorizationButtons(event.target.value)}>Condiment</Button>
                 <Button variant={categorizationButtons === "dessert" ? "outlined" : "contained"} color="primary" size="small" value="dessert" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dessert</Button>
                 <Button variant={categorizationButtons === "drinks" ? "outlined" : "contained"} color="primary" size="small" value="drinks" onClick={(event) => handleCategorizationButtons(event.target.value)}>Drinks</Button>
+                <Button variant={categorizationButtons === "other" ? "outlined" : "contained"} color="primary" size="small" value="other" onClick={(event) => handleCategorizationButtons(event.target.value)}>Other</Button>
             </Container>
             <br/>
             <Container style={{
