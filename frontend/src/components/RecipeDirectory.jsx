@@ -134,7 +134,7 @@ function RecipeDirectory() {
         })    
     }
 
-    const [categorizationButtons, setCategorizationButtons] = useState("allrecipes");
+    const [categorizationButtons, setCategorizationButtons] = useState("dessert");
     const handleCategorizationButtons = (category) => {
         setCategorizationButtons(category);
         fetchRecipes(category);
