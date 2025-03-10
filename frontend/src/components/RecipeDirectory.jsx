@@ -100,9 +100,6 @@ function RecipeDirectory() {
     }
 
     let recipeList = recipes;
-    if (chosenCookbook) {
-        recipeList = recipeList.filter(recipe => chosenCookbook === recipe.source)
-    }
 
     if (toggleRecipes === "allrecipes") {
         recipeList = recipeList

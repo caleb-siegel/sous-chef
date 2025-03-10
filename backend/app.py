@@ -608,57 +608,60 @@ def filter_recipes():
     category = request.args.get('category')
     cookbook = request.args.get('cookbook')
     
+    # Start with a base query
     query = Recipe.query
 
+    # Build filters list
+    filters = []
+    
+    # Add category filter if specified
     if category and category != 'all':
         if category == "chicken":
-            query = query.filter(Recipe.recipe_ingredients.any(
+            filters.append(Recipe.recipe_ingredients.any(
                 Recipe_Ingredient.ingredient_name.ilike("%chicken%")
             ))
         elif category == "fish":
-            query = query.filter(Recipe.recipe_ingredients.any(
-                or_(
-                    Recipe_Ingredient.ingredient_name.ilike("%salmon%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%tilapia%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%crab%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%flounder%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%sea bass%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%tuna%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%snapper%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%fish%")
-                )
-            ))
+            fish_terms = ["salmon", "tilapia", "crab", "flounder", "sea bass", "tuna", "snapper", "fish"]
+            fish_conditions = or_(*[Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in fish_terms])
+            filters.append(Recipe.recipe_ingredients.any(fish_conditions))
+        elif category == "meat":
+            tag = Tag.query.filter_by(name="meat").first()
+            if tag:
+                filters.extend([
+                    Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag.id),
+                    ~Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))
+                ])
         elif category == "other":
-            query = query.filter(
-                ~or_(
-                    Recipe.recipe_tags.any(
-                        Recipe_Tag.tag_id == Tag.query.filter_by(name=tag).first().id
-                    ) for tag in [
-                        "breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "meat"
-                    ]
-                ),
+            excluded_tags = ["breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "meat"]
+            excluded_tag_filters = [
+                ~Recipe.recipe_tags.any(
+                    Recipe_Tag.tag_id == Tag.query.filter_by(name=tag).first().id
+                ) for tag in excluded_tags
+            ]
+            excluded_ingredients = [
+                "chicken", "salmon", "tilapia", "crab", "flounder", 
+                "sea bass", "tuna", "snapper", "fish"
+            ]
+            excluded_ingredient_filters = [
                 ~Recipe.recipe_ingredients.any(
-                    or_(
-                        Recipe_Ingredient.ingredient_name.ilike("%chicken%"),
-                        Recipe_Ingredient.ingredient_name.ilike("%salmon%"),
-                        Recipe_Ingredient.ingredient_name.ilike("%tilapia%"),
-                        Recipe_Ingredient.ingredient_name.ilike("%crab%"),
-                        Recipe_Ingredient.ingredient_name.ilike("%flounder%"),
-                        Recipe_Ingredient.ingredient_name.ilike("%sea bass%"),
-                        Recipe_Ingredient.ingredient_name.ilike("%tuna%"),
-                        Recipe_Ingredient.ingredient_name.ilike("%snapper%"),
-                        Recipe_Ingredient.ingredient_name.ilike("%fish%")
-                    )
+                    or_(*[Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in excluded_ingredients])
                 )
-            )
+            ]
+            filters.extend(excluded_tag_filters + excluded_ingredient_filters)
         else:
             tag = Tag.query.filter_by(name=category).first()
             if tag:
-                query = query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag.id))
+                filters.append(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag.id))
 
+    # Add cookbook filter if specified
     if cookbook:
-        query = query.filter(Recipe.source == cookbook)
+        filters.append(Recipe.source == cookbook)
 
+    # Apply all filters at once
+    if filters:
+        query = query.filter(and_(*filters))
+
+    # Get results
     recipes = query.order_by(Recipe.id.desc()).all()
     recipes_dict = get_recipe_dict(recipes)
     
