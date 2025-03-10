@@ -5,7 +5,7 @@ import AddToMealPrep from "./AddToMealPrep";
 import RecipeSkeleton from "./RecipeSkeleton";
 import SearchBar from "./SearchBar";
 import Filter from "./Filter";
-import { Button, Card, CardHeader, CardMedia, Container, Chip, IconButton, Divider, BottomNavigation, BottomNavigationAction, Typography, CardContent } from "@mui/material";
+import { Button, Card, CardHeader, CardMedia, Container, Chip, IconButton, Divider, BottomNavigation, BottomNavigationAction, Typography, CardContent, CircularProgress, Alert, Box } from "@mui/material";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -21,14 +21,39 @@ function RecipeDirectory() {
     const { backendUrl } = useOutletContext();
 
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [recipes, setRecipes] = useState([]);
-    useEffect(() => {
-        fetch(`${backendUrl}/api/recipe_info`)
-        .then((response) => response.json())
-        .then((data) => {
+    const [tempRecipes, setTempRecipes] = useState(null); // Store new recipes temporarily
+
+    const fetchRecipes = async (category = null) => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const url = category 
+                ? `${backendUrl}/api/category_button/${category}`
+                : `${backendUrl}/api/recipe_info`;
+                
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            // Update recipes only on success
             setRecipes(data);
+            setTempRecipes(null);
+        } catch (err) {
+            console.error("Error fetching recipes:", err);
+            setError(`Error getting ${category} recipes. Please try again.`);
+            setTempRecipes(null);
+        } finally {
             setLoading(false);
-        });
+        }
+    };
+
+    useEffect(() => {
+        fetchRecipes();
     }, []);
 
     const [tags, setTags] = useState([]);
@@ -111,14 +136,9 @@ function RecipeDirectory() {
 
     const [categorizationButtons, setCategorizationButtons] = useState("allrecipes");
     const handleCategorizationButtons = (category) => {
-        setCategorizationButtons(category)
-        fetch(`${backendUrl}/api/category_button/${category}`)
-        .then((response) => response.json())
-        .then((data) => {
-            setRecipes(data)
-        });
-        
-    }
+        setCategorizationButtons(category);
+        fetchRecipes(category);
+    };
 
     const [addRecipe, setAddRecipe] = useState(false)
     let addRecipeButtonText;
@@ -342,26 +362,174 @@ function RecipeDirectory() {
                 <Filter recipes={recipes} setRecipes={setRecipes} handleAddRecipe={handleAddRecipe} filterValue={filterValue} handleFilterValueChange={handleFilterValueChange} filterType={filterType} handleFilterTypeChange={handleFilterTypeChange} filterBy={filterBy} handleFilterByChange={handleFilterByChange} tags={tags} userTags={userTags}/>
             }
             <br/>
-            {!loading ? 
-                <Typography variant="h3" color="secondary" >There are {recipeList.length} results.</Typography> 
-            : 
-                <Typography variant="h3" color="secondary" >Recipes are loading...</Typography>
-            }
+            <Typography variant="h3" color="secondary">
+                {!loading && 
+                    `There are ${recipeList.length} results.`
+                }
+            </Typography>
             <br/>
             <Container disableGutters maxWidth={false}>
-                <Button variant={categorizationButtons === "all" ? "outlined" : "contained"} color="primary" size="small" value="all" onClick={(event) => handleCategorizationButtons(event.target.value)}>All Recipes</Button>
-                <Button variant={categorizationButtons === "breakfast" ? "outlined" : "contained"} color="primary" size="small" value="breakfast" onClick={(event) => handleCategorizationButtons(event.target.value)}>Breakfast</Button>
-                <Button variant={categorizationButtons === "chicken" ? "outlined" : "contained"} color="primary" size="small" value="chicken" onClick={(event) => handleCategorizationButtons(event.target.value)}>Chicken</Button>
-                <Button variant={categorizationButtons === "meat" ? "outlined" : "contained"} color="primary" size="small" value="meat" onClick={(event) => handleCategorizationButtons(event.target.value)}>Meat</Button>
-                <Button variant={categorizationButtons === "fish" ? "outlined" : "contained"} color="primary" size="small" value="fish" onClick={(event) => handleCategorizationButtons(event.target.value)}>Fish</Button>
-                <Button variant={categorizationButtons === "dairy" ? "outlined" : "contained"} color="primary" size="small" value="dairy" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dairy</Button>
-                <Button variant={categorizationButtons === "salad" ? "outlined" : "contained"} color="primary" size="small" value="salad" onClick={(event) => handleCategorizationButtons(event.target.value)}>Salad</Button>
-                <Button variant={categorizationButtons === "soup" ? "outlined" : "contained"} color="primary" size="small" value="soup" onClick={(event) => handleCategorizationButtons(event.target.value)}>Soup</Button>
-                <Button variant={categorizationButtons === "side" ? "outlined" : "contained"} color="primary" size="small" value="side" onClick={(event) => handleCategorizationButtons(event.target.value)}>Side</Button>
-                <Button variant={categorizationButtons === "condiment" ? "outlined" : "contained"} color="primary" size="small" value="condiment" onClick={(event) => handleCategorizationButtons(event.target.value)}>Condiment</Button>
-                <Button variant={categorizationButtons === "dessert" ? "outlined" : "contained"} color="primary" size="small" value="dessert" onClick={(event) => handleCategorizationButtons(event.target.value)}>Dessert</Button>
-                <Button variant={categorizationButtons === "drinks" ? "outlined" : "contained"} color="primary" size="small" value="drinks" onClick={(event) => handleCategorizationButtons(event.target.value)}>Drinks</Button>
-                <Button variant={categorizationButtons === "other" ? "outlined" : "contained"} color="primary" size="small" value="other" onClick={(event) => handleCategorizationButtons(event.target.value)}>Other</Button>
+                {/* Loading indicator that appears above recipes */}
+                {loading && (
+                    <Box sx={{ 
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 1,
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 2,
+                        bgcolor: 'rgba(255, 255, 255, 0.9)',
+                        p: 2,
+                        borderRadius: 1,
+                        mb: 2,
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
+                        <CircularProgress size={24} color="secondary" />
+                        <Typography>Loading {categorizationButtons} recipes...</Typography>
+                    </Box>
+                )}
+
+                {/* Error message that appears above recipes */}
+                {error && (
+                    <Alert 
+                        severity="error" 
+                        sx={{ 
+                            mb: 2,
+                            position: 'sticky',
+                            top: loading ? '64px' : 0,
+                            zIndex: 1
+                        }}
+                        action={
+                            <Button 
+                                color="inherit" 
+                                size="small"
+                                onClick={() => fetchRecipes(categorizationButtons)}
+                            >
+                                RETRY
+                            </Button>
+                        }
+                    >
+                        {error}
+                    </Alert>
+                )}
+
+                <Button 
+                    variant={categorizationButtons === "all" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="all" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    All Recipes
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "breakfast" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="breakfast" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Breakfast
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "chicken" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="chicken" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Chicken
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "meat" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="meat" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Meat
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "fish" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="fish" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Fish
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "dairy" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="dairy" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Dairy
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "salad" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="salad" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Salad
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "soup" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="soup" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Soup
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "side" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="side" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Side
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "condiment" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="condiment" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Condiment
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "dessert" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="dessert" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Dessert
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "drinks" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="drinks" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Drinks
+                </Button>
+                <Button 
+                    variant={categorizationButtons === "other" ? "outlined" : "contained"} 
+                    color="primary" 
+                    size="small" 
+                    value="other" 
+                    onClick={(event) => handleCategorizationButtons(event.target.value)}
+                >
+                    Other
+                </Button>
             </Container>
             <br/>
             <Container style={{
@@ -385,61 +553,62 @@ function RecipeDirectory() {
                 </BottomNavigation>
             }
             </Container>
-            {!loading ?
-                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    {recipeList?.map((recipe) => (
-                        <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>
-                            <Card key={recipe.id} sx={{ maxWidth: 345, margin: '10px', padding: '10px', borderRadius: "1rem" }}>
-                                <CardHeader
-                                title={recipe.name}
-                                action={
-                                    user && 
-                                        <Container sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                            <IconButton size="small" onClick={(event) => {handleFavorites(event, recipe.id)}}>
-                                                {userRecipes && userRecipes[recipe.id] > 0 ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
-                                            </IconButton>
-                                        </Container>
+
+            {/* Recipe grid - now always visible */}
+            <div style={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                opacity: loading ? 0.6 : 1, 
+                transition: 'opacity 0.2s',
+                position: 'relative'
+            }}>
+                {recipeList?.map((recipe) => (
+                    <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>
+                        <Card key={recipe.id} sx={{ maxWidth: 345, margin: '10px', padding: '10px', borderRadius: "1rem" }}>
+                            <CardHeader
+                            title={recipe.name}
+                            action={
+                                user && 
+                                    <Container sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                        <IconButton size="small" onClick={(event) => {handleFavorites(event, recipe.id)}}>
+                                            {userRecipes && userRecipes[recipe.id] > 0 ? <FavoriteIcon color="primary"/> : <FavoriteBorderIcon color="primary"/>}
+                                        </IconButton>
+                                    </Container>
+                            }
+                            />
+                            <CardMedia
+                            component="img"
+                            height="194"
+                            image={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"}
+                            alt="Image not available"
+                            />
+                            {recipe.recipe_tags.map(tag => {
+                                if (tag && tag.tag) {
+                                    return <Chip key={tag.tag.id} size="small" label={tag.tag.name} color="primary" sx={{ margin: '1px'}}/>
                                 }
-                                />
-                                <CardMedia
-                                component="img"
-                                height="194"
-                                image={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"}
-                                alt="Image not available"
-                                />
-                                {recipe.recipe_tags.map(tag => {
-                                    if (tag && tag.tag) {
-                                        return <Chip key={tag.tag.id} size="small" label={tag.tag.name} color="primary" sx={{ margin: '1px'}}/>
-                                    }
-                                })}
-                                {recipe.user_recipe_tags
-                                    .filter(user_recipe_tag => (user && user.id && (user_recipe_tag.user_id === user.id)))
-                                    .map(user_recipe_tag => (
-                                        user_recipe_tag && user_recipe_tag.id && user_recipe_tag.user_tag &&
-                                        <Chip
-                                            key={user_recipe_tag.id}
-                                            size="small"
-                                            label={user_recipe_tag.user_tag.name}
-                                            color="secondary"
-                                            sx={{ margin: '1px'}}
-                                            onDelete={(event) => handleDeleteUserTag(event, user_recipe_tag.id)}
-                                        />
-                                    ))
-                                }
-                                {user && <UserRecipeTagsMenu recipeId={recipe.id} tags={userTags} handleTagSelect={handleTagSelect} color="secondary"/>}
-                                <Divider/>
-                                <AddToMealPrep user={user} recipe={recipe}/>
-                                <Divider/>                                
-                            </Card>
-                        </a>
-                    ))}
-                </div>
-                
-            :
-                <Container disableGutters maxWidth={false}>
-                    <RecipeSkeleton />
-                </Container>
-            }
+                            })}
+                            {recipe.user_recipe_tags
+                                .filter(user_recipe_tag => (user && user.id && (user_recipe_tag.user_id === user.id)))
+                                .map(user_recipe_tag => (
+                                    user_recipe_tag && user_recipe_tag.id && user_recipe_tag.user_tag &&
+                                    <Chip
+                                        key={user_recipe_tag.id}
+                                        size="small"
+                                        label={user_recipe_tag.user_tag.name}
+                                        color="secondary"
+                                        sx={{ margin: '1px'}}
+                                        onDelete={(event) => handleDeleteUserTag(event, user_recipe_tag.id)}
+                                    />
+                                ))
+                            }
+                            {user && <UserRecipeTagsMenu recipeId={recipe.id} tags={userTags} handleTagSelect={handleTagSelect} color="secondary"/>}
+                            <Divider/>
+                            <AddToMealPrep user={user} recipe={recipe}/>
+                            <Divider/>                                
+                        </Card>
+                    </a>
+                ))}
+            </div>
         </Container>
     )
 }
