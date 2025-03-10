@@ -24,15 +24,21 @@ function RecipeDirectory() {
     const [error, setError] = useState(null);
     const [recipes, setRecipes] = useState([]);
     const [tempRecipes, setTempRecipes] = useState(null); // Store new recipes temporarily
+    const [cookbooks, setCookbooks] = useState([]);
+    const [chosenCookbook, setChosenCookbook] = useState("");
 
     const fetchRecipes = async (category = null) => {
         try {
             setLoading(true);
             setError(null);
             
-            const url = category 
-                ? `${backendUrl}/api/category_button/${category}`
-                : `${backendUrl}/api/recipe_info`;
+            let url = new URL(`${backendUrl}/api/recipes/filter`);
+            if (category && category !== 'all') {
+                url.searchParams.append('category', category);
+            }
+            if (chosenCookbook) {
+                url.searchParams.append('cookbook', chosenCookbook);
+            }
                 
             const response = await fetch(url);
             if (!response.ok) {
@@ -40,21 +46,29 @@ function RecipeDirectory() {
             }
             
             const data = await response.json();
-            // Update recipes only on success
             setRecipes(data);
             setTempRecipes(null);
         } catch (err) {
             console.error("Error fetching recipes:", err);
-            setError(`Error getting ${category} recipes. Please try again.`);
+            setError(`Error getting recipes. Please try again.`);
             setTempRecipes(null);
         } finally {
             setLoading(false);
         }
     };
 
+    // Fetch cookbooks when component mounts
     useEffect(() => {
-        fetchRecipes();
+        fetch(`${backendUrl}/api/cookbooks`)
+        .then((response) => response.json())
+        .then((data) => {
+            setCookbooks(data);
+        });
     }, []);
+
+    useEffect(() => {
+        fetchRecipes(categorizationButtons);
+    }, [chosenCookbook]); // Re-fetch when cookbook changes
 
     const [tags, setTags] = useState([]);
     useEffect(() => {
@@ -84,16 +98,6 @@ function RecipeDirectory() {
     const handleToggleRecipes = (event) => {
         setToggleRecipes(event)
     }
-
-    const [cookbooks, setCookbooks] = useState([]);
-    const [chosenCookbook, setChosenCookbook] = useState("")
-    useEffect(() => {
-        fetch(`${backendUrl}/api/cookbooks`)
-        .then((response) => response.json())
-        .then((data) => {
-            setCookbooks(data);
-        });
-    }, []);
 
     let recipeList = recipes;
     if (chosenCookbook) {

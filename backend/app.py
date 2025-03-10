@@ -18,7 +18,7 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY')
 CORS(app,
     supports_credentials=True, 
     resources={r"/*": {
-        "origins": ["https://souschef2.vercel.app", "http://localhost:5173"],
+        "origins": ["https://souschef2.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555"],
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allow_headers": ["Content-Type", "Accept", "Authorization", "Origin"],
         "supports_credentials": True,
@@ -603,6 +603,66 @@ def user_recipe_ids(id):
         return user_recipes_dict
 # return a list of the recipe ids
 
+@app.route('/api/recipes/filter', methods=['GET'])
+def filter_recipes():
+    category = request.args.get('category')
+    cookbook = request.args.get('cookbook')
+    
+    query = Recipe.query
+
+    if category and category != 'all':
+        if category == "chicken":
+            query = query.filter(Recipe.recipe_ingredients.any(
+                Recipe_Ingredient.ingredient_name.ilike("%chicken%")
+            ))
+        elif category == "fish":
+            query = query.filter(Recipe.recipe_ingredients.any(
+                or_(
+                    Recipe_Ingredient.ingredient_name.ilike("%salmon%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%tilapia%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%crab%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%flounder%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%sea bass%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%tuna%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%snapper%"),
+                    Recipe_Ingredient.ingredient_name.ilike("%fish%")
+                )
+            ))
+        elif category == "other":
+            query = query.filter(
+                ~or_(
+                    Recipe.recipe_tags.any(
+                        Recipe_Tag.tag_id == Tag.query.filter_by(name=tag).first().id
+                    ) for tag in [
+                        "breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "meat"
+                    ]
+                ),
+                ~Recipe.recipe_ingredients.any(
+                    or_(
+                        Recipe_Ingredient.ingredient_name.ilike("%chicken%"),
+                        Recipe_Ingredient.ingredient_name.ilike("%salmon%"),
+                        Recipe_Ingredient.ingredient_name.ilike("%tilapia%"),
+                        Recipe_Ingredient.ingredient_name.ilike("%crab%"),
+                        Recipe_Ingredient.ingredient_name.ilike("%flounder%"),
+                        Recipe_Ingredient.ingredient_name.ilike("%sea bass%"),
+                        Recipe_Ingredient.ingredient_name.ilike("%tuna%"),
+                        Recipe_Ingredient.ingredient_name.ilike("%snapper%"),
+                        Recipe_Ingredient.ingredient_name.ilike("%fish%")
+                    )
+                )
+            )
+        else:
+            tag = Tag.query.filter_by(name=category).first()
+            if tag:
+                query = query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag.id))
+
+    if cookbook:
+        query = query.filter(Recipe.source == cookbook)
+
+    recipes = query.order_by(Recipe.id.desc()).all()
+    recipes_dict = get_recipe_dict(recipes)
+    
+    return make_response(recipes_dict, 200)
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
