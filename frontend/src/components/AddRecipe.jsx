@@ -15,7 +15,7 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     const [reference, setReference] = useState("");
     const [recipeInstructions, setRecipeInstructions] = useState("");
     const {user} = useOutletContext();
-    const emptyIngredient = { quantity: 0, unit: '', name: '', note: '' };
+    const emptyIngredient = { ingredient_quantity: 0, ingredient_unit: '', ingredient_name: '', ingredient_note: '' };
     const [ingredients, setIngredients] = useState([emptyIngredient]);
 
     const [sourceCategories, setSourceCategories] = useState([]);
@@ -86,10 +86,10 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                 ingredients && ingredients.map(ingredient => {
                     const ingredientData = {
                         recipe_id: newRecipeData.id,
-                        ingredient_name: ingredient.name,
-                        ingredient_quantity: ingredient.quantity,
-                        ingredient_unit: ingredient.unit,
-                        ingredient_note: ingredient.note
+                        ingredient_name: ingredient.ingredient_name,
+                        ingredient_quantity: ingredient.ingredient_quantity,
+                        ingredient_unit: ingredient.ingredient_unit,
+                        ingredient_note: ingredient.ingredient_note
                     };
                     fetch(`${backendUrl}/api/recipeingredients`, {
                         method: "POST",

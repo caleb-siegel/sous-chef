@@ -5,25 +5,25 @@ function Ingredients({ index, ingredients, setIngredients }) {
     
     const handleQuantityChange = (event) => {
         const newIngredients = [...ingredients];
-        newIngredients[index].quantity = event.target.value;
+        newIngredients[index].ingredient_quantity = parseFloat(event.target.value);
         setIngredients(newIngredients);
     };
 
     const handleUnitChange = (event) => {
         const newIngredients = [...ingredients];
-        newIngredients[index].unit = event.target.value;
+        newIngredients[index].ingredient_unit = event.target.value;
         setIngredients(newIngredients);
     };
 
     const handleIngredientChange = (event) => {
         const newIngredients = [...ingredients];
-        newIngredients[index].name = event.target.value;
+        newIngredients[index].ingredient_name = event.target.value;
         setIngredients(newIngredients);
     };
 
     const handleIngredientNoteChange = (event) => {
         const newIngredients = [...ingredients];
-        newIngredients[index].note = event.target.value;
+        newIngredients[index].ingredient_note = event.target.value;
         setIngredients(newIngredients);
     };
     
@@ -34,15 +34,15 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 label="Quantity"
                 variant="standard"
                 type="number"
-                value={ingredients[index].quantity}
-                onChange={(event) => handleQuantityChange(event, index)}
+                value={ingredients[index].ingredient_quantity}
+                onChange={handleQuantityChange}
             />
             <Select
                 labelId={`unit-label-${index}`}
                 id={`unit-${index}`}
                 label="Measurement Unit"
-                value={ingredients[index].unit}
-                onChange={(event) => handleUnitChange(event, index)}
+                value={ingredients[index].ingredient_unit}
+                onChange={handleUnitChange}
             >
                 <MenuItem value=""></MenuItem>
                 <MenuItem value="Tsp">Tsp</MenuItem>
@@ -57,15 +57,15 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 id={`ingredient-${index}`}
                 label="Ingredient"
                 variant="standard"
-                value={ingredients[index].name}
-                onChange={(event) => handleIngredientChange(event, index)}
+                value={ingredients[index].ingredient_name}
+                onChange={handleIngredientChange}
             />
             <TextField
                 id={`note-${index}`}
                 label="Ingredient Note"
                 variant="standard"
-                value={ingredients[index].note}
-                onChange={(event) => handleIngredientNoteChange(event, index)}
+                value={ingredients[index].ingredient_note}
+                onChange={handleIngredientNoteChange}
             />
         </Paper>
     );
