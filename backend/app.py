@@ -31,7 +31,7 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Ensures cookies are only sent ove
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
-from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category
+from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category, Cooked_Instance
 
 @app.route("/")
 def root():
@@ -601,7 +601,7 @@ def user_recipe_ids(id):
                 continue
             user_recipes_dict[recipe.recipe_id] = recipe.id
         return user_recipes_dict
-# return a list of the recipe ids
+
 
 @app.route('/api/recipes/filter', methods=['GET'])
 def filter_recipes():
@@ -666,6 +666,28 @@ def filter_recipes():
     recipes_dict = get_recipe_dict(recipes)
     
     return make_response(recipes_dict, 200)
+
+@app.route('/api/cooked_instances', methods=['GET', 'POST'])
+def cooked_instances():
+    if request.method == 'GET':
+        cooked_instances = [cooked_instance.to_dict() for cooked_instance in Cooked_Instance.query.all()]
+        return make_response( cooked_instances, 200 )
+    
+    elif request.method == 'POST':
+        print("running function")
+        new_cooked_instance = Cooked_Instance(
+            user_recipe_id=request.json.get("user_recipe_id"),
+            comment=request.json.get("comment"),
+            cooked_date=request.json.get("cooked_date"),
+        )
+        db.session.add(new_cooked_instance)
+        db.session.commit()
+        new_cooked_instance_dict = new_cooked_instance.to_dict()
+        response = make_response(
+            new_cooked_instance_dict,
+            201
+        )
+        return response
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)

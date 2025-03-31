@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { Chip, Container, Box, Paper, Badge, Typography, Select, MenuItem, InputLabel } from '@mui/material';
+import { Chip, Container, Box, Paper, Badge, Typography, Select, MenuItem, InputLabel, Card, CardContent, TextField, Button, IconButton } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import AddToMealPrep from './AddToMealPrep';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -77,7 +78,46 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
         }
     }
 
-    const properComment = recipe.user_recipes && recipe.user_recipes.filter(comment => comment && user && comment.user_id === user.id);
+    const formatDate = (instance) => {
+        return new Date(instance.cooked_date).toLocaleDateString('en-US', { 
+            weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' 
+        });
+    };
+
+    const [comment, setComment] = useState("");
+    const [cookedDate, setCookedDate] = useState("");
+    const [cookedInstances, setCookedInstances] = useState(recipe.user_recipes?.flatMap(user_recipe => user_recipe.cooked_instances) || []);
+    const [showForm, setShowForm] = useState(false);
+
+    const handleSubmit = async (e, user_recipe_id) => {
+        e.preventDefault();
+
+        const newInstance = {
+            user_recipe_id: user_recipe_id,
+            comment: comment,
+            cooked_date: new Date(cookedDate).toISOString(),
+        };
+
+        try {
+            const response = await fetch(`${backendUrl}/api/cooked_instances`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newInstance),
+            });
+
+            if (response.ok) {
+                const newEntry = await response.json();
+                setCookedInstances([...cookedInstances, newEntry]); // Update UI
+                setComment("");
+                setCookedDate("");
+                setShowForm(false)
+            } else {
+                console.error("Failed to add cooked instance.");
+            }
+        } catch (error) {
+            console.error("Error posting data:", error);
+        }
+    };
     
     return (
         <Box key={recipe.id} >
@@ -144,13 +184,109 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                     <Container disableGutters maxWidth={false}><strong>Instructions</strong></Container>
                     {recipe.instructions && 
                         recipe.instructions.split(/\s\d+\.\s/).filter(instruction => instruction.trim() !== "").map((instruction, index) => {
-                            return  <Container disableGutters maxWidth={false} key={index}>{index + 1}. {instruction}</Container>;
+                            return  <Container disableGutters maxWidth={false} key={index} sx={{ mt: 2 }}>{index + 1}. {instruction}</Container>;
                         })
                     }
                 </Paper>
                     <Paper>
                         <Container disableGutters maxWidth={false}><strong>Comments</strong></Container>
-                        <Container disableGutters maxWidth={false} >{`${user && user.name}'s Comments: ${properComment && properComment[0] && properComment[0].comments}`}</Container>
+                            <div>
+                                {recipe.user_recipes?.map((user_recipe) => {
+                                    return (
+                                        <div key={user_recipe.id}>
+                                            {/* Toggle Button */}
+                                            {!showForm && (
+                                                <IconButton 
+                                                    onClick={() => setShowForm(true)} 
+                                                    color="primary" 
+                                                    sx={{ fontSize: 30, borderRadius: '50%', padding: '10px', backgroundColor: '#e6e6e6', boxShadow: 1 }}
+                                                >
+                                                    <AddIcon />
+                                                </IconButton>
+                                            )}
+
+                                            {/* Form */}
+                                            {showForm && (
+                                                <Box 
+                                                    sx={{
+                                                        padding: 3,
+                                                        backgroundColor: '#fff',
+                                                        borderRadius: '12px',
+                                                        boxShadow: 3,
+                                                        maxWidth: 400,
+                                                        margin: '20px auto',
+                                                        transition: 'all 0.3s ease',
+                                                        opacity: showForm ? 1 : 0,
+                                                        display: 'block'
+                                                    }}
+                                                >
+                                                    <form onSubmit={(e) => handleSubmit(e, user_recipe.id)} style={{ marginBottom: "20px" }}>
+                                                        <TextField
+                                                            label="Cooked Date"
+                                                            type="date"
+                                                            InputLabelProps={{ shrink: true }}
+                                                            value={cookedDate}
+                                                            onChange={(e) => setCookedDate(e.target.value)}
+                                                            required
+                                                            fullWidth
+                                                            sx={{ marginBottom: 2 }}
+                                                        />
+                                                        <TextField
+                                                            label="Comment"
+                                                            value={comment}
+                                                            onChange={(e) => setComment(e.target.value)}
+                                                            required
+                                                            fullWidth
+                                                            sx={{ marginBottom: 2 }}
+                                                        />
+                                                        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ borderRadius: 20 }}>
+                                                            Add Cooked Instance
+                                                        </Button>
+                                                        <Button 
+                                                            onClick={() => setShowForm(false)} 
+                                                            sx={{ color: 'red', textTransform: 'none', marginTop: 2, display: 'block', width: '100%' }}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </form>
+                                                </Box>
+                                            )}
+
+                                            {/* Render Cooked Instances */}
+                                            {user_recipe.cooked_instances?.map((instance) => {
+                                                return (
+                                                    <Card 
+                                                        key={instance.id} 
+                                                        sx={{ 
+                                                            marginLeft: 5,
+                                                            marginRight: 5,
+                                                            backgroundColor: '#f5f5f5',
+                                                            boxShadow: 2,
+                                                            margin: '8px auto',
+                                                            borderRadius: '12px',
+                                                            maxWidth: 350,
+                                                            padding: '10px',
+                                                        }}
+                                                    >
+                                                        <CardContent sx={{ padding: 1 }}>
+                                                            <Typography variant="body2" color="primary" fontWeight="bold">
+                                                                {formatDate(instance)} {/* Assuming formatDate is a helper function */}
+                                                            </Typography>
+                                                            <Typography variant="caption" color="textSecondary">
+                                                                {instance.comment}
+                                                            </Typography>
+                                                            <br />
+                                                            <Typography variant="caption" color="textSecondary">
+                                                                -- {user_recipe.user?.name}
+                                                            </Typography>
+                                                        </CardContent>
+                                                    </Card>
+                                                );
+                                            })}
+                                        </div>
+                                    );
+                                })}
+                            </div>                  
                     </Paper>
             </Box>
             <br/>
