@@ -31,7 +31,7 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Ensures cookies are only sent ove
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
-from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category, Cooked_Instance
+from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category, Cooked_Instance, Shopping_List
 
 @app.route("/")
 def root():
@@ -452,14 +452,34 @@ def meal_prep():
         return response
 
     elif request.method == 'POST':
+
+        recipe_id = request.json.get("recipe_id"),
         new_meal_prep = Meal_Prep(
             user_id=request.json.get("user_id"),
-            recipe_id=request.json.get("recipe_id"),
+            recipe_id=recipe_id,
             weekday=request.json.get("weekday"),
             meal=request.json.get("meal"),
         )
 
         db.session.add(new_meal_prep)
+        db.session.flush()
+
+        recipe_id = request.json.get("recipe_id")
+        print(f'recipe id: {recipe_id}')
+        recipe = Recipe.query.filter_by(id=recipe_id).first()
+        rd = recipe.to_dict()
+        print(f'recipe ingredients: {rd}')
+
+        if recipe:
+            for ingredient in recipe.recipe_ingredients:
+                new_shopping_list_entry = Shopping_List(
+                    checked=False,
+                    ingredient_id=ingredient.id,
+                    user_id=request.json.get("user_id"),
+                    mealprep_id=new_meal_prep.id
+                )
+                db.session.add(new_shopping_list_entry)
+
         db.session.commit()
 
         new_meal_prep_dict = new_meal_prep.to_dict()
@@ -470,6 +490,53 @@ def meal_prep():
         )
 
         return response
+
+@app.route('/api/shopping_list', methods=['GET', 'POST'])
+def shopping_list():
+    if request.method == 'GET':
+        shopping_list = []
+        for item in Shopping_List.query.all():
+            item_dict = item.to_dict()
+            shopping_list.append(item_dict)
+
+        response = make_response(
+            shopping_list,
+            200
+        )
+
+        return response
+
+@app.route('/api/user_shopping_list')
+def user_shopping_list():
+    shopping_list = Shopping_List.query.all()
+    
+    returned_shopping_list = []
+    for item in shopping_list:
+        item_dict = item.to_dict()
+        returned_shopping_list.append(item_dict)
+
+    response = make_response(
+        returned_shopping_list,
+        200
+    )
+    return response
+    
+@app.route('/api/user_shopping_list/<int:id>', methods=['GET', 'PATCH'])
+def edit_user_shopping_list(id):
+    if request.method == 'PATCH':
+        shopping_list_item = db.session.get(Shopping_List, id)
+        if not shopping_list_item:
+            return {"error": f"shopping_list_item for id {id} not found"}, 404
+        try:
+            data = request.json
+            for key in data:
+                setattr(shopping_list_item, key, data[key])
+            db.session.add(shopping_list_item)
+            db.session.commit()
+            return shopping_list_item.to_dict(), 200
+        except Exception as e:
+            return {"error": f'{e}'}
+
     
 @app.route('/api/mealprep/<int:id>', methods=['GET', 'DELETE'])
 def meal_prep_id(id):
@@ -674,7 +741,6 @@ def cooked_instances():
         return make_response( cooked_instances, 200 )
     
     elif request.method == 'POST':
-        print("running function")
         new_cooked_instance = Cooked_Instance(
             user_recipe_id=request.json.get("user_recipe_id"),
             comment=request.json.get("comment"),

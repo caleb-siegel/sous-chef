@@ -86,7 +86,7 @@ class Meal_Prep(db.Model, SerializerMixin):
 
     user = db.relationship("User", back_populates="meal_preps")
     recipe = db.relationship("Recipe", back_populates="meal_preps")
-    shopping_list = db.relationship("Shopping_List", back_populates="meal_prep")
+    shopping_list = db.relationship("Shopping_List", back_populates="meal_prep", cascade="all, delete-orphan")
 
 class Recipe(db.Model, SerializerMixin):
     __tablename__ = "recipe"
@@ -160,13 +160,40 @@ class Source_Category(db.Model, SerializerMixin):
 class Shopping_List(db.Model, SerializerMixin):
     __tablename__ = "shopping_list"
 
-    serialize_rules = ["-user.shopping_list", "-meal_prep.shopping_list", "-recipe_ingredient.shopping_list"]
+    serialize_rules = [
+        # '-user.user_recipes',
+        # '-user.user_recipe_tags',
+        # '-user.meal_preps',
+        # '-user.recipes',
+        # '-user.shopping_list',
+        "-recipe_ingredient.shopping_list",
+        "-recipe_ingredient.recipe.id",
+        "-recipe_ingredient.recipe.picture",
+        "-recipe_ingredient.recipe.source_category_id",
+        "-recipe_ingredient.recipe.source",
+        "-recipe_ingredient.recipe.reference",
+        "-recipe_ingredient.recipe.instructions",
+        "-recipe_ingredient.recipe.created_by_user_id",
+        "-recipe_ingredient.recipe.user_recipes",
+        "-recipe_ingredient.recipe.user_recipe_tags",
+        "-recipe_ingredient.recipe.meal_preps",
+        "-recipe_ingredient.recipe.source_category",
+        "-recipe_ingredient.recipe.recipe_ingredients",
+        "-recipe_ingredient.recipe.recipe_tags",
+        "-recipe_ingredient.recipe.user",
+        # "-meal_prep.user", 
+        # "-meal_prep.recipe", 
+        # "-meal_prep.shopping_list", 
+        '-user',
+        '-meal_prep',
+        # '-recipe_ingredient',
+        ]
 
     id = db.Column(db.Integer, primary_key=True)
     checked = db.Column(db.Boolean)
     ingredient_id = db.Column(db.Integer, db.ForeignKey("recipe_ingredient.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    mealprep_id = db.Column(db.Integer, db.ForeignKey("meal_prep.id"))
+    mealprep_id = db.Column(db.Integer, db.ForeignKey("meal_prep.id", ondelete="CASCADE"))
 
     recipe_ingredient = db.relationship("Recipe_Ingredient", back_populates="shopping_list")
     user = db.relationship("User", back_populates="shopping_list")
