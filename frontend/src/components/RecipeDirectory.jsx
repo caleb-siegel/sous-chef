@@ -106,7 +106,7 @@ function RecipeDirectory() {
     } else if (toggleRecipes === "yourrecipes") {
         recipeList = recipeList.filter(recipe => {
             return (
-                recipe.user_recipes.some(userRecipe => userRecipe.user_id === user.id)
+                recipe.user_recipes?.some(userRecipe => userRecipe.user_id === user.id)
                 &&
                 recipe.user_recipe_tags.every(userRecipe => userRecipe.user_tag.name !== "not a reorder")    
             )
@@ -114,7 +114,7 @@ function RecipeDirectory() {
     } else if (toggleRecipes === "interest") {
         recipeList = recipeList.filter(recipe => {
             return (
-                recipe.user_recipe_tags.some(user_recipe_tag => {
+                recipe.user_recipe_tags?.some(user_recipe_tag => {
                     return (
                         user_recipe_tag.user_tag.name === "interest" &&
                         user_recipe_tag.user_id === user.id
@@ -125,7 +125,7 @@ function RecipeDirectory() {
     } else if (toggleRecipes === "notreorder") {
         recipeList = recipeList.filter(recipe => {
             return (
-                recipe.user_recipe_tags.some(user_recipe_tag => {
+                recipe.user_recipe_tags?.some(user_recipe_tag => {
                     return (
                         user_recipe_tag.user_tag.name === "not a reorder" &&
                         user_recipe_tag.user_id === user.id
@@ -205,7 +205,7 @@ function RecipeDirectory() {
                     return (
                         recipe &&
                         recipe.recipe_tags &&
-                        recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === filterValue.toLowerCase()))
+                        recipe.recipe_tags?.some(tag => (tag.tag && tag.tag.name.toLowerCase() === filterValue.toLowerCase()))
                     )
                 }
             } else if (filterBy === "usertag") {
@@ -215,7 +215,7 @@ function RecipeDirectory() {
                     return (
                         recipe &&
                         recipe.user_recipe_tags &&
-                        recipe.user_recipe_tags.some(tag => {
+                        recipe.user_recipe_tags?.some(tag => {
                             return (
                                 tag.user_tag && 
                                 tag.user_tag.name.toLowerCase() === filterValue.toLowerCase() &&
@@ -228,7 +228,7 @@ function RecipeDirectory() {
                 return (
                     recipe && 
                     recipe.recipe_ingredients &&
-                    recipe.recipe_ingredients.some(ingredient => {
+                    recipe.recipe_ingredients?.some(ingredient => {
                         return (
                             ingredient &&
                             ingredient.toLowerCase().includes(filterValue.toLowerCase())
@@ -244,16 +244,16 @@ function RecipeDirectory() {
                 return (
                         recipe &&
                         recipe.user_recipe_tags &&
-                        !recipe.recipe_tags.some(tag => (tag.tag && tag.tag.name.toLowerCase() === filterValue.toLowerCase()))
+                        !recipe.recipe_tags?.some(tag => (tag.tag && tag.tag.name.toLowerCase() === filterValue.toLowerCase()))
                 )
             } else if (filterBy === "usertag") {
                 return (
                         recipe &&
                         recipe.recipe_tags &&
-                        !recipe.user_recipe_tags.some(tag => (tag.user_tag && tag.user_tag.name.toLowerCase() === filterValue.toLowerCase()))
+                        !recipe.user_recipe_tags?.some(tag => (tag.user_tag && tag.user_tag.name.toLowerCase() === filterValue.toLowerCase()))
                 )
             } else if (filterBy === "ingredients") {
-                return !recipe.recipe_ingredients.some(ingredient => (ingredient && ingredient.ingredient_name.toLowerCase().includes(filterValue.toLowerCase())))            
+                return !recipe.recipe_ingredients?.some(ingredient => (ingredient && ingredient.ingredient_name.toLowerCase().includes(filterValue.toLowerCase())))            
             }
         }    
     });

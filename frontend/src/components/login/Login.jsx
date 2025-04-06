@@ -63,28 +63,31 @@ function Login() {
                     <br/>
                     <LoginForm submitText={"Login"} handleSubmit={handleSubmit} handleChangeUsername={handleChangeUsername} name={name} handleChangePassword={handleChangePassword} password={password}/>
                     <br/>
-                    <Typography variant="h2">OR</Typography>
+                    {/* <Typography variant="h2">OR</Typography>
                     <br/>
-                    <Button variant="outlined" color="secondary" onClick={handleCreateAccount}>Create Account</Button>
+                    <Button variant="outlined" color="secondary" onClick={handleCreateAccount}>Create Account</Button> */}
                 </div>
                 <Divider>or</Divider>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: 2, 
+                    // marginTop: 3, 
+                    // marginLeft: 20, 
+                    // marginRight: 20,
+                    maxWidth: '400px', // Set maximum width
+                    width: '100%',     // Take full width up to maxWidth
+                    margin: '24px auto',  // Center horizontally
+                }}>
                     <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={googleLogin}
-                    startIcon={<GoogleIcon />}
-                    >
-                    Sign in with Google
+                        fullWidth
+                        variant="contained"
+                        color='primary'
+                        onClick={googleLogin}
+                        startIcon={<GoogleIcon />}
+                        >
+                        Sign in with Google
                     </Button>
-                    {/* <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={() => alert('Sign in with Facebook')}
-                    startIcon={<FacebookIcon />}
-                    >
-                    Sign in with Facebook
-                    </Button> */}
                 </Box>
             </div>
             
