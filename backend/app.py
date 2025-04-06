@@ -10,15 +10,18 @@ import os
 import random
 from helpers import get_recipe_dict
 from db import db, app
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 load_dotenv()
 
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
+google_client_id = os.getenv('GOOGLE_CLIENT_SECRET')
 
 CORS(app,
     supports_credentials=True, 
     resources={r"/*": {
-        "origins": ["https://souschef2.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555"],
+        "origins": ["https://souschef2.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555", "http://127.0.0.1:5174"],
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allow_headers": ["Content-Type", "Accept", "Authorization", "Origin"],
         "supports_credentials": True,
@@ -95,6 +98,48 @@ def user():
         except Exception as e:
             print(e)
             return {"error": f"could not post user: {e}"}, 405
+
+@app.route('/api/auth/google', methods=['POST'])
+def google_auth():
+    data = request.json
+    user_info = data.get('userInfo')
+    
+    try:
+        if user_info:
+            email = user_info.get('email')
+            name = user_info.get('name')
+            
+            # Check if user exists
+            user = User.query.filter_by(email=email).first()
+            
+            if not user:
+                # Create new user
+                names = name.split(' ', 1)
+                first_name = names[0]
+                last_name = names[1] if len(names) > 1 else ''
+                
+                user = User(
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                )
+                db.session.add(user)
+                db.session.commit()
+            
+            # Set session
+            session.permanent = True
+            session["user_id"] = user.id
+            
+            return jsonify({
+                'success': True,
+                'user': user.to_dict()
+            })
+            
+        return jsonify({'error': 'Invalid user info'}), 400
+        
+    except Exception as e:
+        print(f"Error in google_auth: {str(e)}")
+        return jsonify({'error': 'Authentication failed'}), 400
 
 @app.route('/api/sourcecategories')
 def get_source_categories():
@@ -509,7 +554,6 @@ def shopping_list():
 @app.route('/api/user_shopping_list')
 def user_shopping_list():
     shopping_list = Shopping_List.query.all()
-    
     returned_shopping_list = []
     for item in shopping_list:
         item_dict = item.to_dict()

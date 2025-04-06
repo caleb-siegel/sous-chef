@@ -8,13 +8,14 @@ import Home from './components/Home';
 import RecipeDirectory from './components/RecipeDirectory';
 import { ThemeProvider } from '@emotion/react';
 import { createTheme } from '@mui/material';
-import Login from './components/Login';
+import Login from './components/login/Login';
 import MealPrep from './components/MealPrep';
 import IndividualRecipe from './components/IndividualRecipe';
 import RandomizeRecipe from './components/RandomizeRecipe';
 import ProfilePage from './components/ProfilePage';
 import NewTag from './components/NewTag';
 import { Analytics } from "@vercel/analytics/react"
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const router = createBrowserRouter([
   {
@@ -89,10 +90,12 @@ const theme = createTheme({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+    <GoogleOAuthProvider clientId="642274321446-8vuopp3k9ev63r77vjhv658634c9qvqe.apps.googleusercontent.com">
       <ThemeProvider theme={theme}>
         <RouterProvider router={router} />
         <Analytics />
       </ThemeProvider>
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );
 

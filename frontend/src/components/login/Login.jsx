@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { useOutletContext } from "react-router-dom";
 import LoginForm from './LoginForm';
-import { Paper, Button, Typography } from '@mui/material';
-
+import { Paper, Button, Typography, Divider, Box } from '@mui/material';
+import { GoogleIcon } from './CustomIcons';
 
 function Login() {
     const { backendUrl } = useOutletContext();
@@ -14,6 +14,8 @@ function Login() {
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [createAccount, setCreateAccount] = useState(false);
+    const { googleLogin } = useOutletContext();
+
 
     function createUser(e) {
         e.preventDefault();
@@ -56,14 +58,37 @@ function Login() {
     <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px'}}>
         {!createAccount && 
             <div>
-                <Typography variant="h2">Sign In</Typography>
-                <br/>
-                <LoginForm submitText={"Login"} handleSubmit={handleSubmit} handleChangeUsername={handleChangeUsername} name={name} handleChangePassword={handleChangePassword} password={password}/>
-                <br/>
-                <Typography variant="h2">OR</Typography>
-                <br/>
-                <Button variant="outlined" color="secondary" onClick={handleCreateAccount}>Create Account</Button>
+                <div>
+                    <Typography variant="h2">Sign In</Typography>
+                    <br/>
+                    <LoginForm submitText={"Login"} handleSubmit={handleSubmit} handleChangeUsername={handleChangeUsername} name={name} handleChangePassword={handleChangePassword} password={password}/>
+                    <br/>
+                    <Typography variant="h2">OR</Typography>
+                    <br/>
+                    <Button variant="outlined" color="secondary" onClick={handleCreateAccount}>Create Account</Button>
+                </div>
+                <Divider>or</Divider>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={googleLogin}
+                    startIcon={<GoogleIcon />}
+                    >
+                    Sign in with Google
+                    </Button>
+                    {/* <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={() => alert('Sign in with Facebook')}
+                    startIcon={<FacebookIcon />}
+                    >
+                    Sign in with Facebook
+                    </Button> */}
+                </Box>
             </div>
+            
+            
         }
         {accountForm ? (
             <div>
