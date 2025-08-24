@@ -4,6 +4,9 @@ from sqlalchemy import MetaData
 from flask_migrate import Migrate
 from flask_cors import CORS
 import os
+from dotenv import dotenv_values, load_dotenv
+
+load_dotenv()
 
 metadata = MetaData(
     naming_convention={

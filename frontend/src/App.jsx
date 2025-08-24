@@ -39,37 +39,43 @@ function App() {
       //     setUser(null);
       //   });
     }
-  }, []);
+  }, [backendUrl]);
 
-  //   useEffect(() => {
-  //     fetch(`${backendUrl}/api/check_session`, {
-  //         credentials: 'include'
-  //     }).then((res) => {
-  //         if (res.ok) {
-  //             res.json().then((user) => setUser(user));
-  //         }
-  //     });
-  // }, []);
+//   useEffect(() => {
+//     fetch(`${backendUrl}/api/check_session`, {
+//         credentials: 'include'
+//     }).then((res) => {
+//         if (res.ok) {
+//             res.json().then((user) => setUser(user));
+//         }
+//     });
+// }, []);
 
-  async function attemptLogin(userInfo) {
-    try {
-      const res = await fetch(`${backendUrl}/api/login`, {
+  function attemptLogin(userInfo) {
+    fetch(`${backendUrl}/api/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify(userInfo),
-      });
-      if (!res.ok) throw res;
-      const data = await res.json();
-      setUser(data);
-      localStorage.setItem("user", JSON.stringify(data));
-      navigate("/alerts");
-    } catch (e) {
-      alert("Incorrect email or password");
-    }
+        credentials: 'include'
+    })
+        .then((res) => {
+            if (res.ok) {
+                return res.json();
+            }
+            throw res;
+        })
+        .then((data) => {
+            setUser(data);
+            localStorage.setItem("user", JSON.stringify(data));
+            navigate("/recipes");
+        })
+        .catch((e) => {
+            alert('incorrect username or password')
+            console.log(e);
+        });
   }
 
   const googleLogin = useGoogleLogin({
@@ -85,12 +91,13 @@ function App() {
         if (!userResponse.ok) {
           throw new Error('Failed to get user info from Google');
         }
+        
         const userInfo = await userResponse.json();
         
         // Send to your backend
         const backendResponse = await fetch(`${backendUrl}/api/auth/google`, {
           method: 'POST',
-          credentials: 'include',  // Important for cookies
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${codeResponse.access_token}`,
@@ -101,17 +108,15 @@ function App() {
         if (!backendResponse.ok) {
           throw new Error('Backend authentication failed');
         }
-
+  
         const data = await backendResponse.json();
         
-        // Handle successful login (e.g., redirect or update UI)
+        // ✅ Change this line - remove the callback
         setUser(data.user);
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/alerts");
 
       } catch (error) {
         console.error('Error during login:', error);
-        // Handle error (e.g., show error message to user)
       }
     },
     onError: (error) => {
@@ -122,14 +127,11 @@ function App() {
   });
 
   function logout() {
-    fetch(`${backendUrl}/api/logout`, {
-      method: "DELETE",
-      credentials: "include",
-    }).then((res) => {
-      if (res.ok) {
-        localStorage.removeItem("user");
-        setUser(null);
-      }
+    fetch(`${backendUrl}/api/logout`, { method: "DELETE" }).then((res) => {
+        if (res.ok) {
+          localStorage.removeItem("user");
+          setUser(null);
+        }
     });
   }
 
