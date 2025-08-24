@@ -15,45 +15,61 @@ function App() {
   // const backendUrl = "http://127.0.0.1:5555"
 
   useEffect(() => {
-    if (user) {
-      navigate("/recipes");
+    const storedUser = localStorage.getItem("user");
+  
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+  
+      // Check with the backend for the latest data
+      // fetch(`${backendUrl}/api/check_session`, {
+      //   credentials: "include", // important for cookies/session
+      // })
+      //   .then((res) => {
+      //     if (!res.ok) throw new Error("Session invalid");
+      //     return res.json();
+      //   })
+      //   .then((freshUser) => {
+      //     setUser(freshUser);
+      //     localStorage.setItem("user", JSON.stringify(freshUser)); // update local storage
+      //   })
+      //   .catch(() => {
+      //     // Session is no longer valid
+      //     localStorage.removeItem("user");
+      //     setUser(null);
+      //   });
     }
-  }, [user, navigate]);
+  }, []);
 
-  useEffect(() => {
-    fetch(`${backendUrl}/api/check_session`, {
-        credentials: 'include'
-    }).then((res) => {
-        if (res.ok) {
-            res.json().then((user) => setUser(user));
-        }
-    });
-}, []);
+  //   useEffect(() => {
+  //     fetch(`${backendUrl}/api/check_session`, {
+  //         credentials: 'include'
+  //     }).then((res) => {
+  //         if (res.ok) {
+  //             res.json().then((user) => setUser(user));
+  //         }
+  //     });
+  // }, []);
 
-  function attemptLogin(userInfo) {
-    fetch(`${backendUrl}/api/login`, {
+  async function attemptLogin(userInfo) {
+    try {
+      const res = await fetch(`${backendUrl}/api/login`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Accept": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(userInfo),
-        credentials: 'include'
-    })
-        .then((res) => {
-            if (res.ok) {
-                return res.json();
-            }
-            throw res;
-        })
-        .then((data) => {
-            setUser(data);
-            navigate("/recipes");
-        })
-        .catch((e) => {
-            alert('incorrect username or password')
-            console.log(e);
-        });
+      });
+      if (!res.ok) throw res;
+      const data = await res.json();
+      setUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+      navigate("/alerts");
+    } catch (e) {
+      alert("Incorrect email or password");
+    }
   }
 
   const googleLogin = useGoogleLogin({
@@ -69,13 +85,12 @@ function App() {
         if (!userResponse.ok) {
           throw new Error('Failed to get user info from Google');
         }
-        
         const userInfo = await userResponse.json();
         
         // Send to your backend
         const backendResponse = await fetch(`${backendUrl}/api/auth/google`, {
           method: 'POST',
-          credentials: 'include',
+          credentials: 'include',  // Important for cookies
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${codeResponse.access_token}`,
@@ -86,14 +101,17 @@ function App() {
         if (!backendResponse.ok) {
           throw new Error('Backend authentication failed');
         }
-  
+
         const data = await backendResponse.json();
         
-        // ✅ Change this line - remove the callback
+        // Handle successful login (e.g., redirect or update UI)
         setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/alerts");
 
       } catch (error) {
         console.error('Error during login:', error);
+        // Handle error (e.g., show error message to user)
       }
     },
     onError: (error) => {
@@ -104,10 +122,14 @@ function App() {
   });
 
   function logout() {
-    fetch(`${backendUrl}/api/logout`, { method: "DELETE" }).then((res) => {
-        if (res.ok) {
-            setUser(null);
-        }
+    fetch(`${backendUrl}/api/logout`, {
+      method: "DELETE",
+      credentials: "include",
+    }).then((res) => {
+      if (res.ok) {
+        localStorage.removeItem("user");
+        setUser(null);
+      }
     });
   }
 

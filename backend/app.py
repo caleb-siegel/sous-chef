@@ -49,35 +49,34 @@ def check_session():
     else:
         return {"message": "No user logged in"}, 401
 
+# @app.delete('/api/logout')
+# def logout():
+#     session.pop('user_id')
+#     return { "message": "Logged out"}, 200
+
 @app.delete('/api/logout')
 def logout():
-    session.pop('user_id')
-    return { "message": "Logged out"}, 200
-
-@app.route('/api/login', methods=['POST', 'OPTIONS'])
-def login():
-    if request.method == 'OPTIONS':
-        # Handle the CORS preflight request
-        print("handling preflight")
-        response = jsonify({"message": "CORS preflight handled"})
-        response.headers.add("Access-Control-Allow-Origin", request.headers.get("Origin"))
-        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization")
-        response.headers.add("Access-Control-Allow-Credentials", "true")
+    try:
+        session.clear()
+        response = jsonify({"message": "Logged out successfully"})
+        response.set_cookie('session', '', expires=0)  # Clear session cookie
         return response, 200
+    except Exception as e:
+        print(f"Logout error: {str(e)}")
+        return jsonify({"error": "Logout failed"}), 500
 
-    if request.method == 'POST':
-        print("attempting login")
-        data = request.json
-        user = db.session.query(User.id, User.name, User.password_hash).filter(User.name == data.get('name')).first()
-        if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
-            session["user_id"] = user.id
-            return {
-                "id": user.id,
-                "name": user.name,
-            }, 200
-        else:
-            return { "error": "Invalid username or password" }, 401
+@app.post('/api/login')
+def login():
+    print('login')
+    data = request.json
+    user = User.query.filter(User.email == data.get('email')).first()
+    if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
+        session.permanent = True
+        session["user_id"] = user.id
+        print(f'{user.first_name} {user.last_name} logged in')
+        return user.to_dict(), 200
+    else:
+        return { "error": "Invalid username or password" }, 401
         
 @app.route('/api/user', methods=['GET', 'POST'])
 def user():
