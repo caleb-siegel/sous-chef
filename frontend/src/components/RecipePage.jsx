@@ -18,6 +18,44 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
         setDimensions(event.target.value)
     }
 
+    // Check if reference is an Instagram URL and convert to embed format
+    const isInstagramUrl = (url) => {
+        if (!url) return false;
+        return url.includes('instagram.com') || url.includes('instagr.am');
+    };
+
+    const getInstagramEmbedUrl = (url) => {
+        if (!url) return null;
+        
+        // Extract shortcode from various Instagram URL formats
+        // Examples:
+        // https://www.instagram.com/p/ABC123/
+        // https://www.instagram.com/reel/ABC123/
+        // https://www.instagram.com/p/ABC123/?utm_source=...
+        // https://instagr.am/p/ABC123/
+        
+        const patterns = [
+            /instagram\.com\/p\/([A-Za-z0-9_-]+)/,
+            /instagram\.com\/reel\/([A-Za-z0-9_-]+)/,
+            /instagr\.am\/p\/([A-Za-z0-9_-]+)/,
+        ];
+
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match && match[1]) {
+                const shortcode = match[1];
+                // Check if it's a reel or post
+                if (url.includes('/reel/')) {
+                    return `https://www.instagram.com/reel/${shortcode}/embed/`;
+                } else {
+                    return `https://www.instagram.com/p/${shortcode}/embed/`;
+                }
+            }
+        }
+        
+        return null;
+    };
+
     const [userTags, setUserTags] = useState([]);
     useEffect(() => {
         fetch(`${backendUrl}/api/usertags`)
@@ -88,7 +126,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
     const [cookedDate, setCookedDate] = useState("");
     const [cookedInstances, setCookedInstances] = useState(recipe.user_recipes?.flatMap(user_recipe => user_recipe.cooked_instances) || []);
     const [showForm, setShowForm] = useState(false);
-
+console.log(recipe)
     const handleSubmit = async (e, user_recipe_id) => {
         e.preventDefault();
 
@@ -130,7 +168,18 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                     <FavoriteIcon color="action" />
                 </Badge>
             </Container>
-            {recipe.source_category_id === 2 ? <div>This recipe is from {recipe.source} and can be found on Page {recipe.reference}.</div> : <div>This recipe was sourced from {recipe.source}</div>}
+            {recipe.source_category_id === 2 ? (
+                <div>This recipe is from {recipe.source} and can be found on Page {recipe.reference}.</div>
+            ) : isInstagramUrl(recipe.reference) ? (
+                <div>
+                    This recipe was sourced from {recipe.source}. 
+                    <a href={recipe.reference} target="_blank" rel="noopener noreferrer" style={{ marginLeft: '8px', color: '#1976d2' }}>
+                        View original Instagram post
+                    </a>
+                </div>
+            ) : (
+                <div>This recipe was sourced from {recipe.source}</div>
+            )}
             <Container disableGutters maxWidth={false}>
                 {recipe.recipe_tags && recipe.recipe_tags.map(tag => {
                     if (tag && tag.tag) {
@@ -156,7 +205,32 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
             </Container>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', }}>
                 <Paper>
-                    <img src={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"} style={{ maxWidth: '500px' }}/>
+                    {isInstagramUrl(recipe.reference) ? (
+                        <Box sx={{ maxWidth: '500px' }}>
+                            <iframe
+                                src={getInstagramEmbedUrl(recipe.reference)}
+                                title="Instagram video"
+                                width="100%"
+                                height="600"
+                                frameBorder="0"
+                                scrolling="no"
+                                allowTransparency="true"
+                                allow="encrypted-media"
+                                style={{ 
+                                    maxWidth: '500px',
+                                    borderRadius: '8px',
+                                    overflow: 'hidden'
+                                }}
+                            />
+                            <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
+                                <a href={recipe.reference} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>
+                                    View on Instagram
+                                </a>
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <img src={recipe.picture !== "" ? recipe.picture : "/favicon3.jpeg"} style={{ maxWidth: '500px' }}/>
+                    )}
                 </Paper>
                 <Paper sx={{ marginLeft: '10px' }}>
                     <InputLabel id="dimensions-input-label">Dimensions</InputLabel>
@@ -277,6 +351,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                                                             </Typography>
                                                             <br />
                                                             <Typography variant="caption" color="textSecondary">
+                                                                {console.log(instance)}
                                                                 -- {user_recipe.user?.name}
                                                             </Typography>
                                                         </CardContent>

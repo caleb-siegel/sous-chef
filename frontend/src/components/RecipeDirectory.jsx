@@ -369,6 +369,7 @@ function RecipeDirectory() {
                 }
             </Typography>
             <br/>
+            
             <Container disableGutters maxWidth={false}>
                 {/* Loading indicator that appears above recipes */}
                 {loading && (

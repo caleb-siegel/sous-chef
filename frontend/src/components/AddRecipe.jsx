@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import Tag from "./Tag";
 import Ingredients from "./Ingredients";
-import { Button, TextField, InputLabel, MenuItem, Select, Paper } from '@mui/material';
+import { Button, TextField, InputLabel, MenuItem, Select, Paper, CircularProgress, Alert, Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import InstagramIcon from '@mui/icons-material/Instagram';
 
 function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     const { backendUrl } = useOutletContext();
@@ -26,10 +27,96 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     }, []);
 
     const [selectedTags, setSelectedTags] = useState([]);
+    const [instagramUrl, setInstagramUrl] = useState("");
+    const [isParsing, setIsParsing] = useState(false);
+    const [parseError, setParseError] = useState(null);
 
     const handleTagChange = (event, newValue) => {
         event.preventDefault();
         setSelectedTags(newValue);
+    };
+
+    const handleParseInstagram = async (event) => {
+        event.preventDefault();
+        if (!instagramUrl || !instagramUrl.trim()) {
+            setParseError("Please enter an Instagram URL");
+            return;
+        }
+
+        setIsParsing(true);
+        setParseError(null);
+
+        try {
+            console.log("Parsing Instagram URL:", instagramUrl.trim());
+            console.log("Backend URL:", backendUrl);
+            
+            const response = await fetch(`${backendUrl}/api/parse-instagram-recipe`, {
+                method: "POST",
+                credentials: 'include', // Important for CORS
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                body: JSON.stringify({ instagram_url: instagramUrl.trim() }),
+            });
+
+            console.log("Response status:", response.status);
+            console.log("Response ok:", response.ok);
+
+            if (!response.ok) {
+                // Try to get error message from response
+                let errorMessage = "Failed to parse Instagram video";
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                    console.error("Error response:", errorData);
+                } catch (e) {
+                    console.error("Could not parse error response:", e);
+                    errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                }
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            console.log("Parsed recipe data:", data);
+
+            // Populate form fields with parsed data
+            if (data.name) setName(data.name);
+            if (data.instructions) setRecipeInstructions(data.instructions);
+            if (data.ingredients && data.ingredients.length > 0) {
+                const formattedIngredients = data.ingredients.map(ing => ({
+                    ingredient_name: ing.ingredient_name || '',
+                    ingredient_quantity: ing.ingredient_quantity || 0,
+                    ingredient_unit: ing.ingredient_unit || '',
+                    ingredient_note: ing.ingredient_note || ''
+                }));
+                setIngredients(formattedIngredients);
+            }
+
+            // Set source name to Instagram
+            setSourceName("Instagram");
+            setReference(instagramUrl.trim());
+
+            // Clear the Instagram URL field
+            setInstagramUrl("");
+        } catch (error) {
+            console.error("Error parsing Instagram:", error);
+            
+            // Provide more specific error messages
+            let errorMessage = "Failed to parse Instagram video. ";
+            
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                errorMessage += "Could not connect to the server. Please check if the backend is running and the URL is correct.";
+            } else if (error.message) {
+                errorMessage += error.message;
+            } else {
+                errorMessage += "Please check the URL and try again.";
+            }
+            
+            setParseError(errorMessage);
+        } finally {
+            setIsParsing(false);
+        }
     };
 
     const handleSubmit = (event) => {
@@ -112,6 +199,43 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     return (
         <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px'}}>
             <h1> Add New Recipe</h1>
+            
+            {/* Instagram URL Parser Section */}
+            <Box sx={{ mb: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+                <h3 style={{ marginTop: 0 }}>Quick Add from Instagram</h3>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                    <TextField 
+                        fullWidth
+                        id="instagram-url" 
+                        label="Instagram Video URL" 
+                        variant="outlined" 
+                        value={instagramUrl} 
+                        onChange={(event) => {
+                            setInstagramUrl(event.target.value);
+                            setParseError(null);
+                        }}
+                        placeholder="https://www.instagram.com/reel/..."
+                        disabled={isParsing}
+                        size="small"
+                    />
+                    <Button 
+                        variant="contained" 
+                        color="secondary" 
+                        onClick={handleParseInstagram}
+                        disabled={isParsing || !instagramUrl.trim()}
+                        startIcon={isParsing ? <CircularProgress size={20} /> : <InstagramIcon />}
+                        sx={{ minWidth: 150 }}
+                    >
+                        {isParsing ? "Parsing..." : "Parse Recipe"}
+                    </Button>
+                </Box>
+                {parseError && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                        {parseError}
+                    </Alert>
+                )}
+            </Box>
+
             <form onSubmit={handleSubmit}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div>
