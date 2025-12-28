@@ -8,12 +8,20 @@ from flask_bcrypt import Bcrypt
 import json
 import os
 import random
+import logging
 from helpers import get_recipe_dict
 from db import db, app
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 google_client_id = os.getenv('GOOGLE_CLIENT_SECRET')
@@ -253,6 +261,56 @@ def recipes():
         )
 
         return response
+
+@app.route('/api/parse-instagram-recipe', methods=['POST', 'OPTIONS'])
+def parse_instagram_recipe():
+    """
+    Parse an Instagram video URL and extract recipe information.
+    Expects JSON with 'instagram_url' field.
+    Returns recipe data including name, instructions, and ingredients.
+    """
+    if request.method == 'OPTIONS':
+        # Handle the CORS preflight request
+        logger.debug("Handling CORS preflight for parse-instagram-recipe")
+        response = jsonify({"message": "CORS preflight handled"})
+        response.headers.add("Access-Control-Allow-Origin", request.headers.get("Origin"))
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, Origin")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response, 200
+    
+    logger.info("=== Instagram recipe parsing endpoint called ===")
+    
+    try:
+        data = request.json
+        logger.debug(f"Request data: {data}")
+        
+        instagram_url = data.get('instagram_url')
+        logger.info(f"Received Instagram URL: {instagram_url}")
+        
+        if not instagram_url:
+            logger.warning("No instagram_url provided in request")
+            return {"error": "instagram_url is required"}, 400
+        
+        # Validate Instagram URL format
+        if 'instagram.com' not in instagram_url and 'instagr.am' not in instagram_url:
+            logger.warning(f"Invalid Instagram URL format: {instagram_url}")
+            return {"error": "Invalid Instagram URL"}, 400
+        
+        # Import here to avoid circular imports
+        from instagram_parser import parse_instagram_recipe as parse_recipe
+        
+        # Parse the Instagram video
+        logger.info("Calling parse_recipe function...")
+        recipe_data = parse_recipe(instagram_url)
+        logger.info(f"Successfully parsed recipe: {recipe_data.get('name', 'Unknown')}")
+        
+        return jsonify(recipe_data), 200
+        
+    except Exception as e:
+        logger.error(f"Error in parse_instagram_recipe endpoint: {str(e)}", exc_info=True)
+        print(f"Error parsing Instagram recipe: {str(e)}")
+        return {"error": f"Failed to parse Instagram recipe: {str(e)}"}, 500
     
 @app.route('/api/random_recipe')
 def random_recipe():

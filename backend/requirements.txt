@@ -60,3 +60,4 @@ typing-extensions==4.11.0; python_version >= '3.8'
 urllib3==2.3.0; python_version >= '3.9'
 wcwidth==0.2.13
 werkzeug==2.2.2; python_version >= '3.7'
+yt-dlp>=2024.1.0
