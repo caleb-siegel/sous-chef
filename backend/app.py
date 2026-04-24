@@ -1005,7 +1005,9 @@ def search_external_restaurants():
     try:
         response = requests.get(url)
         data = response.json()
+        print(f"DEBUG: Google API Status: {data.get('status')}")
         
+        # Check for Google API level errors (e.g. REQUEST_DENIED, etc.)
         if data.get('status') not in ['OK', 'ZERO_RESULTS']:
             return jsonify({
                 "message": f"Google API Error: {data.get('status')}",
