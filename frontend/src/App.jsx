@@ -16,11 +16,11 @@ function App() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-  
+
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-  
+
       // Check with the backend for the latest data
       // fetch(`${backendUrl}/api/check_session`, {
       //   credentials: "include", // important for cookies/session
@@ -41,41 +41,41 @@ function App() {
     }
   }, [backendUrl]);
 
-//   useEffect(() => {
-//     fetch(`${backendUrl}/api/check_session`, {
-//         credentials: 'include'
-//     }).then((res) => {
-//         if (res.ok) {
-//             res.json().then((user) => setUser(user));
-//         }
-//     });
-// }, []);
+  //   useEffect(() => {
+  //     fetch(`${backendUrl}/api/check_session`, {
+  //         credentials: 'include'
+  //     }).then((res) => {
+  //         if (res.ok) {
+  //             res.json().then((user) => setUser(user));
+  //         }
+  //     });
+  // }, []);
 
   function attemptLogin(userInfo) {
     fetch(`${backendUrl}/api/login`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
-        body: JSON.stringify(userInfo),
-        credentials: 'include'
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(userInfo),
+      credentials: 'include'
     })
-        .then((res) => {
-            if (res.ok) {
-                return res.json();
-            }
-            throw res;
-        })
-        .then((data) => {
-            setUser(data);
-            localStorage.setItem("user", JSON.stringify(data));
-            navigate("/recipes");
-        })
-        .catch((e) => {
-            alert('incorrect username or password')
-            console.log(e);
-        });
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw res;
+      })
+      .then((data) => {
+        setUser(data);
+        localStorage.setItem("user", JSON.stringify(data));
+        navigate("/recipes");
+      })
+      .catch((e) => {
+        alert('incorrect username or password')
+        console.log(e);
+      });
   }
 
   const googleLogin = useGoogleLogin({
@@ -87,13 +87,13 @@ function App() {
             'Authorization': `Bearer ${codeResponse.access_token}`,
           },
         });
-        
+
         if (!userResponse.ok) {
           throw new Error('Failed to get user info from Google');
         }
-        
+
         const userInfo = await userResponse.json();
-        
+
         // Send to your backend
         const backendResponse = await fetch(`${backendUrl}/api/auth/google`, {
           method: 'POST',
@@ -104,13 +104,13 @@ function App() {
           },
           body: JSON.stringify({ userInfo })
         });
-        
+
         if (!backendResponse.ok) {
           throw new Error('Backend authentication failed');
         }
-  
+
         const data = await backendResponse.json();
-        
+
         // ✅ Change this line - remove the callback
         setUser(data.user);
         localStorage.setItem("user", JSON.stringify(data.user));
@@ -128,10 +128,10 @@ function App() {
 
   function logout() {
     fetch(`${backendUrl}/api/logout`, { method: "DELETE" }).then((res) => {
-        if (res.ok) {
-          localStorage.removeItem("user");
-          setUser(null);
-        }
+      if (res.ok) {
+        localStorage.removeItem("user");
+        setUser(null);
+      }
     });
   }
 
@@ -143,12 +143,12 @@ function App() {
   };
 
   return (
-      <Container disableGutters maxWidth={false} sx={{ height: '100vh', width: '100%', padding: '0px'}}>
-        <Typography component={'span'}>
-          <Navbar logout={logout} user={user} toggleDarkMode={toggleDarkMode} darkMode={darkMode}/>
-          <Outlet context={{ user, attemptLogin, logout, backendUrl, googleLogin }}/>
-        </Typography>
-      </Container>
+    <Container disableGutters maxWidth={false} sx={{ height: '100vh', width: '100%', padding: '0px' }}>
+      <Typography component={'span'}>
+        <Navbar logout={logout} user={user} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+        <Outlet context={{ user, attemptLogin, logout, backendUrl, googleLogin }} />
+      </Typography>
+    </Container>
   );
 };
 

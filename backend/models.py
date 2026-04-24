@@ -18,6 +18,8 @@ class User(db.Model, SerializerMixin):
     last_name = db.Column(db.String)
     email = db.Column(db.String)
     password_hash = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     user_recipes = db.relationship("User_Recipe", back_populates="user")
     user_recipe_tags = db.relationship("User_Recipe_Tag", back_populates="user")
@@ -32,6 +34,8 @@ class User_Tag(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     user_recipe_tags = db.relationship("User_Recipe_Tag", back_populates="user_tag")
 
@@ -45,6 +49,8 @@ class User_Recipe(db.Model, SerializerMixin):
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     not_reorder = db.Column(db.Boolean)
     comments = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     user = db.relationship("User", back_populates="user_recipes")
     recipe = db.relationship("Recipe", back_populates="user_recipes")
@@ -59,6 +65,8 @@ class Cooked_Instance(db.Model, SerializerMixin):
     user_recipe_id = db.Column(db.Integer, db.ForeignKey("user_recipe.id"))
     comment = db.Column(db.String)
     cooked_date = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
     
     user_recipe = db.relationship("User_Recipe", back_populates="cooked_instances")
 
@@ -71,6 +79,8 @@ class User_Recipe_Tag(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     user_tag_id = db.Column(db.Integer, db.ForeignKey("user_tag.id"))
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     user = db.relationship("User", back_populates="user_recipe_tags")
     recipe = db.relationship("Recipe", back_populates="user_recipe_tags")
@@ -86,6 +96,8 @@ class Meal_Prep(db.Model, SerializerMixin):
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     weekday = db.Column(db.String)
     meal = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     user = db.relationship("User", back_populates="meal_preps")
     recipe = db.relationship("Recipe", back_populates="meal_preps")
@@ -104,6 +116,8 @@ class Recipe(db.Model, SerializerMixin):
     reference = db.Column(db.String)
     instructions = db.Column(db.String)
     created_by_user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     user_recipes = db.relationship("User_Recipe", back_populates="recipe")
     user_recipe_tags = db.relationship("User_Recipe_Tag", back_populates="recipe")
@@ -124,6 +138,8 @@ class Recipe_Ingredient(db.Model, SerializerMixin):
     ingredient_quantity = db.Column(db.Float)
     ingredient_unit = db.Column(db.String)
     ingredient_note = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     recipe = db.relationship("Recipe", back_populates="recipe_ingredients")
     shopping_list = db.relationship("Shopping_List", back_populates="recipe_ingredient")
@@ -135,6 +151,8 @@ class Tag(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     recipe_tags = db.relationship("Recipe_Tag", back_populates="tag")
 
@@ -146,6 +164,8 @@ class Recipe_Tag(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     tag_id = db.Column(db.Integer, db.ForeignKey("tag.id"))
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     recipe = db.relationship("Recipe", back_populates="recipe_tags")
     tag = db.relationship("Tag", back_populates="recipe_tags")
@@ -157,6 +177,8 @@ class Source_Category(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     recipes = db.relationship("Recipe", back_populates="source_category")
 
@@ -197,6 +219,8 @@ class Shopping_List(db.Model, SerializerMixin):
     ingredient_id = db.Column(db.Integer, db.ForeignKey("recipe_ingredient.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     mealprep_id = db.Column(db.Integer, db.ForeignKey("meal_prep.id", ondelete="CASCADE"))
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     recipe_ingredient = db.relationship("Recipe_Ingredient", back_populates="shopping_list")
     user = db.relationship("User", back_populates="shopping_list")
