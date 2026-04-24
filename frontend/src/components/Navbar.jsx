@@ -10,6 +10,7 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
                     <Box display="flex">
                         <NavLink to="/" className="nav-link">Home</NavLink>
                         <NavLink to="recipes" className="nav-link">Recipes</NavLink>
+                        <NavLink to="restaurants" className="nav-link">Restaurants</NavLink>
                         <NavLink to="mealprep" className="nav-link">Meal Prep</NavLink>
                         <NavLink to="random" className="nav-link">Spice It Up</NavLink>
                         {user && user.id === 2 && <NavLink to="newtag" className="nav-link">Add New Tag</NavLink>}

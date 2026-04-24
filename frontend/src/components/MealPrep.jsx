@@ -151,6 +151,10 @@ function MealPrep() {
         ]);
     };
 
+    const handleAdd = (newMealPrep) => {
+        setMealPrep(prevMealPrep => [...prevMealPrep, newMealPrep]);
+    };
+
     const handleViewChange = (event, newView) => {
         if (newView !== null) {
             setMobileView(newView);
@@ -215,7 +219,7 @@ function MealPrep() {
                                 <DroppableMealSlot weekday={weekday} meal={meal} onDrop={handleDrop}>
                                     {mealPrep.map(prep => {
                                         if (user?.id === prep.user_id && prep.meal === meal && prep.weekday === weekday) {
-                                            if (typeof prep.recipe_id === "number") {
+                                            if (prep.recipe_id) {
                                                 return (
                                                     <DraggableRecipe 
                                                         key={prep.id} 
@@ -224,11 +228,12 @@ function MealPrep() {
                                                     />
                                                 );
                                             } else {
+                                                const displayName = prep.recipe_name || prep.recipe_id;
                                                 return (
-                                                    <Tooltip key={prep.id} title={prep.recipe_id}>
+                                                    <Tooltip key={prep.id} title={displayName}>
                                                         <Chip
                                                             color="primary"
-                                                            label={prep.recipe_id}
+                                                            label={displayName}
                                                             onDelete={(event) => handleDelete(event, prep.id)}
                                                             sx={{
                                                                 width: '100%',
@@ -283,7 +288,7 @@ function MealPrep() {
         <DndProvider backend={HTML5Backend}>
             <Container maxWidth="xl" sx={{ py: 3 }}>
                 <Box sx={{ mb: 3 }}>
-                    <AddToMealPrep user={user} />
+                    <AddToMealPrep user={user} onAdd={handleAdd} />
                 </Box>
                 
                 {isMobile && (

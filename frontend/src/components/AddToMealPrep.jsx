@@ -2,7 +2,7 @@ import { Container, Chip, InputLabel, Select, MenuItem, Button, Stack, TextField
 import React, { useState, useEffect } from 'react'
 import { useOutletContext } from "react-router-dom";
 
-function AddToMealPrep({ user, recipe = "" }) {
+function AddToMealPrep({ user, recipe = "", onAdd }) {
     const { backendUrl } = useOutletContext();
 
     const [showAddMealPrepForm, setShowAddMealPrepForm] = useState(false)
@@ -40,7 +40,9 @@ function AddToMealPrep({ user, recipe = "" }) {
             setWeekday("")
             setMeal("")
             setShowAddMealPrepForm(!showAddMealPrepForm)
-            // window.location.reload();
+            if (onAdd) {
+                onAdd(newMealPrepData);
+            }
         })
     }
 

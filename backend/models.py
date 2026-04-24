@@ -96,6 +96,7 @@ class Meal_Prep(db.Model, SerializerMixin):
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
     weekday = db.Column(db.String)
     meal = db.Column(db.String)
+    recipe_name = db.Column(db.String)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
@@ -225,3 +226,55 @@ class Shopping_List(db.Model, SerializerMixin):
     recipe_ingredient = db.relationship("Recipe_Ingredient", back_populates="shopping_list")
     user = db.relationship("User", back_populates="shopping_list")
     meal_prep = db.relationship("Meal_Prep", back_populates="shopping_list")
+
+class Restaurant(db.Model, SerializerMixin):
+    __tablename__ = "restaurant"
+    
+    serialize_rules = ["-menu_items.restaurant", "-user_notes.restaurant"]
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    address = db.Column(db.String)
+    external_id = db.Column(db.String, unique=True) # Google Place ID
+    website = db.Column(db.String)
+    phone = db.Column(db.String)
+    picture = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    menu_items = db.relationship("Restaurant_Menu_Item", back_populates="restaurant", cascade="all, delete-orphan")
+    user_notes = db.relationship("User_Restaurant_Note", back_populates="restaurant", cascade="all, delete-orphan")
+
+class Restaurant_Menu_Item(db.Model, SerializerMixin):
+    __tablename__ = "restaurant_menu_item"
+    
+    serialize_rules = ["-restaurant.menu_items", "-user_notes.menu_item"]
+    
+    id = db.Column(db.Integer, primary_key=True)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=False)
+    name = db.Column(db.String, nullable=False)
+    description = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    restaurant = db.relationship("Restaurant", back_populates="menu_items")
+    user_notes = db.relationship("User_Restaurant_Note", back_populates="menu_item", cascade="all, delete-orphan")
+
+class User_Restaurant_Note(db.Model, SerializerMixin):
+    __tablename__ = "user_restaurant_note"
+    
+    serialize_rules = ["-user", "-restaurant.user_notes", "-menu_item.user_notes"]
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=False)
+    menu_item_id = db.Column(db.Integer, db.ForeignKey("restaurant_menu_item.id"))
+    note = db.Column(db.String)
+    rating = db.Column(db.Integer)
+    date_eaten = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    user = db.relationship("User")
+    restaurant = db.relationship("Restaurant", back_populates="user_notes")
+    menu_item = db.relationship("Restaurant_Menu_Item", back_populates="user_notes")

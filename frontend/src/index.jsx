@@ -14,6 +14,8 @@ import IndividualRecipe from './components/IndividualRecipe';
 import RandomizeRecipe from './components/RandomizeRecipe';
 import ProfilePage from './components/ProfilePage';
 import NewTag from './components/NewTag';
+import RestaurantDirectory from './components/RestaurantDirectory';
+import RestaurantPage from './components/RestaurantPage';
 import { Analytics } from "@vercel/analytics/react"
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
@@ -54,6 +56,14 @@ const router = createBrowserRouter([
       {
         path: "newtag",
         element: <NewTag />,
+      },
+      {
+        path: "restaurants",
+        element: <RestaurantDirectory />,
+      },
+      {
+        path: "restaurants/:id",
+        element: <RestaurantPage />,
       }
     ]
   }

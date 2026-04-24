@@ -36,14 +36,14 @@ CORS(app,
     }},
 )
 
-app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Allows cross-origin cookies
-app.config['SESSION_COOKIE_SECURE'] = False  # Ensures cookies are only sent over HTTPS (recommended for production)
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # More compatible with local dev
+app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
-from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category, Cooked_Instance, Shopping_List
+from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category, Cooked_Instance, Shopping_List, Restaurant, Restaurant_Menu_Item, User_Restaurant_Note
 
 @app.route("/")
 def root():
@@ -556,11 +556,19 @@ def meal_prep():
         return response
 
     elif request.method == 'POST':
+        recipe_val = request.json.get("recipe_id")
+        recipe_id = None
+        recipe_name = None
 
-        recipe_id = request.json.get("recipe_id"),
+        if isinstance(recipe_val, int):
+            recipe_id = recipe_val
+        elif isinstance(recipe_val, str):
+            recipe_name = recipe_val
+
         new_meal_prep = Meal_Prep(
             user_id=request.json.get("user_id"),
             recipe_id=recipe_id,
+            recipe_name=recipe_name,
             weekday=request.json.get("weekday"),
             meal=request.json.get("meal"),
         )
@@ -568,11 +576,12 @@ def meal_prep():
         db.session.add(new_meal_prep)
         db.session.flush()
 
-        recipe_id = request.json.get("recipe_id")
-        print(f'recipe id: {recipe_id}')
-        recipe = Recipe.query.filter_by(id=recipe_id).first()
-        rd = recipe.to_dict()
-        print(f'recipe ingredients: {rd}')
+        recipe = None
+        if recipe_id:
+            recipe = Recipe.query.filter_by(id=recipe_id).first()
+            if recipe:
+                rd = recipe.to_dict()
+                print(f'recipe ingredients: {rd}')
 
         if recipe:
             for ingredient in recipe.recipe_ingredients:
@@ -852,11 +861,171 @@ def cooked_instances():
         db.session.add(new_cooked_instance)
         db.session.commit()
         new_cooked_instance_dict = new_cooked_instance.to_dict()
-        response = make_response(
-            new_cooked_instance_dict,
-            201
-        )
         return response
+
+@app.route('/api/restaurants', methods=['GET', 'POST'])
+def restaurants():
+    if request.method == 'GET':
+        search_query = request.args.get('search')
+        if search_query:
+            restaurants = Restaurant.query.filter(Restaurant.name.ilike(f"%{search_query}%")).all()
+        else:
+            restaurants = Restaurant.query.all()
+        return jsonify([r.to_dict() for r in restaurants]), 200
+    
+    elif request.method == 'POST':
+        data = request.json
+        # Check if restaurant with this external_id already exists
+        if data.get('external_id'):
+            existing = Restaurant.query.filter_by(external_id=data.get('external_id')).first()
+            if existing:
+                return jsonify(existing.to_dict()), 200
+        
+        new_restaurant = Restaurant(
+            name=data.get('name'),
+            address=data.get('address'),
+            external_id=data.get('external_id'),
+            website=data.get('website'),
+            phone=data.get('phone'),
+            picture=data.get('picture')
+        )
+        db.session.add(new_restaurant)
+        db.session.commit()
+        return jsonify(new_restaurant.to_dict()), 201
+
+@app.route('/api/restaurants/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
+def restaurant_by_id(id):
+    restaurant = db.session.get(Restaurant, id)
+    if not restaurant:
+        return {"error": "Restaurant not found"}, 404
+    
+    if request.method == 'GET':
+        return jsonify(restaurant.to_dict()), 200
+    
+    elif request.method == 'PATCH':
+        data = request.json
+        for key, value in data.items():
+            if hasattr(restaurant, key):
+                setattr(restaurant, key, value)
+        db.session.commit()
+        return jsonify(restaurant.to_dict()), 200
+    
+    elif request.method == 'DELETE':
+        db.session.delete(restaurant)
+        db.session.commit()
+        return {}, 202
+
+@app.route('/api/restaurants/<int:id>/menu-items', methods=['GET', 'POST'])
+def restaurant_menu_items(id):
+    restaurant = db.session.get(Restaurant, id)
+    if not restaurant:
+        return {"error": "Restaurant not found"}, 404
+        
+    if request.method == 'GET':
+        return jsonify([item.to_dict() for item in restaurant.menu_items]), 200
+    
+    elif request.method == 'POST':
+        data = request.json
+        new_item = Restaurant_Menu_Item(
+            restaurant_id=id,
+            name=data.get('name'),
+            description=data.get('description')
+        )
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify(new_item.to_dict()), 201
+
+@app.route('/api/user_restaurant_notes', methods=['GET', 'POST'])
+def user_restaurant_notes():
+    user_id = session.get('user_id')
+    print(f"DEBUG: Session keys: {list(session.keys())}")
+    print(f"DEBUG: Session user_id: {user_id}")
+    if not user_id:
+        return {"error": "Unauthorized"}, 401
+        
+    if request.method == 'GET':
+        restaurant_id = request.args.get('restaurant_id')
+        query = User_Restaurant_Note.query.filter_by(user_id=user_id)
+        if restaurant_id:
+            query = query.filter_by(restaurant_id=restaurant_id)
+        
+        notes = query.order_by(User_Restaurant_Note.date_eaten.desc()).all()
+        return jsonify([note.to_dict() for note in notes]), 200
+    
+    elif request.method == 'POST':
+        data = request.json
+        new_note = User_Restaurant_Note(
+            user_id=user_id,
+            restaurant_id=data.get('restaurant_id'),
+            menu_item_id=data.get('menu_item_id'),
+            note=data.get('note'),
+            rating=data.get('rating'),
+            date_eaten=data.get('date_eaten')
+        )
+        db.session.add(new_note)
+        db.session.commit()
+        return jsonify(new_note.to_dict()), 201
+
+@app.route('/api/user_restaurant_notes/<int:id>', methods=['PATCH', 'DELETE'])
+def user_restaurant_note_by_id(id):
+    user_id = session.get('user_id')
+    note = db.session.get(User_Restaurant_Note, id)
+    if not note or note.user_id != user_id:
+        return {"error": "Note not found or unauthorized"}, 404
+        
+    if request.method == 'PATCH':
+        data = request.json
+        for key, value in data.items():
+            if hasattr(note, key):
+                setattr(note, key, value)
+        db.session.commit()
+        return jsonify(note.to_dict()), 200
+    
+    elif request.method == 'DELETE':
+        db.session.delete(note)
+        db.session.commit()
+        return {}, 202
+
+@app.route('/api/restaurants/search-external', methods=['GET'])
+def search_external_restaurants():
+    query = request.args.get('query')
+    if not query:
+        return {"error": "Query required"}, 400
+    
+    api_key = os.getenv('GOOGLE_PLACES_API_KEY')
+    print(f"DEBUG: Search query: {query}")
+    print(f"DEBUG: API Key found: {'Yes' if api_key else 'No'}")
+    
+    if not api_key:
+        return jsonify({"message": "Google Places API key not configured", "results": []}), 200
+        
+    import requests
+    url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query={query}&type=restaurant&key={api_key}"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        if data.get('status') not in ['OK', 'ZERO_RESULTS']:
+            return jsonify({
+                "message": f"Google API Error: {data.get('status')}",
+                "error_details": data.get('error_message'),
+                "results": []
+            }), 200
+
+        results = []
+        for place in data.get('results', []):
+            results.append({
+                "name": place.get('name'),
+                "address": place.get('formatted_address'),
+                "external_id": place.get('place_id'),
+                "rating": place.get('rating'),
+                "picture": f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={place['photos'][0]['photo_reference']}&key={api_key}" if place.get('photos') else None
+            })
+            
+        return jsonify({"results": results, "count": len(results)}), 200
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)

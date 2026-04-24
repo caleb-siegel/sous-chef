@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import Tag from "./Tag";
 import Ingredients from "./Ingredients";
-import { Button, TextField, InputLabel, MenuItem, Select, Paper, CircularProgress, Alert, Box } from '@mui/material';
+import { 
+    Button, TextField, InputLabel, MenuItem, Select, Paper, 
+    CircularProgress, Alert, Box, Dialog, DialogTitle, DialogContent, 
+    DialogActions, Typography, Grid, Divider 
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import InstagramIcon from '@mui/icons-material/Instagram';
 
@@ -197,85 +201,101 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     };    
     
     return (
-        <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px'}}>
-            <h1> Add New Recipe</h1>
-            
-            {/* Instagram URL Parser Section */}
-            <Box sx={{ mb: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-                <h3 style={{ marginTop: 0 }}>Quick Add from Instagram</h3>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                    <TextField 
-                        fullWidth
-                        id="instagram-url" 
-                        label="Instagram Video URL" 
-                        variant="outlined" 
-                        value={instagramUrl} 
-                        onChange={(event) => {
-                            setInstagramUrl(event.target.value);
-                            setParseError(null);
-                        }}
-                        placeholder="https://www.instagram.com/reel/..."
-                        disabled={isParsing}
-                        size="small"
-                    />
-                    <Button 
-                        variant="contained" 
-                        color="secondary" 
-                        onClick={handleParseInstagram}
-                        disabled={isParsing || !instagramUrl.trim()}
-                        startIcon={isParsing ? <CircularProgress size={20} /> : <InstagramIcon />}
-                        sx={{ minWidth: 150 }}
-                    >
-                        {isParsing ? "Parsing..." : "Parse Recipe"}
-                    </Button>
-                </Box>
-                {parseError && (
-                    <Alert severity="error" sx={{ mt: 1 }}>
-                        {parseError}
-                    </Alert>
-                )}
-            </Box>
-
-            <form onSubmit={handleSubmit}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div>
-                        <TextField id="outlined-basic" label="Name" variant="standard" value={name} onChange={(event) => setName(event.target.value)}/>
-                        <br />
-                        <TextField id="outlined-basic" label="Picture" variant="standard" value={picture} onChange={(event) => setPicture(event.target.value)}/>
-                        <br />
-                        <br />
-                        <InputLabel id="demo-simple-select-label">Source Category</InputLabel>
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={sourceCategoryInput}
-                            label="Source Category"
-                            onChange={(event) => setSourceCategoryInput(event.target.value)}
+        <Dialog open={true} onClose={() => handleAddRecipe({preventDefault: () => {}})} fullWidth maxWidth="md">
+            <DialogTitle sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+                <Typography variant="h4">Add New Recipe</Typography>
+            </DialogTitle>
+            <DialogContent sx={{ mt: 2 }}>
+                {/* Instagram URL Parser Section */}
+                <Box sx={{ mb: 4, p: 3, border: '1px dashed #FF7D45', borderRadius: 2, bgcolor: 'rgba(255, 125, 69, 0.05)' }}>
+                    <Typography variant="h6" gutterBottom color="secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <InstagramIcon /> Quick Add from Instagram
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                        <TextField 
+                            fullWidth
+                            label="Instagram Video URL" 
+                            variant="outlined" 
+                            value={instagramUrl} 
+                            onChange={(event) => {
+                                setInstagramUrl(event.target.value);
+                                setParseError(null);
+                            }}
+                            placeholder="https://www.instagram.com/reel/..."
+                            disabled={isParsing}
+                        />
+                        <Button 
+                            variant="contained" 
+                            color="secondary" 
+                            onClick={handleParseInstagram}
+                            disabled={isParsing || !instagramUrl.trim()}
+                            startIcon={isParsing ? <CircularProgress size={20} /> : <InstagramIcon />}
+                            sx={{ py: 1.5, px: 3 }}
                         >
-                            {sourceCategories.map(sourceCategory => {
-                                return <MenuItem key={sourceCategory.id} value={sourceCategory.name}>{sourceCategory.name}</MenuItem>
-                            })}
-                        </Select>
-                        <br />
-                        <TextField id="outlined-basic" label="Source Name" variant="standard" value={sourceName} onChange={(event) => setSourceName(event.target.value)}/>
-                        <br />
-                        <TextField id="outlined-basic" label="Reference" variant="standard" value={reference} onChange={(event) => setReference(event.target.value)}/>
-                        <br />
-                        <TextField label="Recipe Instructions" variant="standard" multiline maxRows={20} value={recipeInstructions} onChange={(event) => setRecipeInstructions(event.target.value)} sx={{ display: 'flex' }}/>
-                        <br />
-                        <br />
+                            {isParsing ? "Parsing..." : "Parse"}
+                        </Button>
+                    </Box>
+                    {parseError && <Alert severity="error" sx={{ mt: 2 }}>{parseError}</Alert>}
+                </Box>
+
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                        <TextField fullWidth label="Recipe Name" variant="outlined" value={name} onChange={(event) => setName(event.target.value)} sx={{ mb: 2 }}/>
+                        <TextField fullWidth label="Picture URL" variant="outlined" value={picture} onChange={(event) => setPicture(event.target.value)} sx={{ mb: 2 }}/>
+                        
+                        <Box sx={{ mb: 2 }}>
+                            <InputLabel id="category-label">Source Category</InputLabel>
+                            <Select
+                                labelId="category-label"
+                                fullWidth
+                                value={sourceCategoryInput}
+                                onChange={(event) => setSourceCategoryInput(event.target.value)}
+                            >
+                                {sourceCategories.map(cat => <MenuItem key={cat.id} value={cat.name}>{cat.name}</MenuItem>)}
+                            </Select>
+                        </Box>
+                        
+                        <TextField fullWidth label="Source (e.g. Cookbook Name)" variant="outlined" value={sourceName} onChange={(event) => setSourceName(event.target.value)} sx={{ mb: 2 }}/>
+                        <TextField fullWidth label="Reference (URL/Page #)" variant="outlined" value={reference} onChange={(event) => setReference(event.target.value)} sx={{ mb: 2 }}/>
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                        <TextField 
+                            fullWidth 
+                            label="Instructions" 
+                            variant="outlined" 
+                            multiline 
+                            rows={10} 
+                            value={recipeInstructions} 
+                            onChange={(event) => setRecipeInstructions(event.target.value)}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Divider sx={{ my: 1 }} />
+                        <Typography variant="h6" gutterBottom>Tags</Typography>
                         <Tag tags={tags} selectedTags={selectedTags} handleTagChange={handleTagChange}/>
-                        <br/>
-                        {ingredients && ingredients.map((ingredient, index) => (
-                            <Ingredients key={index} index={index} ingredients={ingredients} setIngredients={setIngredients}/>                        
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <Divider sx={{ my: 1 }} />
+                        <Typography variant="h6" gutterBottom>Ingredients</Typography>
+                        {ingredients.map((_, index) => (
+                            <Ingredients key={index} index={index} ingredients={ingredients} setIngredients={setIngredients}/>
                         ))}
-                        <Button variant="contained" color="primary" size="small" startIcon={<AddIcon/>} onClick={() => setIngredients([...ingredients, emptyIngredient])}>Add Ingredient</Button>
-                    </div>
-                </div>
-                <br />
-                <Button variant="contained" color="primary" size="small" type="submit">Submit</Button>
-            </form>
-        </Paper>
+                        <Button variant="outlined" startIcon={<AddIcon/>} onClick={() => setIngredients([...ingredients, emptyIngredient])} sx={{ mt: 1 }}>
+                            Add Ingredient
+                        </Button>
+                    </Grid>
+                </Grid>
+            </DialogContent>
+            <DialogActions sx={{ p: 3, bgcolor: '#f9f9f9' }}>
+                <Button onClick={handleAddRecipe}>Cancel</Button>
+                <Button variant="contained" color="primary" onClick={handleSubmit} size="large" sx={{ px: 4 }}>
+                    Save Recipe
+                </Button>
+            </DialogActions>
+        </Dialog>
     )
 }
 
