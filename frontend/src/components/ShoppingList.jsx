@@ -76,7 +76,7 @@ function ShoppingList({ mealPrep, user }) {
                                                 onChange={() => handleCheckboxChange(event, item.id, item.checked)} // Updates state
                                               />
                                             } 
-                                            label={`${item.recipe_ingredient.ingredient_quantity === 0 ? "" : item.recipe_ingredient.ingredient_quantity} ${item.recipe_ingredient.ingredient_unit} ${item.recipe_ingredient.ingredient_name}${(item.recipe_ingredient.ingredient_note === null || item.recipe_ingredient.ingredient_note === "") ? "" : ", " + item.recipe_ingredient.ingredient_note} (${item.recipe_ingredient.recipe.name})`} 
+                                            label={`${item.recipe_ingredient.ingredient_quantity || ""} ${item.recipe_ingredient.ingredient_unit || ""} ${item.recipe_ingredient.ingredient_name || ""}${item.recipe_ingredient.ingredient_note ? ", " + item.recipe_ingredient.ingredient_note : ""} ${item.recipe_ingredient.recipe?.name ? "(" + item.recipe_ingredient.recipe.name + ")" : ""}`} 
                                         />
                                     </div>
                                 // )

@@ -586,15 +586,31 @@ def meal_prep():
                 rd = recipe.to_dict()
                 print(f'recipe ingredients: {rd}')
 
-        if recipe:
-            for ingredient in recipe.recipe_ingredients:
-                new_shopping_list_entry = Shopping_List(
-                    checked=False,
-                    ingredient_id=ingredient.id,
-                    user_id=request.json.get("user_id"),
-                    mealprep_id=new_meal_prep.id
-                )
-                db.session.add(new_shopping_list_entry)
+                for ingredient in recipe.recipe_ingredients:
+                    new_shopping_list_entry = Shopping_List(
+                        checked=False,
+                        ingredient_id=ingredient.id,
+                        user_id=request.json.get("user_id"),
+                        mealprep_id=new_meal_prep.id
+                    )
+                    db.session.add(new_shopping_list_entry)
+        elif recipe_name:
+            # Create a standalone Recipe_Ingredient for the manual mealprep item
+            new_ingredient = Recipe_Ingredient(
+                ingredient_name=recipe_name,
+                recipe_id=None
+            )
+            db.session.add(new_ingredient)
+            db.session.flush()
+
+            # Link it to the shopping list
+            new_shopping_list_entry = Shopping_List(
+                checked=False,
+                ingredient_id=new_ingredient.id,
+                user_id=request.json.get("user_id"),
+                mealprep_id=new_meal_prep.id
+            )
+            db.session.add(new_shopping_list_entry)
 
         db.session.commit()
 
