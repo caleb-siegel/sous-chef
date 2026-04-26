@@ -36,8 +36,11 @@ CORS(app,
     }},
 )
 
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # More compatible with local dev
+from datetime import timedelta
+app.permanent_session_lifetime = timedelta(days=31)
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' 
 app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_PERMANENT'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 
 bcrypt = Bcrypt(app)
@@ -861,7 +864,7 @@ def cooked_instances():
         db.session.add(new_cooked_instance)
         db.session.commit()
         new_cooked_instance_dict = new_cooked_instance.to_dict()
-        return response
+        return make_response(new_cooked_instance_dict, 201)
 
 @app.route('/api/restaurants', methods=['GET', 'POST'])
 def restaurants():
