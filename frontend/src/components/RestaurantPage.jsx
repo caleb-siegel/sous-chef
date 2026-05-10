@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { 
     Button, Container, TextField, Typography, CircularProgress, 
-    Alert, Box, Card, CardContent, Divider, Rating, IconButton
+    Alert, Box, Card, CardContent, Divider, Rating, IconButton, Collapse
 } from "@mui/material";
 import { useParams, useOutletContext, useNavigate } from "react-router-dom";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 function RestaurantPage() {
     const { id } = useParams();
@@ -23,6 +26,11 @@ function RestaurantPage() {
     const [newNote, setNewNote] = useState("");
     const [newRating, setNewRating] = useState(3);
     const [activeMenuItemId, setActiveMenuItemId] = useState(null);
+    const [expandedItems, setExpandedItems] = useState({});
+
+    const toggleExpand = (itemId) => {
+        setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
+    };
 
     const fetchData = async () => {
         try {
@@ -142,7 +150,20 @@ function RestaurantPage() {
                             <CardContent>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="h6">{item.name}</Typography>
-                                    <Button size="small" onClick={() => setActiveMenuItemId(item.id)}>Add Note</Button>
+                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                        {notes.filter(n => n.menu_item_id === item.id).length > 0 && (
+                                            <Button 
+                                                size="small" 
+                                                variant="outlined"
+                                                startIcon={<ChatBubbleOutlineIcon />}
+                                                endIcon={expandedItems[item.id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                                onClick={() => toggleExpand(item.id)}
+                                            >
+                                                {notes.filter(n => n.menu_item_id === item.id).length} Note{notes.filter(n => n.menu_item_id === item.id).length > 1 ? 's' : ''}
+                                            </Button>
+                                        )}
+                                        <Button size="small" onClick={() => setActiveMenuItemId(item.id)}>Add Note</Button>
+                                    </Box>
                                 </Box>
                                 
                                 {activeMenuItemId === item.id && (
@@ -166,17 +187,21 @@ function RestaurantPage() {
                                 )}
 
                                 {/* Show notes for this specific item */}
-                                {Array.isArray(notes) && notes.filter(n => n.menu_item_id === item.id).map(note => (
-                                    <Box key={note.id} sx={{ mt: 1, pl: 2, borderLeft: '2px solid orange' }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Rating value={note.rating} readOnly size="small" />
-                                            <Typography variant="caption" color="text.secondary">
-                                                {note.user_name} • {new Date(note.date_eaten).toLocaleDateString()}
-                                            </Typography>
-                                        </Box>
-                                        <Typography variant="body2">{note.note}</Typography>
+                                <Collapse in={expandedItems[item.id]}>
+                                    <Box sx={{ mt: 1 }}>
+                                        {Array.isArray(notes) && notes.filter(n => n.menu_item_id === item.id).map(note => (
+                                            <Box key={note.id} sx={{ mt: 1, pl: 2, borderLeft: '2px solid orange' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Rating value={note.rating} readOnly size="small" />
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {note.user_name} • {new Date(note.date_eaten).toLocaleDateString()}
+                                                    </Typography>
+                                                </Box>
+                                                <Typography variant="body2">{note.note}</Typography>
+                                            </Box>
+                                        ))}
                                     </Box>
-                                ))}
+                                </Collapse>
                             </CardContent>
                         </Card>
                     ))}
