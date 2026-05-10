@@ -230,7 +230,7 @@ class Shopping_List(db.Model, SerializerMixin):
 class Restaurant(db.Model, SerializerMixin):
     __tablename__ = "restaurant"
     
-    serialize_rules = ["-menu_items.restaurant", "-user_notes"]
+    serialize_rules = ["-menu_items.restaurant", "-user_notes.restaurant"]
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
@@ -248,7 +248,7 @@ class Restaurant(db.Model, SerializerMixin):
 class Restaurant_Menu_Item(db.Model, SerializerMixin):
     __tablename__ = "restaurant_menu_item"
     
-    serialize_rules = ["-restaurant", "-user_notes"]
+    serialize_rules = ["-restaurant.menu_items", "-user_notes.menu_item"]
     
     id = db.Column(db.Integer, primary_key=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey("restaurant.id"), nullable=False)
