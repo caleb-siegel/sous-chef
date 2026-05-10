@@ -31,7 +31,7 @@ google_client_id = os.getenv('GOOGLE_CLIENT_SECRET')
 CORS(app,
     supports_credentials=True, 
     resources={r"/*": {
-        "origins": ["https://souschef2.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555", "http://127.0.0.1:5174"],
+        "origins": ["https://souschef2.vercel.app", "https://souschef.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555", "http://127.0.0.1:5174", "http://localhost:5174"],
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allow_headers": ["Content-Type", "Accept", "Authorization", "Origin"],
         "supports_credentials": True,
@@ -40,8 +40,8 @@ CORS(app,
 
 from datetime import timedelta
 app.permanent_session_lifetime = timedelta(days=31)
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' 
-app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_SAMESITE'] = 'None' 
+app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_PERMANENT'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 
@@ -113,8 +113,17 @@ def user():
             print(e)
             return {"error": f"could not post user: {e}"}, 405
 
-@app.route('/api/auth/google', methods=['POST'])
+@app.route('/api/auth/google', methods=['POST', 'OPTIONS'])
 def google_auth():
+    if request.method == 'OPTIONS':
+        # Handle the CORS preflight request
+        response = jsonify({"message": "CORS preflight handled"})
+        response.headers.add("Access-Control-Allow-Origin", request.headers.get("Origin"))
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response, 200
+
     data = request.json
     user_info = data.get('userInfo')
     
