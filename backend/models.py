@@ -263,7 +263,7 @@ class Restaurant_Menu_Item(db.Model, SerializerMixin):
 class User_Restaurant_Note(db.Model, SerializerMixin):
     __tablename__ = "user_restaurant_note"
     
-    serialize_rules = ["-user", "-restaurant.user_notes", "-menu_item.user_notes"]
+    serialize_rules = ["-user", "-restaurant.user_notes", "-menu_item.user_notes", "user_name"]
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -278,3 +278,9 @@ class User_Restaurant_Note(db.Model, SerializerMixin):
     user = db.relationship("User")
     restaurant = db.relationship("Restaurant", back_populates="user_notes")
     menu_item = db.relationship("Restaurant_Menu_Item", back_populates="user_notes")
+
+    @property
+    def user_name(self):
+        if self.user:
+            return f"{self.user.first_name or ''} {self.user.last_name or ''}".strip()
+        return None
