@@ -5,7 +5,7 @@ import Ingredients from "./Ingredients";
 import { 
     Button, TextField, InputLabel, MenuItem, Select, Paper, 
     CircularProgress, Alert, Box, Dialog, DialogTitle, DialogContent, 
-    DialogActions, Typography, Grid, Divider 
+    DialogActions, Typography, Grid, Divider, ToggleButton, ToggleButtonGroup 
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -40,6 +40,14 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [parseError, setParseError] = useState(null);
     const [imageError, setImageError] = useState(null);
+    const [importMethod, setImportMethod] = useState('manual');
+
+    const handleImportMethodChange = (event, newMethod) => {
+        if (newMethod !== null) {
+            setImportMethod(newMethod);
+            setParseError(null);
+        }
+    };
 
     const handleTagChange = (event, newValue) => {
         event.preventDefault();
@@ -301,67 +309,85 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                 <Typography variant="h4">Add New Recipe</Typography>
             </DialogTitle>
             <DialogContent sx={{ mt: 2 }}>
-                <Grid container spacing={2} sx={{ mb: 4 }}>
-                    {/* Instagram URL Parser Section */}
-                    <Grid item xs={12} md={6}>
-                        <Paper sx={{ p: 3, border: '1px dashed #FF7D45', borderRadius: 2, bgcolor: 'rgba(255, 125, 69, 0.05)', height: '100%' }}>
-                            <Typography variant="h6" gutterBottom color="secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <InstagramIcon /> Instagram Add
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                                <TextField 
-                                    fullWidth
-                                    size="small"
-                                    label="Instagram URL" 
-                                    variant="outlined" 
-                                    value={instagramUrl} 
-                                    onChange={(event) => {
-                                        setInstagramUrl(event.target.value);
-                                        setParseError(null);
-                                    }}
-                                    disabled={isParsing}
-                                />
-                                <Button 
-                                    variant="contained" 
-                                    color="secondary" 
-                                    onClick={handleParseInstagram}
-                                    disabled={isParsing || !instagramUrl.trim()}
-                                >
-                                    {isParsing ? <CircularProgress size={20} /> : "Parse"}
-                                </Button>
-                            </Box>
-                        </Paper>
-                    </Grid>
+                <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+                    <ToggleButtonGroup
+                        value={importMethod}
+                        exclusive
+                        onChange={handleImportMethodChange}
+                        aria-label="import method"
+                        color="primary"
+                        size="small"
+                    >
+                        <ToggleButton value="manual">Manual Entry</ToggleButton>
+                        <ToggleButton value="instagram" sx={{ gap: 1 }}>
+                            <InstagramIcon fontSize="small" /> Instagram
+                        </ToggleButton>
+                        <ToggleButton value="ai" sx={{ gap: 1 }}>
+                            <AutoFixHighIcon fontSize="small" /> AI Image Parser
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Box>
 
-                    {/* AI Image Parser Section */}
-                    <Grid item xs={12} md={6}>
-                        <Paper 
-                            sx={{ p: 3, border: '1px dashed #3FFFC2', borderRadius: 2, bgcolor: 'rgba(63, 255, 194, 0.05)', height: '100%', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(63, 255, 194, 0.1)' } }}
-                            onPaste={(e) => handleImagePaste(e, 'ai')}
-                        >
-                            <Typography variant="h6" gutterBottom color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <AutoFixHighIcon /> AI Data Extractor
-                            </Typography>
-                            <Box sx={{ textAlign: 'center', py: 1 }}>
-                                {isParsingImage ? (
-                                    <CircularProgress size={30} />
-                                ) : (
-                                    <>
-                                        <Typography variant="body2" color="textSecondary" gutterBottom>
-                                            Paste image of ingredients/instructions here
-                                        </Typography>
-                                        <Button component="label" size="small" variant="text" startIcon={<ContentPasteIcon />}>
-                                            Choose Image
-                                            <input type="file" hidden accept="image/*" onChange={(e) => handleImageUpload(e, 'ai')} />
-                                        </Button>
-                                    </>
-                                )}
-                            </Box>
-                        </Paper>
-                    </Grid>
-                </Grid>
+                {importMethod === 'instagram' && (
+                    <Box sx={{ mb: 4, p: 3, border: '1px dashed #FF7D45', borderRadius: 2, bgcolor: 'rgba(255, 125, 69, 0.05)' }}>
+                        <Typography variant="h6" gutterBottom color="secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <InstagramIcon /> Instagram Quick Add
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                            <TextField 
+                                fullWidth
+                                label="Instagram Video URL" 
+                                variant="outlined" 
+                                value={instagramUrl} 
+                                onChange={(event) => {
+                                    setInstagramUrl(event.target.value);
+                                    setParseError(null);
+                                }}
+                                placeholder="https://www.instagram.com/reel/..."
+                                disabled={isParsing}
+                            />
+                            <Button 
+                                variant="contained" 
+                                color="secondary" 
+                                onClick={handleParseInstagram}
+                                disabled={isParsing || !instagramUrl.trim()}
+                                sx={{ py: 1.5, px: 3 }}
+                            >
+                                {isParsing ? <CircularProgress size={20} /> : "Parse"}
+                            </Button>
+                        </Box>
+                        {parseError && <Alert severity="error" sx={{ mt: 2 }}>{parseError}</Alert>}
+                    </Box>
+                )}
 
-                {parseError && <Alert severity="error" sx={{ mb: 2 }}>{parseError}</Alert>}
+                {importMethod === 'ai' && (
+                    <Box sx={{ mb: 4, p: 3, border: '1px dashed #3FFFC2', borderRadius: 2, bgcolor: 'rgba(63, 255, 194, 0.05)', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(63, 255, 194, 0.1)' } }}
+                        onPaste={(e) => handleImagePaste(e, 'ai')}
+                    >
+                        <Typography variant="h6" gutterBottom color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <AutoFixHighIcon /> AI Data Extractor
+                        </Typography>
+                        <Box sx={{ textAlign: 'center', py: 2 }}>
+                            {isParsingImage ? (
+                                <CircularProgress size={40} />
+                            ) : (
+                                <>
+                                    <Typography variant="body1" color="textPrimary" gutterBottom>
+                                        Paste an image containing ingredients and instructions
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                                        The AI will automatically fill out the form for you
+                                    </Typography>
+                                    <Button component="label" variant="outlined" startIcon={<ContentPasteIcon />}>
+                                        Select Image File
+                                        <input type="file" hidden accept="image/*" onChange={(e) => handleImageUpload(e, 'ai')} />
+                                    </Button>
+                                </>
+                            )}
+                        </Box>
+                        {parseError && <Alert severity="error" sx={{ mt: 2 }}>{parseError}</Alert>}
+                    </Box>
+                )}
 
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
