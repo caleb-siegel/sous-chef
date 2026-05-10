@@ -9,6 +9,8 @@ import json
 import os
 import random
 import logging
+import uuid
+import base64
 from helpers import get_recipe_dict
 from db import db, app
 from google.oauth2 import id_token
@@ -314,6 +316,91 @@ def parse_instagram_recipe():
         logger.error(f"Error in parse_instagram_recipe endpoint: {str(e)}", exc_info=True)
         print(f"Error parsing Instagram recipe: {str(e)}")
         return {"error": f"Failed to parse Instagram recipe: {str(e)}"}, 500
+
+@app.route('/api/parse-recipe-image', methods=['POST', 'OPTIONS'])
+def parse_recipe_image_route():
+    """
+    Parse a recipe image using AI and return structured data.
+    Does NOT save the image to disk.
+    """
+    if request.method == 'OPTIONS':
+        response = jsonify({"message": "CORS preflight handled"})
+        response.headers.add("Access-Control-Allow-Origin", request.headers.get("Origin"))
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, Origin")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response, 200
+
+    try:
+        data = request.json
+        image_base64 = data.get('image')
+        
+        if not image_base64:
+            return {"error": "Image data is required"}, 400
+            
+        # Strip data URL prefix if present
+        if ',' in image_base64:
+            image_base64 = image_base64.split(',')[1]
+            
+        from recipe_image_parser import parse_recipe_image
+        recipe_data = parse_recipe_image(image_base64)
+        
+        return jsonify(recipe_data), 200
+        
+    except Exception as e:
+        logger.error(f"Error in parse-recipe-image: {str(e)}")
+        return {"error": str(e)}, 500
+
+@app.route('/api/upload-recipe-image', methods=['POST', 'OPTIONS'])
+def upload_recipe_image():
+    """
+    Upload a recipe display image and save it to the frontend public folder.
+    Returns the public URL.
+    """
+    if request.method == 'OPTIONS':
+        response = jsonify({"message": "CORS preflight handled"})
+        response.headers.add("Access-Control-Allow-Origin", request.headers.get("Origin"))
+        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, Origin")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response, 200
+
+    try:
+        data = request.json
+        image_data = data.get('image')
+        recipe_name = data.get('name', '').strip()
+        
+        if not image_data:
+            return {"error": "Image data is required"}, 400
+            
+        # Strip data URL prefix if present
+        header, encoded = image_data.split(",", 1)
+        extension = header.split(";")[0].split("/")[1]
+        if extension == 'jpeg': extension = 'jpg'
+        
+        # Determine filename
+        if recipe_name:
+            # Sanitize filename: remove characters that aren't alphanumeric, space, or hyphen/underscore
+            import re
+            clean_name = re.sub(r'[^\w\s-]', '', recipe_name).strip()
+            filename = f"{clean_name}.{extension}"
+        else:
+            filename = f"{uuid.uuid4()}.{extension}"
+            
+        # Save to frontend/public/recipes
+        save_path = os.path.join(os.getcwd(), '..', 'frontend', 'public', 'recipes', filename)
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        
+        with open(save_path, "wb") as f:
+            f.write(base64.b64decode(encoded))
+            
+        return jsonify({"url": f"/recipes/{filename}"}), 201
+        
+    except Exception as e:
+        logger.error(f"Error uploading image: {str(e)}")
+        return {"error": str(e)}, 500
     
 @app.route('/api/random_recipe')
 def random_recipe():

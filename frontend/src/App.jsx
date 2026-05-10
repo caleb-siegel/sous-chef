@@ -11,8 +11,8 @@ function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const backendUrl = "https://souschef-backend.vercel.app"
-  // const backendUrl = "http://127.0.0.1:5555"
+  // const backendUrl = "https://souschef-backend.vercel.app"
+  const backendUrl = "http://127.0.0.1:5555"
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -22,22 +22,22 @@ function App() {
       setUser(parsedUser);
 
       // Check with the backend for the latest data
-      // fetch(`${backendUrl}/api/check_session`, {
-      //   credentials: "include", // important for cookies/session
-      // })
-      //   .then((res) => {
-      //     if (!res.ok) throw new Error("Session invalid");
-      //     return res.json();
-      //   })
-      //   .then((freshUser) => {
-      //     setUser(freshUser);
-      //     localStorage.setItem("user", JSON.stringify(freshUser)); // update local storage
-      //   })
-      //   .catch(() => {
-      //     // Session is no longer valid
-      //     localStorage.removeItem("user");
-      //     setUser(null);
-      //   });
+      fetch(`${backendUrl}/api/check_session`, {
+        credentials: "include", // important for cookies/session
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Session invalid");
+          return res.json();
+        })
+        .then((freshUser) => {
+          setUser(freshUser);
+          localStorage.setItem("user", JSON.stringify(freshUser)); // update local storage
+        })
+        .catch(() => {
+          // Session is no longer valid
+          localStorage.removeItem("user");
+          setUser(null);
+        });
     }
   }, [backendUrl]);
 

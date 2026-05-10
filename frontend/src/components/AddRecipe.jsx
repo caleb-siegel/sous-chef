@@ -9,6 +9,9 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 
 function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     const { backendUrl } = useOutletContext();
@@ -33,7 +36,10 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
     const [selectedTags, setSelectedTags] = useState([]);
     const [instagramUrl, setInstagramUrl] = useState("");
     const [isParsing, setIsParsing] = useState(false);
+    const [isParsingImage, setIsParsingImage] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [parseError, setParseError] = useState(null);
+    const [imageError, setImageError] = useState(null);
 
     const handleTagChange = (event, newValue) => {
         event.preventDefault();
@@ -123,6 +129,95 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
         }
     };
 
+    const handleImagePaste = async (event, type) => {
+        // type can be 'ai' (for data extraction) or 'display' (for recipe image)
+        const items = event.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") !== -1) {
+                const blob = items[i].getAsFile();
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const base64Image = e.target.result;
+                    if (type === 'ai') {
+                        processAIImage(base64Image);
+                    } else {
+                        uploadDisplayImage(base64Image);
+                    }
+                };
+                reader.readAsDataURL(blob);
+                break;
+            }
+        }
+    };
+
+    const handleImageUpload = (event, type) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Image = e.target.result;
+                if (type === 'ai') {
+                    processAIImage(base64Image);
+                } else {
+                    uploadDisplayImage(base64Image);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const processAIImage = async (base64Image) => {
+        setIsParsingImage(true);
+        setParseError(null);
+        try {
+            const response = await fetch(`${backendUrl}/api/parse-recipe-image`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image: base64Image }),
+            });
+            if (!response.ok) throw new Error("Failed to parse image");
+            const data = await response.json();
+            
+            if (data.name) setName(data.name);
+            if (data.instructions) setRecipeInstructions(data.instructions);
+            if (data.reference) setReference(data.reference);
+            if (data.ingredients) {
+                setIngredients(data.ingredients.map(ing => ({
+                    ingredient_name: ing.ingredient_name || '',
+                    ingredient_quantity: ing.ingredient_quantity || 0,
+                    ingredient_unit: ing.ingredient_unit || '',
+                    ingredient_note: ing.ingredient_note || ''
+                })));
+            }
+        } catch (error) {
+            setParseError("Error parsing recipe from image: " + error.message);
+        } finally {
+            setIsParsingImage(false);
+        }
+    };
+
+    const uploadDisplayImage = async (base64Image) => {
+        setIsUploadingImage(true);
+        setImageError(null);
+        try {
+            const response = await fetch(`${backendUrl}/api/upload-recipe-image`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    image: base64Image,
+                    name: name // Send the current recipe name if available
+                }),
+            });
+            if (!response.ok) throw new Error("Failed to upload image");
+            const data = await response.json();
+            setPicture(data.url);
+        } catch (error) {
+            setImageError("Error uploading display image: " + error.message);
+        } finally {
+            setIsUploadingImage(false);
+        }
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
         let sourceCategoryId = 0;
@@ -206,42 +301,106 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                 <Typography variant="h4">Add New Recipe</Typography>
             </DialogTitle>
             <DialogContent sx={{ mt: 2 }}>
-                {/* Instagram URL Parser Section */}
-                <Box sx={{ mb: 4, p: 3, border: '1px dashed #FF7D45', borderRadius: 2, bgcolor: 'rgba(255, 125, 69, 0.05)' }}>
-                    <Typography variant="h6" gutterBottom color="secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <InstagramIcon /> Quick Add from Instagram
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                        <TextField 
-                            fullWidth
-                            label="Instagram Video URL" 
-                            variant="outlined" 
-                            value={instagramUrl} 
-                            onChange={(event) => {
-                                setInstagramUrl(event.target.value);
-                                setParseError(null);
-                            }}
-                            placeholder="https://www.instagram.com/reel/..."
-                            disabled={isParsing}
-                        />
-                        <Button 
-                            variant="contained" 
-                            color="secondary" 
-                            onClick={handleParseInstagram}
-                            disabled={isParsing || !instagramUrl.trim()}
-                            startIcon={isParsing ? <CircularProgress size={20} /> : <InstagramIcon />}
-                            sx={{ py: 1.5, px: 3 }}
+                <Grid container spacing={2} sx={{ mb: 4 }}>
+                    {/* Instagram URL Parser Section */}
+                    <Grid item xs={12} md={6}>
+                        <Paper sx={{ p: 3, border: '1px dashed #FF7D45', borderRadius: 2, bgcolor: 'rgba(255, 125, 69, 0.05)', height: '100%' }}>
+                            <Typography variant="h6" gutterBottom color="secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <InstagramIcon /> Instagram Add
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                                <TextField 
+                                    fullWidth
+                                    size="small"
+                                    label="Instagram URL" 
+                                    variant="outlined" 
+                                    value={instagramUrl} 
+                                    onChange={(event) => {
+                                        setInstagramUrl(event.target.value);
+                                        setParseError(null);
+                                    }}
+                                    disabled={isParsing}
+                                />
+                                <Button 
+                                    variant="contained" 
+                                    color="secondary" 
+                                    onClick={handleParseInstagram}
+                                    disabled={isParsing || !instagramUrl.trim()}
+                                >
+                                    {isParsing ? <CircularProgress size={20} /> : "Parse"}
+                                </Button>
+                            </Box>
+                        </Paper>
+                    </Grid>
+
+                    {/* AI Image Parser Section */}
+                    <Grid item xs={12} md={6}>
+                        <Paper 
+                            sx={{ p: 3, border: '1px dashed #3FFFC2', borderRadius: 2, bgcolor: 'rgba(63, 255, 194, 0.05)', height: '100%', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(63, 255, 194, 0.1)' } }}
+                            onPaste={(e) => handleImagePaste(e, 'ai')}
                         >
-                            {isParsing ? "Parsing..." : "Parse"}
-                        </Button>
-                    </Box>
-                    {parseError && <Alert severity="error" sx={{ mt: 2 }}>{parseError}</Alert>}
-                </Box>
+                            <Typography variant="h6" gutterBottom color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <AutoFixHighIcon /> AI Data Extractor
+                            </Typography>
+                            <Box sx={{ textAlign: 'center', py: 1 }}>
+                                {isParsingImage ? (
+                                    <CircularProgress size={30} />
+                                ) : (
+                                    <>
+                                        <Typography variant="body2" color="textSecondary" gutterBottom>
+                                            Paste image of ingredients/instructions here
+                                        </Typography>
+                                        <Button component="label" size="small" variant="text" startIcon={<ContentPasteIcon />}>
+                                            Choose Image
+                                            <input type="file" hidden accept="image/*" onChange={(e) => handleImageUpload(e, 'ai')} />
+                                        </Button>
+                                    </>
+                                )}
+                            </Box>
+                        </Paper>
+                    </Grid>
+                </Grid>
+
+                {parseError && <Alert severity="error" sx={{ mb: 2 }}>{parseError}</Alert>}
 
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
                         <TextField fullWidth label="Recipe Name" variant="outlined" value={name} onChange={(event) => setName(event.target.value)} sx={{ mb: 2 }}/>
-                        <TextField fullWidth label="Picture URL" variant="outlined" value={picture} onChange={(event) => setPicture(event.target.value)} sx={{ mb: 2 }}/>
+                        
+                        <Paper 
+                            sx={{ p: 2, mb: 2, border: '1px dashed #ccc', textAlign: 'center', bgcolor: picture ? 'transparent' : '#f5f5f5', position: 'relative' }}
+                            onPaste={(e) => handleImagePaste(e, 'display')}
+                        >
+                            {picture ? (
+                                <Box sx={{ position: 'relative' }}>
+                                    <img src={picture} alt="Recipe Preview" style={{ width: '100%', maxHeight: '150px', objectFit: 'cover', borderRadius: '4px' }} />
+                                    <Button 
+                                        size="small" 
+                                        color="error" 
+                                        sx={{ position: 'absolute', top: 5, right: 5, bgcolor: 'rgba(255,255,255,0.8)' }}
+                                        onClick={() => setPicture("")}
+                                    >
+                                        Remove
+                                    </Button>
+                                </Box>
+                            ) : (
+                                <Box sx={{ py: 2 }}>
+                                    {isUploadingImage ? <CircularProgress size={24} /> : (
+                                        <>
+                                            <PhotoCameraIcon color="disabled" sx={{ fontSize: 40 }} />
+                                            <Typography variant="body2">Paste or Upload Recipe Image</Typography>
+                                            <Button component="label" size="small">
+                                                Select File
+                                                <input type="file" hidden accept="image/*" onChange={(e) => handleImageUpload(e, 'display')} />
+                                            </Button>
+                                        </>
+                                    )}
+                                </Box>
+                            )}
+                            {imageError && <Alert severity="error" size="small">{imageError}</Alert>}
+                        </Paper>
+
+                        <TextField fullWidth label="Picture URL (manual)" variant="outlined" value={picture} onChange={(event) => setPicture(event.target.value)} sx={{ mb: 2 }} size="small"/>
                         
                         <Box sx={{ mb: 2 }}>
                             <InputLabel id="category-label">Source Category</InputLabel>
