@@ -171,7 +171,7 @@ function RestaurantPage() {
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Rating value={note.rating} readOnly size="small" />
                                             <Typography variant="caption" color="text.secondary">
-                                                {new Date(note.date_eaten).toLocaleDateString()}
+                                                {note.user_name} • {new Date(note.date_eaten).toLocaleDateString()}
                                             </Typography>
                                         </Box>
                                         <Typography variant="body2">{note.note}</Typography>
@@ -206,7 +206,7 @@ function RestaurantPage() {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                 <Rating value={note.rating} readOnly size="small" />
                                 <Typography variant="caption" color="text.secondary">
-                                    {new Date(note.date_eaten).toLocaleDateString()}
+                                    {note.user_name} • {new Date(note.date_eaten).toLocaleDateString()}
                                 </Typography>
                             </Box>
                             <Typography variant="body2">{note.note}</Typography>
