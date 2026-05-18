@@ -54,6 +54,7 @@ google-auth-oauthlib = "*"
 google-auth-httplib2 = "*"
 requests = "==2.31.0"
 yt-dlp = "*"
+openai = "*"
 
 [dev-packages]
 
