@@ -11,6 +11,23 @@ import random
 import logging
 import uuid
 import base64
+
+# Apply monkey-patch directly on Pydantic BaseModel to handle by_alias=None
+# This fixes compatibility between certain versions of Pydantic V2 and OpenAI's SDK
+try:
+    from pydantic import BaseModel
+    _original_model_dump = BaseModel.model_dump
+    
+    def _patched_model_dump(self, *args, **kwargs):
+        if 'by_alias' in kwargs and kwargs['by_alias'] is None:
+            kwargs['by_alias'] = False
+        return _original_model_dump(self, *args, **kwargs)
+        
+    BaseModel.model_dump = _patched_model_dump
+    logging.getLogger(__name__).info("Successfully monkey-patched Pydantic BaseModel.model_dump")
+except Exception as patch_err:
+    logging.getLogger(__name__).warning(f"Failed to apply Pydantic monkey-patch: {patch_err}")
+
 from helpers import get_recipe_dict
 from db import db, app
 from google.oauth2 import id_token
@@ -31,7 +48,7 @@ google_client_id = os.getenv('GOOGLE_CLIENT_SECRET')
 CORS(app,
     supports_credentials=True, 
     resources={r"/*": {
-        "origins": ["https://souschef2.vercel.app", "https://souschef.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555", "http://127.0.0.1:5174", "http://localhost:5174"],
+        "origins": ["https://souschef2.vercel.app", "https://souschef.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555", "http://127.0.0.1:5174", "http://localhost:5174", "http://localhost:5177"],
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allow_headers": ["Content-Type", "Accept", "Authorization", "Origin"],
         "supports_credentials": True,
@@ -396,16 +413,20 @@ def upload_recipe_image():
         else:
             filename = f"{uuid.uuid4()}.{extension}"
             
-        # Save to frontend/public/recipes
-        save_path = os.path.join(os.getcwd(), '..', 'frontend', 'public', 'recipes', filename)
-        
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        
-        with open(save_path, "wb") as f:
-            f.write(base64.b64decode(encoded))
+        # Try to save locally (works in local development)
+        try:
+            save_path = os.path.join(os.getcwd(), '..', 'frontend', 'public', 'recipes', filename)
             
-        return jsonify({"url": f"/recipes/{filename}"}), 201
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            
+            with open(save_path, "wb") as f:
+                f.write(base64.b64decode(encoded))
+                
+            return jsonify({"url": f"/recipes/{filename}"}), 201
+        except Exception as write_err:
+            logger.info(f"Local file write failed (expected in serverless production). Falling back to returning base64 data: {str(write_err)}")
+            return jsonify({"url": image_data}), 201
         
     except Exception as e:
         logger.error(f"Error uploading image: {str(e)}")
@@ -977,6 +998,80 @@ def cooked_instances():
         db.session.commit()
         new_cooked_instance_dict = new_cooked_instance.to_dict()
         return make_response(new_cooked_instance_dict, 201)
+
+@app.route('/api/comments_feed', methods=['GET'])
+def comments_feed():
+    try:
+        # Get cooked instance comments
+        cooked_instances = Cooked_Instance.query.filter(
+            Cooked_Instance.comment.isnot(None),
+            Cooked_Instance.comment != ''
+        ).all()
+        
+        feed_items = []
+        for ci in cooked_instances:
+            user_recipe = ci.user_recipe
+            user = user_recipe.user if user_recipe else None
+            recipe = user_recipe.recipe if user_recipe else None
+            
+            user_name = "Anonymous"
+            if user:
+                user_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or user.name or "Anonymous"
+                
+            feed_items.append({
+                "id": f"cooked_{ci.id}",
+                "type": "cooked_instance",
+                "comment": ci.comment,
+                "created_at": ci.created_at.isoformat() if ci.created_at else None,
+                "event_date": ci.cooked_date.isoformat() if ci.cooked_date else (ci.created_at.isoformat() if ci.created_at else None),
+                "user_name": user_name,
+                "recipe_id": recipe.id if recipe else None,
+                "recipe_name": recipe.name if recipe else "Unknown Recipe",
+                "rating": None,
+                "restaurant_id": None,
+                "restaurant_name": None,
+                "menu_item_id": None,
+                "menu_item_name": None
+            })
+            
+        # Get restaurant menu item comments
+        restaurant_notes = User_Restaurant_Note.query.filter(
+            User_Restaurant_Note.note.isnot(None),
+            User_Restaurant_Note.note != '',
+            User_Restaurant_Note.menu_item_id.isnot(None)
+        ).all()
+        
+        for rn in restaurant_notes:
+            user = rn.user
+            restaurant = rn.restaurant
+            menu_item = rn.menu_item
+            
+            user_name = "Anonymous"
+            if user:
+                user_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or user.name or "Anonymous"
+                
+            feed_items.append({
+                "id": f"restaurant_{rn.id}",
+                "type": "restaurant_menu_item",
+                "comment": rn.note,
+                "created_at": rn.created_at.isoformat() if rn.created_at else None,
+                "event_date": rn.date_eaten.isoformat() if rn.date_eaten else (rn.created_at.isoformat() if rn.created_at else None),
+                "user_name": user_name,
+                "recipe_id": None,
+                "recipe_name": None,
+                "rating": rn.rating,
+                "restaurant_id": restaurant.id if restaurant else None,
+                "restaurant_name": restaurant.name if restaurant else "Unknown Restaurant",
+                "menu_item_id": menu_item.id if menu_item else None,
+                "menu_item_name": menu_item.name if menu_item else "Unknown Item"
+            })
+            
+        # Sort chronologically, most recent first.
+        feed_items.sort(key=lambda x: x["created_at"] or "", reverse=True)
+        return jsonify(feed_items), 200
+    except Exception as e:
+        logger.error(f"Error in comments_feed endpoint: {str(e)}", exc_info=True)
+        return {"error": f"Failed to fetch comments feed: {str(e)}"}, 500
 
 @app.route('/api/restaurants', methods=['GET', 'POST'])
 def restaurants():

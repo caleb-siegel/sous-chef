@@ -22,6 +22,7 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
         { name: "Recipes", path: "/recipes" },
         { name: "Restaurants", path: "/restaurants" },
         { name: "Meal Prep", path: "/mealprep" },
+        { name: "Feed", path: "/feed" },
         { name: "Spice It Up", path: "/random" },
     ];
 
