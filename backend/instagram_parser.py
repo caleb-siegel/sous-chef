@@ -17,8 +17,8 @@ if not logger.handlers:
 
 def extract_instagram_caption(instagram_url):
     """
-    Extract caption/description from Instagram video using yt-dlp metadata.
-    Returns the caption text without downloading the video.
+    Extract caption/description and uploader from Instagram video using yt-dlp metadata.
+    Returns a tuple of (caption_text, uploader_username).
     """
     logger.info(f"Starting caption extraction for URL: {instagram_url}")
     
@@ -30,22 +30,34 @@ def extract_instagram_caption(instagram_url):
     }
     
     try:
-        logger.debug("Extracting metadata with yt-dlp...")
+        logger.info("Extracting metadata with yt-dlp...")
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(instagram_url, download=False)
             
-            logger.debug(f"Metadata extracted. Available keys: {list(info.keys())[:20]}...")  # Log first 20 keys
+            logger.info("=== Instagram Video Metadata Extraction ===")
+            logger.info(f"Available keys in info: {list(info.keys())}")
             
+            # Log specific metadata values
+            metadata_keys = ['uploader', 'uploader_id', 'channel', 'channel_id', 'title', 'webpage_url_basename']
+            for key in metadata_keys:
+                logger.info(f"  Metadata '{key}': {info.get(key)}")
+                
             # Log what fields we're checking
             description = info.get('description')
             fulltitle = info.get('fulltitle')
             title = info.get('title')
             alt_title = info.get('alt_title')
             
-            logger.debug(f"Field values - description: {description[:100] if description else None}...")
-            logger.debug(f"Field values - fulltitle: {fulltitle}")
-            logger.debug(f"Field values - title: {title}")
-            logger.debug(f"Field values - alt_title: {alt_title}")
+            # Prioritize channel (account name/handle like pinchofyum) over display name (uploader like Lindsay Ostrom)
+            uploader = info.get('channel') or info.get('uploader') or info.get('uploader_id')
+            if uploader:
+                uploader = str(uploader).strip()
+            
+            logger.info(f"Field values - description: {description[:100] if description else None}...")
+            logger.info(f"Field values - fulltitle: {fulltitle}")
+            logger.info(f"Field values - title: {title}")
+            logger.info(f"Field values - alt_title: {alt_title}")
+            logger.info(f"Field values - uploader/channel: {uploader}")
             
             # Try to get description/caption from various fields
             # Instagram often stores the caption in 'description' field
@@ -70,7 +82,7 @@ def extract_instagram_caption(instagram_url):
                     if isinstance(value, str) and len(value) > 0:
                         logger.debug(f"  {key}: {value[:100]}...")
             
-            return caption
+            return caption, uploader
     except yt_dlp.utils.DownloadError as e:
         logger.error(f"yt-dlp DownloadError: {str(e)}")
         raise Exception(f"Failed to access Instagram video. The video may be private or the URL may be invalid: {str(e)}")
@@ -282,9 +294,9 @@ def parse_instagram_recipe(instagram_url):
     logger.info(f"=== Starting Instagram recipe parsing for: {instagram_url} ===")
     
     try:
-        # Step 1: Extract caption from Instagram video metadata
-        logger.info("Step 1: Extracting caption from Instagram video...")
-        caption = extract_instagram_caption(instagram_url)
+        # Step 1: Extract caption and uploader from Instagram video metadata
+        logger.info("Step 1: Extracting caption and uploader from Instagram video...")
+        caption, uploader = extract_instagram_caption(instagram_url)
         
         if not caption:
             logger.error("No caption extracted from video")
@@ -293,6 +305,9 @@ def parse_instagram_recipe(instagram_url):
         # Step 2: Parse the caption into recipe data
         logger.info("Step 2: Parsing caption into recipe data...")
         recipe_data = parse_recipe_from_caption(caption)
+        
+        # Add uploader (account name) as the recipe source
+        recipe_data["source"] = uploader if uploader else "Instagram"
         
         logger.info(f"=== Successfully parsed recipe: {recipe_data['name']} ===")
         return recipe_data
