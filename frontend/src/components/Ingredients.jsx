@@ -1,5 +1,6 @@
 import React from 'react';
-import { MenuItem, Paper, TextField, Select } from '@mui/material';
+import { MenuItem, Paper, TextField, Select, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function Ingredients({ index, ingredients, setIngredients }) {
     
@@ -26,9 +27,31 @@ function Ingredients({ index, ingredients, setIngredients }) {
         newIngredients[index].ingredient_note = event.target.value;
         setIngredients(newIngredients);
     };
+
+    const handleDeleteIngredient = () => {
+        const newIngredients = ingredients.filter((_, idx) => idx !== index);
+        setIngredients(newIngredients);
+    };
     
     return (
-        <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px', margin: '10px 0' }}>
+        <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px', margin: '10px 0', position: 'relative' }}>
+            <IconButton 
+                aria-label="delete ingredient"
+                onClick={handleDeleteIngredient}
+                sx={{ 
+                    position: 'absolute', 
+                    top: 8, 
+                    right: 8, 
+                    color: 'rgba(0, 0, 0, 0.54)',
+                    '&:hover': {
+                        color: '#d32f2f',
+                        backgroundColor: 'rgba(211, 47, 47, 0.04)'
+                    }
+                }}
+            >
+                <DeleteIcon />
+            </IconButton>
+            
             <TextField
                 id={`quantity-${index}`}
                 label="Quantity"
@@ -36,6 +59,7 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 type="number"
                 value={ingredients[index].ingredient_quantity}
                 onChange={handleQuantityChange}
+                sx={{ mr: 2, width: '100px' }}
             />
             <Select
                 labelId={`unit-label-${index}`}
@@ -43,6 +67,7 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 label="Measurement Unit"
                 value={ingredients[index].ingredient_unit}
                 onChange={handleUnitChange}
+                sx={{ mr: 2, minWidth: '100px', verticalAlign: 'bottom' }}
             >
                 <MenuItem value=""></MenuItem>
                 <MenuItem value="Tsp">Tsp</MenuItem>
@@ -59,6 +84,7 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 variant="standard"
                 value={ingredients[index].ingredient_name}
                 onChange={handleIngredientChange}
+                sx={{ mr: 2, minWidth: '200px' }}
             />
             <TextField
                 id={`note-${index}`}
@@ -66,6 +92,7 @@ function Ingredients({ index, ingredients, setIngredients }) {
                 variant="standard"
                 value={ingredients[index].ingredient_note}
                 onChange={handleIngredientNoteChange}
+                sx={{ minWidth: '200px' }}
             />
         </Paper>
     );
