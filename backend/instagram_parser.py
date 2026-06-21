@@ -124,19 +124,20 @@ def parse_recipe_from_caption(caption):
     instructions_text = ""
     
     # Common patterns for ingredients
-    ingredient_keywords = ['ingredients', 'ingredient', 'you\'ll need', 'what you need', 'for the']
-    instruction_keywords = ['instructions', 'directions', 'method', 'how to', 'steps', 'recipe']
+    ingredient_keywords = ['ingredients', 'ingredient', 'you\'ll need', 'what you need', 'for the', 'shopping list', 'sauce:', 'marinade:', 'filling:', 'crust:']
+    # Removed "recipe" from instruction keywords because "recipe" is too broad and matches general page titles/recipe names
+    instruction_keywords = ['instructions', 'directions', 'method', 'how to', 'steps', 'to make', 'preparation', 'cook time', 'bake time']
     
     # Find where ingredients section starts
     ingredients_start = -1
     instructions_start = -1
     
-    caption_lower = caption.lower()
-    
     for i, line in enumerate(lines):
         line_lower = line.lower().strip()
         if any(keyword in line_lower for keyword in ingredient_keywords):
-            ingredients_start = i
+            # Only set if we haven't found a start yet, or if this is a main ingredients header
+            if ingredients_start == -1 or 'ingredients' in line_lower:
+                ingredients_start = i
         if any(keyword in line_lower for keyword in instruction_keywords):
             instructions_start = i
             break
@@ -151,12 +152,18 @@ def parse_recipe_from_caption(caption):
         # Look for lines that look like ingredients (short, often with quantities)
         for line in lines:
             line_stripped = line.strip()
-            if line_stripped and (line_stripped.startswith('-') or 
-                                 line_stripped.startswith('•') or 
-                                 line_stripped.startswith('*') or
-                                 re.match(r'^\d+[\.\)]', line_stripped)):
-                if not any(keyword in line_stripped.lower() for keyword in instruction_keywords):
-                    ingredients_text += line_stripped + '\n'
+            if line_stripped:
+                # Check if it starts with a bullet point
+                is_bullet = line_stripped.startswith(('-', '•', '*', '+', '▪', '▫', '🔸', '👉', '✅'))
+                # Check if it starts with a number (e.g. 1, 2, 1/2, etc.) or fraction
+                starts_with_num = bool(re.match(r'^\d', line_stripped) or re.match(r'^[½¼¾⅓⅔⅛]', line_stripped))
+                
+                if is_bullet or starts_with_num:
+                    # Exclude instruction keywords or lines that are too long (ingredients are usually < 100 chars)
+                    if len(line_stripped) < 100 and not any(keyword in line_stripped.lower() for keyword in instruction_keywords):
+                        # Avoid lines like "1. Mix the dough" or "2) Bake" (instruction steps)
+                        if not re.match(r'^\d+\s*[\.\)]\s*[A-Z]', line_stripped):
+                            ingredients_text += line_stripped + '\n'
     
     # Extract instructions
     if instructions_start >= 0:
@@ -167,15 +174,24 @@ def parse_recipe_from_caption(caption):
         if ingredients_start >= 0:
             instructions_text = '\n'.join(lines[ingredients_start + 1:])
         else:
-            # Use all text as instructions if we can't find sections
-            instructions_text = caption
+            # If we couldn't separate, put everything that is NOT an ingredient in instructions
+            instructions_lines = []
+            for line in lines:
+                line_stripped = line.strip()
+                if line_stripped and line_stripped not in ingredients_text:
+                    instructions_lines.append(line)
+            instructions_text = '\n'.join(instructions_lines)
+            if not instructions_text.strip():
+                instructions_text = caption
     
     # Parse ingredients into structured format
     ingredient_lines = [line.strip() for line in ingredients_text.split('\n') if line.strip()]
     
     for ingredient_line in ingredient_lines:
-        # Remove bullet points and numbering
-        ingredient_line = re.sub(r'^[-•*\d+\.\)]\s*', '', ingredient_line)
+        # Remove bullet points, numbering, and leading symbols
+        ingredient_line = re.sub(r'^[-•*+\s]*', '', ingredient_line)
+        # Also clean up list numbers like "1.", "1)"
+        ingredient_line = re.sub(r'^\d+\s*[\.\)]\s*', '', ingredient_line)
         
         if not ingredient_line:
             continue
@@ -194,8 +210,8 @@ def parse_recipe_from_caption(caption):
         elif decimal_match:
             quantity = float(decimal_match.group(1))
         
-        # Common cooking units
-        unit_pattern = r'(cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|ounce|ounces|oz|lb|lbs|pound|pounds|gram|grams|g|kg|kilogram|kilograms|ml|milliliter|milliliters|l|liter|liters|pint|pints|quart|quarts|gallon|gallons|piece|pieces|clove|cloves|can|cans|package|packages|bunch|bunches|head|heads|stalk|stalks|slice|slices|dash|pinch|handful|handfuls)'
+        # Common cooking units (plurals and longer words prioritized first to match correctly)
+        unit_pattern = r'\b(tablespoons|tablespoon|tbsp|teaspoons|teaspoon|tsp|cups|cup|ounces|ounce|oz|lbs|lb|pounds|pound|grams|gram|g|kilograms|kilogram|kg|milliliters|milliliter|ml|liters|liter|l|pints|pint|quarts|quart|gallons|gallon|pieces|piece|cloves|clove|cans|can|packages|package|bunches|bunch|heads|head|stalks|stalk|slices|slice|dash|pinch|handfuls|handful)\b'
         unit_match = re.search(unit_pattern, ingredient_line, re.IGNORECASE)
         unit = unit_match.group(1).lower() if unit_match else None
         
@@ -237,6 +253,7 @@ def parse_recipe_from_caption(caption):
                 ingredient_name = ingredient_line.strip()
         
         # Clean up ingredient name
+        ingredient_name = re.sub(r'^[\.\-\s]+', '', ingredient_name)
         ingredient_name = re.sub(r'^of\s+', '', ingredient_name, flags=re.IGNORECASE)
         ingredient_name = ingredient_name.strip()
         
