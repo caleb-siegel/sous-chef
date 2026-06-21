@@ -111,8 +111,9 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                 setIngredients(formattedIngredients);
             }
 
-            // Set source name to Instagram
-            setSourceName("Instagram");
+            // Set source category to Instagram and source name to the account name
+            setSourceCategoryInput("Instagram");
+            setSourceName(data.source || "Instagram");
             setReference(instagramUrl.trim());
 
             // Clear the Instagram URL field
