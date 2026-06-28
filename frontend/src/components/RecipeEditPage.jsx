@@ -79,7 +79,7 @@ function RecipeEditPage({ recipe, user }) {
 
     const [sourceCategories, setSourceCategories] = useState([]);
     useEffect(() => {
-        fetch(`${backendUrl}/api/sourcecategories`)
+        fetch(`${backendUrl}/api/category_names`)
         .then((response) => response.json())
         .then((data) => setSourceCategories(data));
     }, []);
@@ -113,7 +113,7 @@ function RecipeEditPage({ recipe, user }) {
             const promises = [];
 
             // Find source category ID if input exists
-            let sourceCategoryId = null;
+            let sourceCategoryId = recipe.source_category_id;
             if (sourceCategoryInput && sourceCategories.length > 0) {
                 const category = sourceCategories.find(cat => cat.name === sourceCategoryInput);
                 if (category) {
