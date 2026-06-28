@@ -36,7 +36,7 @@ function RecipeEditPage({ recipe, user }) {
 
     const [tags, setTags] = useState([]);
     useEffect(() => {
-        fetch(`${backendUrl}/api/tags`)
+        fetch(`${backendUrl}/api/tag_names`)
         .then((response) => response.json())
         .then((data) => setTags(data));
     }, []);
