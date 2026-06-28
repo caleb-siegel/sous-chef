@@ -11,7 +11,7 @@ function RecipeEditPage({ recipe, user }) {
 
     const [name, setName] = useState(recipe.name);
     const [picture, setPicture] = useState(recipe.picture);
-    const [sourceCategoryInput, setSourceCategoryInput] = useState(recipe.source_category.name);
+    const [sourceCategoryInput, setSourceCategoryInput] = useState(recipe.source_category ? recipe.source_category.name : "");
     const [sourceName, setSourceName] = useState(recipe.source);
     const [reference, setReference] = useState(recipe.reference);
     const [recipeInstructions, setRecipeInstructions] = useState(recipe.instructions);
