@@ -629,7 +629,7 @@ def recipe_ingredients():
 
         return response
 
-@app.route('/api/recipeingredients/<int:id>/', methods=['GET', 'PATCH', 'DELETE'])
+@app.route('/api/recipeingredients/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
 def recipe_ingredient(id):
     if request.method == 'GET':
         ingredient_id = db.session.get(Recipe_Ingredient, id)
