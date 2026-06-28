@@ -48,7 +48,7 @@ google_client_id = os.getenv('GOOGLE_CLIENT_SECRET')
 CORS(app,
     supports_credentials=True, 
     resources={r"/*": {
-        "origins": ["https://souschef2.vercel.app", "https://souschef.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555", "http://127.0.0.1:5174", "http://localhost:5174", "http://localhost:5177"],
+        "origins": ["https://souschef2.vercel.app", "https://souschef.vercel.app", "http://localhost:5173", "http://127.0.0.1:5555", "http://127.0.0.1:5173", "http://localhost:5555", "http://127.0.0.1:5174", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5175", "http://localhost:5176", "http://127.0.0.1:5176", "http://localhost:5177"],
         "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         "allow_headers": ["Content-Type", "Accept", "Authorization", "Origin"],
         "supports_credentials": True,
@@ -183,12 +183,12 @@ def google_auth():
 
 @app.route('/api/sourcecategories')
 def get_source_categories():
-    source_categories = [source_categories.to_dict() for source_categories in Source_Category.query.all()]
+    source_categories = [c.to_dict(rules=('-recipes',)) for c in Source_Category.query.all()]
     return make_response( source_categories, 200 )
 
 @app.route('/api/tags')
 def get_tags():
-    tags = [tag.to_dict() for tag in Tag.query.all()]
+    tags = [t.to_dict(rules=('-recipe_tags',)) for t in Tag.query.all()]
     return make_response( tags, 200 )
 
 @app.route('/api/usertags', methods=['GET', 'POST'])
