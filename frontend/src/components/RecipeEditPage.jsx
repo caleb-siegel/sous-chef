@@ -108,61 +108,95 @@ function RecipeEditPage({ recipe, user }) {
         ));
     };
 
-    const handlePatch = (id) => {
-        fetch(`${backendUrl}/api/recipes/${id}`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            body: JSON.stringify({
-                name: name,
-                picture: picture,
-                reference: reference,
-                source: sourceName,
-                instructions: recipeInstructions,
-                // source_category_id: sourceCategoryInput,
-            }),
-        })
-        .then((response) => response.json())
-        .then((data) => {})
-        ingredients && ingredients.map(ingredient => {
-            const ingredientData = {
-                ingredient_name: ingredient.ingredient_name,
-                ingredient_quantity: ingredient.ingredient_quantity,
-                ingredient_unit: ingredient.ingredient_unit,
-                ingredient_note: ingredient.ingredient_note
-            };
-            fetch(`${backendUrl}/api/recipeingredients/${ingredient.id}`, {
+    const handlePatch = async (id) => {
+        try {
+            const promises = [];
+
+            // Find source category ID if input exists
+            let sourceCategoryId = null;
+            if (sourceCategoryInput && sourceCategories.length > 0) {
+                const category = sourceCategories.find(cat => cat.name === sourceCategoryInput);
+                if (category) {
+                    sourceCategoryId = category.id;
+                }
+            }
+
+            // 1. Patch recipe details
+            const recipePromise = fetch(`${backendUrl}/api/recipes/${id}`, {
                 method: "PATCH",
                 headers: {
-                    "Content-Type": "Application/JSON",
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
                 },
-                body: JSON.stringify(ingredientData),
-            })
-            .then((response) => response.json())
-            .then((newIngredientData) => {
-                console.log("success")
+                body: JSON.stringify({
+                    name: name,
+                    picture: picture,
+                    reference: reference,
+                    source: sourceName,
+                    instructions: recipeInstructions,
+                    source_category_id: sourceCategoryId,
+                }),
+            }).then(res => {
+                if (!res.ok) throw new Error("Failed to update recipe details");
+                return res.json();
             });
-        });
-        const commentInfo = {
-            comments: comments
+            promises.push(recipePromise);
+
+            // 2. Patch ingredients details
+            if (ingredients && ingredients.length > 0) {
+                ingredients.forEach(ingredient => {
+                    const ingredientData = {
+                        ingredient_name: ingredient.ingredient_name,
+                        ingredient_quantity: ingredient.ingredient_quantity,
+                        ingredient_unit: ingredient.ingredient_unit,
+                        ingredient_note: ingredient.ingredient_note
+                    };
+                    const ingPromise = fetch(`${backendUrl}/api/recipeingredients/${ingredient.id}`, {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(ingredientData),
+                    }).then(res => {
+                        if (!res.ok) throw new Error(`Failed to update ingredient ${ingredient.id}`);
+                        return res.json();
+                    });
+                    promises.push(ingPromise);
+                });
+            }
+
+            // 3. Patch user recipe comments
+            if (recipe.user_recipes && user) {
+                recipe.user_recipes.forEach(userRecipe => {
+                    if (userRecipe && userRecipe.user_id === user.id) {
+                        const commentInfo = {
+                            comments: comments
+                        };
+                        const commentPromise = fetch(`${backendUrl}/api/userrecipes/${userRecipe.id}`, {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(commentInfo),
+                        }).then(res => {
+                            if (!res.ok) throw new Error("Failed to update comments");
+                            return res.json();
+                        });
+                        promises.push(commentPromise);
+                    }
+                });
+            }
+
+            // Wait for all updates to resolve
+            await Promise.all(promises);
+            console.log("All updates completed successfully.");
+            
+            // Reload page to reflect changes
+            window.location.reload();
+        } catch (error) {
+            console.error("Error updating recipe:", error);
+            alert("Failed to save changes: " + error.message);
         }
-        recipe.user_recipes && recipe.user_recipes.filter(userRecipe => {
-            userRecipe.user_id === user.id &&
-            fetch(`${backendUrl}/api/userrecipes/${userRecipe.id}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "Application/JSON",
-                },
-                body: JSON.stringify(commentInfo),
-            })
-            .then((response) => response.json())
-            .then((newCommentData) => {
-                console.log("success")
-            });
-        })
-        window.location.reload();
     }
 
     const handleSubmit = (event) => {
