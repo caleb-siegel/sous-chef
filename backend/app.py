@@ -432,22 +432,226 @@ def upload_recipe_image():
         logger.error(f"Error uploading image: {str(e)}")
         return {"error": str(e)}, 500
     
-@app.route('/api/random_recipe')
-def random_recipe():
-    if session.get('user_id'):
-        all_recipes = User_Recipe.query.filter_by(user_id=session.get('user_id')).all()
+def get_category_filter(cat_name):
+    cat = (cat_name or "").lower().strip()
+    if not cat:
+        return None
+    if cat == "chicken":
+        return Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))
+    elif cat == "fish":
+        fish_terms = ["salmon", "tilapia", "crab", "flounder", "sea bass", "tuna", "snapper", "fish", "cod", "halibut", "shrimp", "trout"]
+        return Recipe.recipe_ingredients.any(or_(*[Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in fish_terms]))
+    elif cat == "meat":
+        meat_tag = Tag.query.filter_by(name="meat").first()
+        if meat_tag:
+            return and_(
+                Recipe.recipe_tags.any(Recipe_Tag.tag_id == meat_tag.id),
+                ~Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))
+            )
+        return Recipe.recipe_ingredients.any(or_(
+            Recipe_Ingredient.ingredient_name.ilike("%beef%"),
+            Recipe_Ingredient.ingredient_name.ilike("%steak%"),
+            Recipe_Ingredient.ingredient_name.ilike("%pork%"),
+            Recipe_Ingredient.ingredient_name.ilike("%lamb%")
+        ))
+    elif cat == "other":
+        excluded_tags = ["breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "meat"]
+        tag_ids = [t.id for t in Tag.query.filter(Tag.name.in_(excluded_tags)).all()]
+        excluded_ingredients = [
+            "chicken", "salmon", "tilapia", "crab", "flounder", 
+            "sea bass", "tuna", "snapper", "fish"
+        ]
+        conds = []
+        if tag_ids:
+            conds.append(~Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(tag_ids)))
+        conds.append(~Recipe.recipe_ingredients.any(or_(*[Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in excluded_ingredients])))
+        return and_(*conds)
     else:
-        all_recipes = User_Recipe.query.all()
-    random.shuffle(all_recipes)
+        tag = Tag.query.filter_by(name=cat).first()
+        if tag:
+            return Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag.id)
+        return None
 
-    random_recipe_dict = all_recipes[0].to_dict()
+@app.route('/api/random_recipe', methods=['GET', 'POST', 'OPTIONS'])
+def random_recipe():
+    if request.method == 'OPTIONS':
+        return make_response('', 200)
 
-    response = make_response(
-        random_recipe_dict,
-        200
-    )
+    # Parse parameters from JSON body or query args
+    data = {}
+    if request.method == 'POST' and request.is_json:
+        data = request.get_json() or {}
+    else:
+        # Support query params in GET
+        data = request.args.to_dict(flat=False)
+        # Flatten single items unless they're list params
+        data = {k: v if len(v) > 1 else v[0] for k, v in data.items()}
 
-    return response
+    def to_list(val):
+        if not val:
+            return []
+        if isinstance(val, list):
+            return [str(v).strip() for v in val if str(v).strip()]
+        if isinstance(val, str):
+            return [v.strip() for v in val.split(',') if v.strip()]
+        return [str(val)]
+
+    categories = to_list(data.get('categories') or data.get('category'))
+    category_mode = data.get('category_mode', 'include').lower() # 'include' or 'exclude'
+    cookbooks = to_list(data.get('cookbooks') or data.get('cookbook'))
+    cookbook_mode = data.get('cookbook_mode', 'include').lower()
+    source_categories = to_list(data.get('source_categories') or data.get('source_category'))
+    source_category_mode = data.get('source_category_mode', 'include').lower()
+    tags = to_list(data.get('tags') or data.get('tag'))
+    tag_mode = data.get('tag_mode', 'include').lower()
+    user_tags = to_list(data.get('user_tags') or data.get('user_tag'))
+    user_tag_mode = data.get('user_tag_mode', 'include').lower()
+    include_ingredients = to_list(data.get('include_ingredients') or data.get('ingredient'))
+    exclude_ingredients = to_list(data.get('exclude_ingredients') or data.get('exclude_ingredient'))
+    scope = data.get('scope', 'all').lower() # 'all' or 'user' / 'my_recipes'
+    
+    # Determine user_id if scope is user
+    user_id = data.get('user_id') or session.get('user_id')
+    try:
+        user_id = int(user_id) if user_id else None
+    except (ValueError, TypeError):
+        user_id = None
+
+    count_only = str(data.get('count_only', '')).lower() in ('true', '1')
+
+    query = Recipe.query
+
+    # Apply scope filter
+    if scope in ('user', 'my_recipes', 'saved') and user_id:
+        query = query.join(User_Recipe).filter(User_Recipe.user_id == user_id)
+
+    filters = []
+
+    # Category filters
+    if categories:
+        cat_conds = [get_category_filter(c) for c in categories]
+        cat_conds = [c for c in cat_conds if c is not None]
+        if cat_conds:
+            if category_mode == 'exclude':
+                # Exclude recipes matching any of these categories
+                filters.append(and_(*[~c for c in cat_conds]))
+            else:
+                # Include recipes matching any of these categories (OR)
+                filters.append(or_(*cat_conds))
+
+    # Cookbook / Source filters
+    if cookbooks:
+        if cookbook_mode == 'exclude':
+            filters.append(~Recipe.source.in_(cookbooks))
+        else:
+            filters.append(Recipe.source.in_(cookbooks))
+
+    # Source Category filters
+    if source_categories:
+        sc_ids = []
+        sc_names = []
+        for sc in source_categories:
+            if sc.isdigit():
+                sc_ids.append(int(sc))
+            else:
+                sc_names.append(sc.lower())
+        
+        sc_obj_ids = [s.id for s in Source_Category.query.all() if s.name.lower() in sc_names]
+        all_sc_ids = list(set(sc_ids + sc_obj_ids))
+        if all_sc_ids:
+            if source_category_mode == 'exclude':
+                filters.append(~Recipe.source_category_id.in_(all_sc_ids))
+            else:
+                filters.append(Recipe.source_category_id.in_(all_sc_ids))
+
+    # Tag filters
+    if tags:
+        tag_ids = []
+        tag_names = []
+        for t in tags:
+            if t.isdigit():
+                tag_ids.append(int(t))
+            else:
+                tag_names.append(t.lower())
+        
+        tag_obj_ids = [t.id for t in Tag.query.all() if t.name.lower() in tag_names]
+        all_tag_ids = list(set(tag_ids + tag_obj_ids))
+        if all_tag_ids:
+            if tag_mode == 'exclude':
+                filters.append(~Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(all_tag_ids)))
+            else:
+                filters.append(Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(all_tag_ids)))
+
+    # User Tag filters
+    if user_tags:
+        ut_ids = []
+        ut_names = []
+        for ut in user_tags:
+            if ut.isdigit():
+                ut_ids.append(int(ut))
+            else:
+                ut_names.append(ut.lower())
+        
+        ut_obj_ids = [u.id for u in User_Tag.query.all() if u.name.lower() in ut_names]
+        all_ut_ids = list(set(ut_ids + ut_obj_ids))
+        if all_ut_ids:
+            ut_cond = Recipe_Tag.tag_id.in_(all_ut_ids)
+            if user_id:
+                user_tag_filter = Recipe.user_recipe_tags.any(
+                    and_(User_Recipe_Tag.user_tag_id.in_(all_ut_ids), User_Recipe_Tag.user_id == user_id)
+                )
+            else:
+                user_tag_filter = Recipe.user_recipe_tags.any(User_Recipe_Tag.user_tag_id.in_(all_ut_ids))
+            
+            if user_tag_mode == 'exclude':
+                filters.append(~user_tag_filter)
+            else:
+                filters.append(user_tag_filter)
+
+    # Ingredient inclusion filters
+    if include_ingredients:
+        for ing in include_ingredients:
+            if ing:
+                filters.append(Recipe.recipe_ingredients.any(
+                    Recipe_Ingredient.ingredient_name.ilike(f"%{ing}%")
+                ))
+
+    # Ingredient exclusion filters
+    if exclude_ingredients:
+        for ing in exclude_ingredients:
+            if ing:
+                filters.append(~Recipe.recipe_ingredients.any(
+                    Recipe_Ingredient.ingredient_name.ilike(f"%{ing}%")
+                ))
+
+    if filters:
+        query = query.filter(and_(*filters))
+
+    matching_recipes = query.all()
+
+    if count_only:
+        return make_response(jsonify({
+            "total_matching": len(matching_recipes)
+        }), 200)
+
+    if not matching_recipes:
+        return make_response(jsonify({
+            "recipe": None,
+            "total_matching": 0,
+            "message": "No recipes found matching the selected filters"
+        }), 200)
+
+    selected_recipe = random.choice(matching_recipes)
+    recipe_dict = selected_recipe.to_dict()
+
+    response_data = {
+        "recipe": recipe_dict,
+        "total_matching": len(matching_recipes),
+        "message": "Success",
+        **recipe_dict
+    }
+
+    return make_response(jsonify(response_data), 200)
     
 @app.route('/api/recipes/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
 def recipe_id(id):
