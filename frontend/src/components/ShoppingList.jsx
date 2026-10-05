@@ -9,12 +9,14 @@ function ShoppingList({ mealPrep, user }) {
     const [consolidate, setConsolidate] = useState(false);
 
     useEffect(() => {
-        fetch(`${backendUrl}/api/user_shopping_list`)
+        const url = user?.id ? `${backendUrl}/api/user_shopping_list?user_id=${user.id}` : `${backendUrl}/api/user_shopping_list`;
+        fetch(url, { credentials: "include" })
         .then((response) => response.json())
         .then((data) => {
-            setShoppingList(data);
-        });
-    }, []);
+            setShoppingList(Array.isArray(data) ? data : []);
+        })
+        .catch(() => setShoppingList([]));
+    }, [user, backendUrl]);
 
     const handleCheckboxChange = (event, itemId, checkedProp) => {
         const isChecked = event.target.checked;
@@ -32,6 +34,7 @@ function ShoppingList({ mealPrep, user }) {
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify({ checked: isChecked }),
             });
         });

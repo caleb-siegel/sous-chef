@@ -23,32 +23,33 @@ function AddToMealPrep({ user, recipe = "", onAdd }) {
     const handleSubmitMealPrep = (event) => {
         event.preventDefault();
         const mealPrepData = {
-            user_id: user ? user.id : "",
-            recipe_id: recipe ? recipe.id : addedRecipe,
+            user_id: user ? user.id : null,
+            recipe_id: recipe ? (typeof recipe === 'object' ? recipe.id : recipe) : addedRecipe,
             weekday: weekday,
             meal: meal,
-        }
+        };
         fetch(`${backendUrl}/api/mealprep`, {
             method: "POST",
             headers: {
-                "Content-Type": "Application/JSON",
+                "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify(mealPrepData),
         })
         .then((response) => response.json())
         .then((newMealPrepData) => {
-            setWeekday("")
-            setMeal("")
-            setShowAddMealPrepForm(!showAddMealPrepForm)
+            setWeekday("");
+            setMeal("");
+            setShowAddMealPrepForm(false);
             if (onAdd) {
                 onAdd(newMealPrepData);
             }
-        })
-    }
+        });
+    };
 
     return (
     <Container disableGutters maxWidth={false} sx={{ paddingTop: '5px' }}>
-        {recipe?.meal_prep?.map(prep => {
+        {(recipe?.meal_preps || recipe?.meal_prep)?.map(prep => {
             return (
                 (user?.id === prep?.user_id) &&
                 <Chip key={prep.id} size="small" variant="outlined" label={`${prep.weekday} ${prep.meal}`}></Chip> 

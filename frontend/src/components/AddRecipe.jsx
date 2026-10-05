@@ -243,13 +243,16 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
             source_category_id: sourceCategoryId,
             source: sourceName,
             reference: reference,
-            instructions: recipeInstructions
+            instructions: recipeInstructions,
+            user_id: user?.id,
+            created_by_user_id: user?.id
         };
         fetch(`${backendUrl}/api/recipes`, {
             method: "POST",
             headers: {
-                "Content-Type": "Application/JSON",
+                "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify(recipeData),
             })
             .then((response) => response.json())
@@ -268,13 +271,13 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                     fetch(`${backendUrl}/api/recipetags`, {
                         method: "POST",
                         headers: {
-                            "Content-Type": "Application/JSON",
+                            "Content-Type": "application/json",
                         },
+                        credentials: "include",
                         body: JSON.stringify(tagData),
                     })
                     .then((response) => response.json())
                     .then((newTagData) => {
-                        // console.log("success")
                         setSelectedTags([]);
                     });
                 });
@@ -289,13 +292,13 @@ function AddRecipe({ setRecipes, recipes, handleAddRecipe, tags }) {
                     fetch(`${backendUrl}/api/recipeingredients`, {
                         method: "POST",
                         headers: {
-                            "Content-Type": "Application/JSON",
+                            "Content-Type": "application/json",
                         },
+                        credentials: "include",
                         body: JSON.stringify(ingredientData),
                     })
                     .then((response) => response.json())
                     .then((newIngredientData) => {
-                        // console.log("success")
                         setIngredients([emptyIngredient]);
                     });
                 });

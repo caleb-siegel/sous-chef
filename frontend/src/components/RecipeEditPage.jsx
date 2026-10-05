@@ -128,6 +128,7 @@ function RecipeEditPage({ recipe, user }) {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify({
                     name: name,
                     picture: picture,
@@ -156,6 +157,7 @@ function RecipeEditPage({ recipe, user }) {
                         headers: {
                             "Content-Type": "application/json",
                         },
+                        credentials: "include",
                         body: JSON.stringify(ingredientData),
                     }).then(res => {
                         if (!res.ok) throw new Error(`Failed to update ingredient ${ingredient.id}`);
@@ -177,6 +179,7 @@ function RecipeEditPage({ recipe, user }) {
                             headers: {
                                 "Content-Type": "application/json",
                             },
+                            credentials: "include",
                             body: JSON.stringify(commentInfo),
                         }).then(res => {
                             if (!res.ok) throw new Error("Failed to update comments");
@@ -211,13 +214,13 @@ function RecipeEditPage({ recipe, user }) {
         fetch(`${backendUrl}/api/recipeingredients`, {
             method: "POST",
             headers: {
-                "Content-Type": "Application/JSON",
+                "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify(ingredientData),
         })
         .then((response) => response.json())
         .then((newIngredientData) => {
-            // console.log("success")
             setNewIngredient();
             setIngredients([...ingredients, newIngredientData]);
         });
@@ -227,10 +230,11 @@ function RecipeEditPage({ recipe, user }) {
         event.preventDefault();
         fetch(`${backendUrl}/api/recipeingredients/${id}`, {
             method: "DELETE",
+            credentials: "include",
         })
         .then((data) => {
             setIngredients(prevIng => prevIng.filter(ing => ing.id !== id));
-        })
+        });
     };
 
     return (

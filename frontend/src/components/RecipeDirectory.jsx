@@ -86,13 +86,17 @@ function RecipeDirectory() {
 
     const [userRecipes, setUserRecipes] = useState({});
     useEffect(() => {
-        user && user.id &&
-        fetch(`${backendUrl}/api/user_recipe_ids/${user.id}`)
-        .then((response) => response.json())
-        .then((data) => {
-            setUserRecipes(data)
-        });
-    }, []);
+        if (user && user.id) {
+            fetch(`${backendUrl}/api/user_recipe_ids/${user.id}`, { credentials: "include" })
+            .then((response) => response.json())
+            .then((data) => {
+                setUserRecipes(typeof data === 'object' && data !== null && !data.error ? data : {});
+            })
+            .catch(() => setUserRecipes({}));
+        } else {
+            setUserRecipes({});
+        }
+    }, [user, backendUrl]);
 
     const [toggleRecipes, setToggleRecipes] = useState("allrecipes");
     const handleToggleRecipes = (event) => {
@@ -135,7 +139,7 @@ function RecipeDirectory() {
         })    
     }
 
-    const [categorizationButtons, setCategorizationButtons] = useState("dessert");
+    const [categorizationButtons, setCategorizationButtons] = useState("all");
     const handleCategorizationButtons = (category) => {
         setCategorizationButtons(category);
         fetchRecipes(category);
@@ -273,6 +277,7 @@ function RecipeDirectory() {
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify(userRecipeData),
             })
             .then((response) => response.json())
@@ -281,7 +286,6 @@ function RecipeDirectory() {
                     ...prevUserRecipes,
                     [newUserRecipe.recipe_id]: newUserRecipe.id,
                 }));
-                // setRecipes([...recipes, newUserRecipe]);
             })
             .catch((error) => {
                 console.error("Error adding recipe to favorites:", error);
@@ -289,14 +293,13 @@ function RecipeDirectory() {
         } else {
             fetch(`${backendUrl}/api/userrecipes/${userRecipes[recipeId]}`, {
                 method: "DELETE",
+                credentials: "include",
             })
             .then(() => {
                 setUserRecipes((prevUserRecipes) => {
-                    // Create a new object without the key that matches recipeId
                     const { [recipeId]: _, ...updatedRecipes } = prevUserRecipes;
                     return updatedRecipes;
                 });
-                // setRecipes(recipes.filter(recipe => recipe.id !== userRecipeIdToRemove));
             })
             .catch((error) => {
                 console.error("Error removing recipe from favorites:", error);
@@ -313,12 +316,13 @@ function RecipeDirectory() {
     };
 
     const handleTagSelect = (recipeIdTag, userTagId) => {
-        if (userTagId !== null) {
+        if (userTagId !== null && user) {
             fetch(`${backendUrl}/api/userrecipetags`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: "include",
                 body: JSON.stringify({
                     user_id: user.id,
                     recipe_id: recipeIdTag,
@@ -327,7 +331,7 @@ function RecipeDirectory() {
             })
             .then((response) => response.json())
             .then(response => {
-                console.log('User tag posted successfully:', response.data);
+                console.log('User tag posted successfully:', response);
             })
             .catch(error => {
                 console.error('Error posting user tag:', error);
@@ -342,9 +346,10 @@ function RecipeDirectory() {
         event.preventDefault();
         fetch(`${backendUrl}/api/userrecipetags/${id}`, {
             method: "DELETE",
+            credentials: "include",
         })
-        .then((data) => {})
-      };
+        .then(() => {});
+    };
 
     return (
         <Container disableGutters maxWidth={false} sx={{ paddingBottom: '50px'}}>

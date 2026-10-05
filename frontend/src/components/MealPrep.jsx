@@ -99,22 +99,28 @@ function MealPrep() {
 
     const [mealPrep, setMealPrep] = useState([]);
     useEffect(() => {
-        fetch(`${backendUrl}/api/mealprep`)
+        const url = user?.id ? `${backendUrl}/api/mealprep?user_id=${user.id}` : `${backendUrl}/api/mealprep`;
+        fetch(url, { credentials: "include" })
         .then((response) => response.json())
         .then((data) => {
-            setMealPrep(data);
+            setMealPrep(Array.isArray(data) ? data : []);
+            setLoading(false);
+        })
+        .catch(() => {
+            setMealPrep([]);
             setLoading(false);
         });
-    }, []);
+    }, [user, backendUrl]);
 
     const handleDelete = (event, id) => {
         event.preventDefault();
         fetch(`${backendUrl}/api/mealprep/${id}`, {
             method: "DELETE",
+            credentials: "include",
         })
-        .then((data) => {
+        .then(() => {
             setMealPrep(prevMealPrep => prevMealPrep.filter(prep => prep.id !== id));
-        })
+        });
     };
 
     const handleDrop = async (item, newWeekday, newMeal) => {
@@ -126,6 +132,7 @@ function MealPrep() {
         // Delete the old meal prep
         await fetch(`${backendUrl}/api/mealprep/${item.id}`, {
             method: "DELETE",
+            credentials: "include",
         });
 
         // Create new meal prep in the new slot
@@ -134,8 +141,9 @@ function MealPrep() {
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({
-                user_id: user.id,
+                user_id: user ? user.id : null,
                 recipe_id: item.recipe.id,
                 weekday: newWeekday,
                 meal: newMeal,
