@@ -7,38 +7,46 @@ import { Container, Typography } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
 
 function App() {
-
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const navigate = useNavigate();
 
-  const backendUrl = "https://souschef-backend.vercel.app"
-  // const backendUrl = "http://127.0.0.1:5555"
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? `http://${window.location.hostname}:5555`
+      : "https://souschef-backend.vercel.app");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-
-      // Check with the backend for the latest data
-      fetch(`${backendUrl}/api/check_session`, {
-        credentials: "include", // important for cookies/session
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Session invalid");
-          return res.json();
-        })
-        .then((freshUser) => {
-          setUser(freshUser);
-          localStorage.setItem("user", JSON.stringify(freshUser)); // update local storage
-        })
-        .catch(() => {
-          // Session is no longer valid
+    // Check with the backend for the latest session data
+    fetch(`${backendUrl}/api/check_session`, {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (res.status === 401) {
           localStorage.removeItem("user");
           setUser(null);
-        });
-    }
+          return null;
+        }
+        if (!res.ok) {
+          throw new Error(`Session check returned ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((freshUser) => {
+        if (freshUser) {
+          setUser(freshUser);
+          localStorage.setItem("user", JSON.stringify(freshUser));
+        }
+      })
+      .catch((err) => {
+        console.warn("Session check could not reach server:", err);
+      });
   }, [backendUrl]);
 
   //   useEffect(() => {
@@ -127,7 +135,7 @@ function App() {
   });
 
   function logout() {
-    fetch(`${backendUrl}/api/logout`, { method: "DELETE" }).then((res) => {
+    fetch(`${backendUrl}/api/logout`, { method: "DELETE", credentials: "include" }).then((res) => {
       if (res.ok) {
         localStorage.removeItem("user");
         setUser(null);
