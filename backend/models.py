@@ -10,7 +10,7 @@ from datetime import date, time
 class User(db.Model, SerializerMixin):
     __tablename__ = "user"
     
-    serialize_rules = ["-user_recipes.user", "-user_recipe_tags.user", "-meal_preps", "-recipes.user", "-shopping_list.user"]
+    serialize_rules = ["-password_hash", "-user_recipes.user", "-user_recipe_tags.user", "-meal_preps", "-recipes.user", "-shopping_list.user"]
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)

@@ -57,8 +57,10 @@ CORS(app,
 
 from datetime import timedelta
 app.permanent_session_lifetime = timedelta(days=31)
-app.config['SESSION_COOKIE_SAMESITE'] = 'None' 
-app.config['SESSION_COOKIE_SECURE'] = True
+is_production = os.getenv('FLASK_ENV') == 'production' or bool(os.getenv('VERCEL')) or os.getenv('ENV') == 'production'
+app.config['SESSION_COOKIE_SAMESITE'] = 'None' if is_production else 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = is_production
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_PERMANENT'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 
@@ -73,16 +75,17 @@ def root():
 
 @app.get('/api/check_session')
 def check_session():
-    user = db.session.get(User, session.get('user_id'))
-    print(f'check session {session.get("user_id")}')
-    if user:
-        return user.to_dict(rules=['-password_hash']), 200
-    else:
-        return {"message": "No user logged in"}, 401
+    user_id = session.get('user_id')
+    print(f'check session user_id={user_id}')
+    if user_id:
+        user = db.session.get(User, user_id)
+        if user:
+            return user.to_dict(rules=['-password_hash']), 200
+    return {"message": "No user logged in"}, 401
 
 @app.delete('/api/logout')
 def logout():
-    session.pop('user_id')
+    session.pop('user_id', None)
     return { "message": "Logged out"}, 200
 
 @app.route('/api/login', methods=['POST', 'OPTIONS'])
@@ -102,11 +105,10 @@ def login():
         data = request.json
         user = db.session.query(User.id, User.name, User.password_hash).filter(User.name == data.get('name')).first()
         if user and bcrypt.check_password_hash(user.password_hash, data.get('password')):
+            session.permanent = True
             session["user_id"] = user.id
-            return {
-                "id": user.id,
-                "name": user.name,
-            }, 200
+            full_user = db.session.get(User, user.id)
+            return full_user.to_dict(rules=['-password_hash']), 200
         else:
             return { "error": "Invalid username or password" }, 401
         
@@ -269,6 +271,7 @@ def recipes():
         return response
 
     elif request.method == 'POST':
+        user_id = session.get('user_id') or request.json.get('created_by_user_id') or request.json.get('user_id')
         new_recipe = Recipe(
             name=request.json.get("name"),
             picture=request.json.get("picture"),
@@ -276,13 +279,15 @@ def recipes():
             source=request.json.get("source"),
             reference=request.json.get("reference"),
             instructions=request.json.get("instructions"),
+            created_by_user_id=user_id,
         )
 
         db.session.add(new_recipe)
         db.session.commit()
         
-        db.session.add(User_Recipe(user_id=session.get('user_id'),recipe=new_recipe,comments="", not_reorder=False))
-        db.session.commit()
+        if user_id:
+            db.session.add(User_Recipe(user_id=user_id, recipe=new_recipe, comments="", not_reorder=False))
+            db.session.commit()
         
         new_recipe_dict = new_recipe.to_dict()
 
@@ -867,10 +872,16 @@ def recipe_ingredient(id):
 @app.route('/api/mealprep', methods=['GET', 'POST'])
 def meal_prep():
     if request.method == 'GET':
-        meal_preps = []
-        for meal_prep in Meal_Prep.query.all():
-            meal_prep_dict = meal_prep.to_dict()
-            meal_preps.append(meal_prep_dict)
+        user_id = session.get('user_id') or request.args.get('user_id')
+        if user_id:
+            try:
+                user_id = int(user_id)
+            except (ValueError, TypeError):
+                user_id = None
+        if user_id:
+            meal_preps = [mp.to_dict() for mp in Meal_Prep.query.filter_by(user_id=user_id).all()]
+        else:
+            meal_preps = []
 
         response = make_response(
             meal_preps,
@@ -889,8 +900,10 @@ def meal_prep():
         elif isinstance(recipe_val, str):
             recipe_name = recipe_val
 
+        user_id = request.json.get("user_id") or session.get("user_id")
+
         new_meal_prep = Meal_Prep(
-            user_id=request.json.get("user_id"),
+            user_id=user_id,
             recipe_id=recipe_id,
             recipe_name=recipe_name,
             weekday=request.json.get("weekday"),
@@ -911,7 +924,7 @@ def meal_prep():
                     new_shopping_list_entry = Shopping_List(
                         checked=False,
                         ingredient_id=ingredient.id,
-                        user_id=request.json.get("user_id"),
+                        user_id=user_id,
                         mealprep_id=new_meal_prep.id
                     )
                     db.session.add(new_shopping_list_entry)
@@ -928,7 +941,7 @@ def meal_prep():
             new_shopping_list_entry = Shopping_List(
                 checked=False,
                 ingredient_id=new_ingredient.id,
-                user_id=request.json.get("user_id"),
+                user_id=user_id,
                 mealprep_id=new_meal_prep.id
             )
             db.session.add(new_shopping_list_entry)
@@ -947,13 +960,19 @@ def meal_prep():
 @app.route('/api/shopping_list', methods=['GET', 'POST'])
 def shopping_list():
     if request.method == 'GET':
-        shopping_list = []
-        for item in Shopping_List.query.all():
-            item_dict = item.to_dict()
-            shopping_list.append(item_dict)
+        user_id = session.get('user_id') or request.args.get('user_id')
+        if user_id:
+            try:
+                user_id = int(user_id)
+            except (ValueError, TypeError):
+                user_id = None
+        if user_id:
+            items = [item.to_dict() for item in Shopping_List.query.filter_by(user_id=user_id).all()]
+        else:
+            items = []
 
         response = make_response(
-            shopping_list,
+            items,
             200
         )
 
@@ -961,11 +980,17 @@ def shopping_list():
 
 @app.route('/api/user_shopping_list')
 def user_shopping_list():
-    shopping_list = Shopping_List.query.all()
-    returned_shopping_list = []
-    for item in shopping_list:
-        item_dict = item.to_dict()
-        returned_shopping_list.append(item_dict)
+    user_id = session.get('user_id') or request.args.get('user_id')
+    if user_id:
+        try:
+            user_id = int(user_id)
+        except (ValueError, TypeError):
+            user_id = None
+    if user_id:
+        shopping_list = Shopping_List.query.filter_by(user_id=user_id).all()
+    else:
+        shopping_list = []
+    returned_shopping_list = [item.to_dict() for item in shopping_list]
 
     response = make_response(
         returned_shopping_list,
@@ -1193,10 +1218,50 @@ def cooked_instances():
         return make_response( cooked_instances, 200 )
     
     elif request.method == 'POST':
+        data = request.json or {}
+        user_id = session.get('user_id') or data.get('user_id')
+        recipe_id = data.get('recipe_id')
+        user_recipe_id = data.get('user_recipe_id')
+
+        if user_id:
+            try:
+                user_id = int(user_id)
+            except (ValueError, TypeError):
+                pass
+
+        if user_id and recipe_id and not user_recipe_id:
+            user_recipe = User_Recipe.query.filter_by(user_id=user_id, recipe_id=recipe_id).first()
+            if not user_recipe:
+                user_recipe = User_Recipe(user_id=user_id, recipe_id=recipe_id, comments="", not_reorder=False)
+                db.session.add(user_recipe)
+                db.session.flush()
+            user_recipe_id = user_recipe.id
+        elif user_id and user_recipe_id:
+            ur = db.session.get(User_Recipe, user_recipe_id)
+            if ur and ur.user_id != user_id:
+                user_recipe = User_Recipe.query.filter_by(user_id=user_id, recipe_id=ur.recipe_id).first()
+                if not user_recipe:
+                    user_recipe = User_Recipe(user_id=user_id, recipe_id=ur.recipe_id, comments="", not_reorder=False)
+                    db.session.add(user_recipe)
+                    db.session.flush()
+                user_recipe_id = user_recipe.id
+
+        cooked_date_val = data.get("cooked_date")
+        cooked_date = None
+        if cooked_date_val:
+            from datetime import datetime
+            try:
+                if isinstance(cooked_date_val, str):
+                    cooked_date = datetime.fromisoformat(cooked_date_val.replace('Z', '+00:00'))
+                else:
+                    cooked_date = cooked_date_val
+            except Exception:
+                cooked_date = None
+
         new_cooked_instance = Cooked_Instance(
-            user_recipe_id=request.json.get("user_recipe_id"),
-            comment=request.json.get("comment"),
-            cooked_date=request.json.get("cooked_date"),
+            user_recipe_id=user_recipe_id,
+            comment=data.get("comment"),
+            cooked_date=cooked_date,
         )
         db.session.add(new_cooked_instance)
         db.session.commit()
