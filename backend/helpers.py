@@ -92,7 +92,9 @@ def get_recipe_dict(recipe_list):
             "user_recipe_tags": user_recipe_tags,
             "user_recipes": user_recipes,
             "source": recipe.source,
-            "recipe_ingredients": ingredients
+            "recipe_ingredients": ingredients,
+            "created_at": recipe.created_at.isoformat() if recipe.created_at else None,
+            "updated_at": recipe.updated_at.isoformat() if recipe.updated_at else None,
         }
         recipes.append(recipe_dict)
     return recipes

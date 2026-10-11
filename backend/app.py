@@ -1018,15 +1018,27 @@ def meal_prep():
 
     elif request.method == 'POST':
         recipe_val = request.json.get("recipe_id")
+        recipe_name_val = request.json.get("recipe_name")
         recipe_id = None
         recipe_name = None
 
         if isinstance(recipe_val, int):
             recipe_id = recipe_val
-        elif isinstance(recipe_val, str):
-            recipe_name = recipe_val
+        elif isinstance(recipe_val, str) and recipe_val.isdigit():
+            recipe_id = int(recipe_val)
+        elif isinstance(recipe_val, str) and not recipe_val.isdigit():
+            recipe_name = recipe_val.strip()
+
+        if not recipe_name and recipe_name_val:
+            recipe_name = str(recipe_name_val).strip()
 
         user_id = request.json.get("user_id") or get_current_user_id()
+
+        recipe = None
+        if recipe_id:
+            recipe = Recipe.query.filter_by(id=recipe_id).first()
+            if recipe and not recipe_name:
+                recipe_name = recipe.name
 
         new_meal_prep = Meal_Prep(
             user_id=user_id,
@@ -1039,21 +1051,15 @@ def meal_prep():
         db.session.add(new_meal_prep)
         db.session.flush()
 
-        recipe = None
-        if recipe_id:
-            recipe = Recipe.query.filter_by(id=recipe_id).first()
-            if recipe:
-                rd = recipe.to_dict()
-                print(f'recipe ingredients: {rd}')
-
-                for ingredient in recipe.recipe_ingredients:
-                    new_shopping_list_entry = Shopping_List(
-                        checked=False,
-                        ingredient_id=ingredient.id,
-                        user_id=user_id,
-                        mealprep_id=new_meal_prep.id
-                    )
-                    db.session.add(new_shopping_list_entry)
+        if recipe:
+            for ingredient in recipe.recipe_ingredients:
+                new_shopping_list_entry = Shopping_List(
+                    checked=False,
+                    ingredient_id=ingredient.id,
+                    user_id=user_id,
+                    mealprep_id=new_meal_prep.id
+                )
+                db.session.add(new_shopping_list_entry)
         elif recipe_name:
             # Create a standalone Recipe_Ingredient for the manual mealprep item
             new_ingredient = Recipe_Ingredient(
@@ -1141,13 +1147,30 @@ def edit_user_shopping_list(id):
             return {"error": f'{e}'}
 
     
-@app.route('/api/mealprep/<int:id>', methods=['GET', 'DELETE'])
+@app.route('/api/mealprep/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
 def meal_prep_id(id):
     if request.method == 'GET':
         meal_prep = db.session.get(Meal_Prep, id)
         if not meal_prep:
             return {"error": f"meal prep with id {id} not found"}, 404
         return meal_prep.to_dict()
+
+    elif request.method == 'PATCH':
+        meal_prep = db.session.get(Meal_Prep, id)
+        if not meal_prep:
+            return {"error": f"Meal prep with id {id} not found"}, 404
+        data = request.json or {}
+        if "weekday" in data:
+            meal_prep.weekday = data["weekday"]
+        if "meal" in data:
+            meal_prep.meal = data["meal"]
+        if "recipe_id" in data:
+            meal_prep.recipe_id = data["recipe_id"]
+        if "recipe_name" in data:
+            meal_prep.recipe_name = data["recipe_name"]
+        db.session.add(meal_prep)
+        db.session.commit()
+        return meal_prep.to_dict(), 200
 
     elif request.method == 'DELETE':
         meal_prep = db.session.get(Meal_Prep, id)
@@ -1332,7 +1355,7 @@ def filter_recipes():
         query = query.filter(and_(*filters))
 
     # Get results
-    recipes = query.order_by(Recipe.id.desc()).all()
+    recipes = query.order_by(Recipe.created_at.desc(), Recipe.id.desc()).all()
     recipes_dict = get_recipe_dict(recipes)
     
     return make_response(recipes_dict, 200)
