@@ -1,0 +1,372 @@
+/* ==========================================================================
+   Add Recipe Modal - Modern Culinary Design System
+   ========================================================================== */
+
+:root {
+  --ar-primary: #3FFFC2;
+  --ar-primary-dark: #059669;
+  --ar-primary-subtle: rgba(63, 255, 194, 0.15);
+  --ar-secondary: #FF7D45;
+  --ar-secondary-dark: #ea580c;
+  --ar-secondary-subtle: rgba(255, 125, 69, 0.15);
+  --ar-surface: #ffffff;
+  --ar-surface-alt: #f8fafc;
+  --ar-surface-elevated: #f1f5f9;
+  --ar-border: #e2e8f0;
+  --ar-border-strong: #cbd5e1;
+  --ar-text-main: #0f172a;
+  --ar-text-muted: #64748b;
+  --ar-radius-sm: 8px;
+  --ar-radius-md: 14px;
+  --ar-radius-lg: 20px;
+  --ar-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+  --ar-shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+}
+
+/* Dialog Container */
+.add-recipe-dialog-paper {
+  border-radius: var(--ar-radius-lg) !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+  overflow: hidden !important;
+  border: 1px solid var(--ar-border) !important;
+  background-color: var(--ar-surface) !important;
+}
+
+/* Modal Header */
+.ar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(135deg, #ffffff 0%, var(--ar-surface-alt) 100%);
+  border-bottom: 1px solid var(--ar-border);
+}
+
+.ar-header-title-box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.ar-header-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--ar-primary-subtle), var(--ar-secondary-subtle));
+  font-size: 1.4rem;
+  box-shadow: var(--ar-shadow-sm);
+}
+
+.ar-header-text h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--ar-text-main);
+  letter-spacing: -0.02em;
+}
+
+.ar-header-text p {
+  margin: 0.15rem 0 0 0;
+  font-size: 0.82rem;
+  color: var(--ar-text-muted);
+}
+
+.ar-close-btn {
+  background: transparent !important;
+  color: var(--ar-text-muted) !important;
+  transition: all 0.2s ease !important;
+}
+
+.ar-close-btn:hover {
+  background: rgba(15, 23, 42, 0.06) !important;
+  color: var(--ar-text-main) !important;
+  transform: rotate(90deg);
+}
+
+/* Dialog Body */
+.ar-content {
+  padding: 1.5rem 1.75rem 2rem !important;
+  max-height: calc(85vh - 140px);
+  overflow-y: auto;
+}
+
+/* Segmented Import Method Selector */
+.ar-method-selector-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+}
+
+.ar-method-pill-group {
+  display: inline-flex;
+  background: var(--ar-surface-elevated);
+  padding: 0.35rem;
+  border-radius: 9999px;
+  border: 1px solid var(--ar-border);
+  gap: 0.35rem;
+}
+
+.ar-method-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ar-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ar-method-btn:hover {
+  color: var(--ar-text-main);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.ar-method-btn.active {
+  background: #ffffff;
+  color: var(--ar-text-main);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  font-weight: 700;
+}
+
+.ar-method-btn.active.instagram {
+  color: #E1306C;
+}
+
+.ar-method-btn.active.ai {
+  color: var(--ar-primary-dark);
+}
+
+/* Smart Import Banner - Instagram */
+.ar-smart-panel {
+  border-radius: var(--ar-radius-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ar-smart-panel.instagram {
+  background: linear-gradient(135deg, rgba(225, 48, 108, 0.06), rgba(253, 29, 29, 0.04));
+  border: 1.5px dashed rgba(225, 48, 108, 0.4);
+}
+
+.ar-smart-panel.instagram:hover {
+  border-color: #E1306C;
+}
+
+.ar-smart-panel.ai {
+  background: linear-gradient(135deg, rgba(63, 255, 194, 0.09), rgba(18, 184, 134, 0.05));
+  border: 1.5px dashed rgba(18, 184, 134, 0.45);
+}
+
+.ar-smart-panel.ai:hover {
+  border-color: var(--ar-primary-dark);
+  background: linear-gradient(135deg, rgba(63, 255, 194, 0.14), rgba(18, 184, 134, 0.08));
+}
+
+.ar-smart-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.85rem;
+}
+
+.ar-smart-header.instagram {
+  color: #E1306C;
+}
+
+.ar-smart-header.ai {
+  color: var(--ar-primary-dark);
+}
+
+/* Form Sections */
+.ar-section-card {
+  background: var(--ar-surface);
+  border: 1px solid var(--ar-border);
+  border-radius: var(--ar-radius-md);
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--ar-shadow-sm);
+}
+
+.ar-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ar-text-main);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ar-surface-elevated);
+}
+
+.ar-section-title span.badge {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: var(--ar-surface-elevated);
+  color: var(--ar-text-muted);
+  font-weight: 600;
+}
+
+/* Photo Uploader Card */
+.ar-photo-uploader {
+  border: 1.5px dashed var(--ar-border-strong);
+  border-radius: var(--ar-radius-md);
+  padding: 1.25rem;
+  text-align: center;
+  background: var(--ar-surface-alt);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.ar-photo-uploader:hover {
+  border-color: var(--ar-primary-dark);
+  background: rgba(63, 255, 194, 0.04);
+}
+
+.ar-photo-preview-wrap {
+  position: relative;
+  border-radius: var(--ar-radius-sm);
+  overflow: hidden;
+  max-height: 180px;
+  box-shadow: var(--ar-shadow-sm);
+}
+
+.ar-photo-preview-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.ar-photo-remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(15, 23, 42, 0.75) !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  padding: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ar-photo-remove-btn:hover {
+  background: #ef4444 !important;
+}
+
+/* Ingredients Builder Table */
+.ar-ingredients-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ar-ingredient-row {
+  display: grid;
+  grid-template-columns: 85px 110px 1fr 1fr 38px;
+  gap: 0.6rem;
+  align-items: center;
+  background: var(--ar-surface-alt);
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--ar-radius-sm);
+  border: 1px solid var(--ar-border);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.ar-ingredient-row:hover {
+  border-color: var(--ar-border-strong);
+  background: #ffffff;
+}
+
+.ar-del-row-btn {
+  color: var(--ar-text-muted) !important;
+  transition: color 0.15s ease !important;
+}
+
+.ar-del-row-btn:hover {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+}
+
+.ar-add-ing-btn {
+  align-self: flex-start;
+  margin-top: 0.5rem !important;
+  border-radius: 9999px !important;
+  text-transform: none !important;
+  font-weight: 700 !important;
+}
+
+/* Modal Actions Footer */
+.ar-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.15rem 1.75rem;
+  background: var(--ar-surface-alt);
+  border-top: 1px solid var(--ar-border);
+}
+
+.ar-submit-btn {
+  border-radius: 9999px !important;
+  padding: 0.6rem 2rem !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  letter-spacing: 0.01em !important;
+  box-shadow: 0 4px 14px rgba(255, 125, 69, 0.35) !important;
+}
+
+.ar-submit-btn:hover {
+  box-shadow: 0 6px 20px rgba(255, 125, 69, 0.45) !important;
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .ar-ingredient-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  .ar-ingredient-row > *:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .ar-ingredient-row > *:nth-child(4) {
+    grid-column: 1 / 2;
+  }
+  .ar-ingredient-row > *:nth-child(5) {
+    grid-column: 2 / 3;
+    justify-self: end;
+  }
+  .ar-method-pill-group {
+    flex-wrap: wrap;
+    border-radius: var(--ar-radius-md);
+  }
+}

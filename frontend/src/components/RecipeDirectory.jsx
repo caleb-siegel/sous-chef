@@ -905,31 +905,14 @@ function RecipeDirectory() {
                 </Box>
             )}
 
-            {/* Add Recipe Dialog (Modal instead of pushing entire page down) */}
-            <Dialog 
+            {/* Add Recipe Modal */}
+            <AddRecipe 
                 open={addRecipeOpen} 
-                onClose={() => setAddRecipeOpen(false)}
-                maxWidth="md"
-                fullWidth
-                PaperProps={{
-                    sx: { borderRadius: 4, p: 1 }
-                }}
-            >
-                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 800 }}>
-                    <span>Create a New Recipe 🍳</span>
-                    <IconButton size="small" onClick={() => setAddRecipeOpen(false)}>
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent dividers>
-                    <AddRecipe 
-                        recipes={recipes} 
-                        setRecipes={setRecipes} 
-                        handleAddRecipe={() => setAddRecipeOpen(false)} 
-                        tags={tags}
-                    />
-                </DialogContent>
-            </Dialog>
+                onClose={() => setAddRecipeOpen(false)} 
+                recipes={recipes} 
+                setRecipes={setRecipes} 
+                tags={tags}
+            />
         </div>
     );
 }

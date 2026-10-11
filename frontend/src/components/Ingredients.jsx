@@ -34,67 +34,69 @@ function Ingredients({ index, ingredients, setIngredients }) {
     };
     
     return (
-        <Paper elevation={3} sx={{ backgroundColor: '#D4D7D5', padding: '20px', margin: '10px 0', position: 'relative' }}>
-            <IconButton 
-                aria-label="delete ingredient"
-                onClick={handleDeleteIngredient}
-                sx={{ 
-                    position: 'absolute', 
-                    top: 8, 
-                    right: 8, 
-                    color: 'rgba(0, 0, 0, 0.54)',
-                    '&:hover': {
-                        color: '#d32f2f',
-                        backgroundColor: 'rgba(211, 47, 47, 0.04)'
-                    }
-                }}
-            >
-                <DeleteIcon />
-            </IconButton>
-            
+        <div className="ar-ingredient-row">
             <TextField
                 id={`quantity-${index}`}
-                label="Quantity"
-                variant="standard"
+                label="Qty"
+                placeholder="1"
+                variant="outlined"
                 type="number"
-                value={ingredients[index].ingredient_quantity}
+                inputProps={{ step: "any", min: "0" }}
+                size="small"
+                value={ingredients[index].ingredient_quantity || ''}
                 onChange={handleQuantityChange}
-                sx={{ mr: 2, width: '100px' }}
             />
             <Select
-                labelId={`unit-label-${index}`}
                 id={`unit-${index}`}
-                label="Measurement Unit"
-                value={ingredients[index].ingredient_unit}
+                size="small"
+                displayEmpty
+                value={ingredients[index].ingredient_unit || ''}
                 onChange={handleUnitChange}
-                sx={{ mr: 2, minWidth: '100px', verticalAlign: 'bottom' }}
             >
-                <MenuItem value=""></MenuItem>
+                <MenuItem value=""><em>Unit</em></MenuItem>
                 <MenuItem value="Tsp">Tsp</MenuItem>
                 <MenuItem value="Tbsp">Tbsp</MenuItem>
                 <MenuItem value="Cup">Cup</MenuItem>
                 <MenuItem value="Oz">Oz</MenuItem>
                 <MenuItem value="Lb">Lb</MenuItem>
-                <MenuItem value="Dash">Dash</MenuItem>
+                <MenuItem value="G">g</MenuItem>
+                <MenuItem value="Kg">kg</MenuItem>
+                <MenuItem value="Ml">ml</MenuItem>
+                <MenuItem value="Liter">L</MenuItem>
                 <MenuItem value="Pinch">Pinch</MenuItem>
+                <MenuItem value="Dash">Dash</MenuItem>
+                <MenuItem value="Clove">Clove</MenuItem>
+                <MenuItem value="Slice">Slice</MenuItem>
+                <MenuItem value="Can">Can</MenuItem>
             </Select>
             <TextField
                 id={`ingredient-${index}`}
-                label="Ingredient"
-                variant="standard"
-                value={ingredients[index].ingredient_name}
+                label="Ingredient Name"
+                placeholder="e.g. Olive Oil"
+                variant="outlined"
+                size="small"
+                value={ingredients[index].ingredient_name || ''}
                 onChange={handleIngredientChange}
-                sx={{ mr: 2, minWidth: '200px' }}
             />
             <TextField
                 id={`note-${index}`}
-                label="Ingredient Note"
-                variant="standard"
-                value={ingredients[index].ingredient_note}
+                label="Prep / Note (opt)"
+                placeholder="e.g. minced, room temp"
+                variant="outlined"
+                size="small"
+                value={ingredients[index].ingredient_note || ''}
                 onChange={handleIngredientNoteChange}
-                sx={{ minWidth: '200px' }}
             />
-        </Paper>
+            <IconButton 
+                aria-label="delete ingredient"
+                onClick={handleDeleteIngredient}
+                size="small"
+                className="ar-del-row-btn"
+                title="Remove ingredient"
+            >
+                <DeleteIcon fontSize="small" />
+            </IconButton>
+        </div>
     );
 };
 

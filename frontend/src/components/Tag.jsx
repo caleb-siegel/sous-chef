@@ -13,13 +13,13 @@ function Tag({ tags, selectedTags, handleTagChange }) {
         <Autocomplete
             multiple
             id="checkboxes-tags-demo"
-            options={tags}
+            options={tags || []}
             disableCloseOnSelect
-            getOptionLabel={(option) => option.name}
-            value={selectedTags}
+            getOptionLabel={(option) => (typeof option === 'string' ? option : option.name || '')}
+            value={selectedTags || []}
             onChange={handleTagChange}
             renderOption={(props, option, { selected }) => (
-                <li {...props}>
+                <li {...props} key={option.id || option.name}>
                     <Checkbox
                         icon={icon}
                         checkedIcon={checkedIcon}
@@ -29,9 +29,14 @@ function Tag({ tags, selectedTags, handleTagChange }) {
                     {option.name}
                 </li>
             )}
-            style={{ width: 200 }}
+            fullWidth
             renderInput={(params) => (
-                <TextField {...params} label="Tags" placeholder="tags" />
+                <TextField 
+                    {...params} 
+                    label="Recipe Tags" 
+                    placeholder="Choose tags (e.g. Dinner, Quick, Healthy)..." 
+                    size="small"
+                />
             )}
         />
     )
