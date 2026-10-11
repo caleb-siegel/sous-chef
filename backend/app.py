@@ -28,7 +28,7 @@ try:
 except Exception as patch_err:
     logging.getLogger(__name__).warning(f"Failed to apply Pydantic monkey-patch: {patch_err}")
 
-from helpers import get_recipe_dict
+from helpers import get_recipe_dict, get_eager_recipe_query
 from db import db, app
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -258,17 +258,7 @@ def delete_user_recipe_tags(id):
 @app.route('/api/recipes', methods=['GET', 'POST'])
 def recipes():
     if request.method == 'GET':
-        recipes = []
-        for recipe in Recipe.query.order_by(Recipe.id.desc()).all():
-            recipe_dict = recipe.to_dict()
-            recipes.append(recipe_dict)
-
-        response = make_response(
-            recipes,
-            200
-        )
-
-        return response
+        return filter_recipes()
 
     elif request.method == 'POST':
         user_id = session.get('user_id') or request.json.get('created_by_user_id') or request.json.get('user_id')
@@ -1080,7 +1070,7 @@ def user_tag_names():
 
 @app.route('/api/recipe_info')
 def recipe_info():
-    recipes = Recipe.query.order_by(Recipe.id.desc()).all()
+    recipes = get_eager_recipe_query().order_by(Recipe.id.desc()).all()
     recipes_dict = get_recipe_dict(recipes)
     response = make_response(recipes_dict, 200)
     return response
@@ -1153,7 +1143,7 @@ def filter_recipes():
     cookbook = request.args.get('cookbook')
     
     # Start with a base query
-    query = Recipe.query
+    query = get_eager_recipe_query()
 
     # Build filters list
     filters = []
