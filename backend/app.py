@@ -11,6 +11,8 @@ import random
 import logging
 import uuid
 import base64
+import re
+import urllib.parse
 
 # Apply monkey-patch directly on Pydantic BaseModel to handle by_alias=None
 # This fixes compatibility between certain versions of Pydantic V2 and OpenAI's SDK
@@ -747,26 +749,60 @@ def random_recipe():
 
     return make_response(jsonify(response_data), 200)
     
+def slugify_recipe(text):
+    if not text:
+        return ""
+    text = re.sub(r"['’]", "", str(text))
+    return re.sub(r"[^a-zA-Z0-9]+", "-", text).strip("-").lower()
+
+def find_recipe_by_identifier(identifier):
+    if identifier is None:
+        return None
+    ident_str = str(identifier).strip()
+    if not ident_str:
+        return None
+
+    # 1. Try numeric ID
+    if ident_str.isdigit():
+        r = db.session.get(Recipe, int(ident_str))
+        if r:
+            return r
+
+    # 2. Try URL-unquoted case-insensitive exact name
+    decoded = urllib.parse.unquote(ident_str).strip()
+    r = Recipe.query.filter(Recipe.name.ilike(decoded)).first()
+    if r:
+        return r
+
+    # 3. Try slug matching
+    target_slug = slugify_recipe(decoded)
+    if target_slug:
+        for candidate in Recipe.query.all():
+            if candidate.name and slugify_recipe(candidate.name) == target_slug:
+                return candidate
+
+    return None
+
 @app.route('/api/recipes/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
-def recipe_id(id):
+@app.route('/api/recipes/<path:identifier>', methods=['GET', 'PATCH', 'DELETE'])
+def recipe_id(id=None, identifier=None):
+    target = id if id is not None else identifier
+    if str(target).strip() == 'filter':
+        return filter_recipes()
+
+    recipe = find_recipe_by_identifier(target)
+    if not recipe:
+        return {"error": f"recipe with identifier '{target}' not found"}, 404
+
     if request.method == 'GET':
-        recipe_id = db.session.get(Recipe, id)
-        if not recipe_id:
-            return {"error": f"recipe with id {id} not found"}, 404
-        return recipe_id.to_dict()
+        return recipe.to_dict()
     
     elif request.method == 'DELETE':
-        recipe_id = db.session.get(Recipe, id)
-        if not recipe_id:
-            return {"error": f"Recipe with id {id} not found"}, 404
-        db.session.delete(recipe_id)
+        db.session.delete(recipe)
         db.session.commit()
         return {}, 202
     
     elif request.method == 'PATCH':
-        recipe = db.session.get(Recipe, id)
-        if not recipe:
-            return {"error": f"recipe for id {id} not found"}, 404
         try:
             data = request.json
             for key in data:
@@ -775,7 +811,7 @@ def recipe_id(id):
             db.session.commit()
             return recipe.to_dict(), 200
         except Exception as e:
-            return {"error": f'{e}'}
+            return {"error": f'{e}'}, 400
 
 
 
