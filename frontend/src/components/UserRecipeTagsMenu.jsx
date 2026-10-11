@@ -26,25 +26,28 @@ function UserRecipeTagsMenu({ recipeId, tags, handleTagSelect, color }) {
         variant="outlined"
         onClick={handleClick}
       />
-      <Menu
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        MenuListProps={{ 'aria-labelledby': '+Chip'}}
-      >
-        {tags && tags.map((tag) => (
-          <MenuItem 
-            key={tag.id} 
-            value={tag.id} 
-            onClick={(event) => {
-              handleTagSelect(recipeId, event.target.value); 
-              handleClose()
-            }}
-          >
-            {tag.name}
-          </MenuItem>
-        ))}
-      </Menu>
+      {open && (
+        <Menu
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          MenuListProps={{ 'aria-labelledby': '+Chip'}}
+          disableScrollLock
+        >
+          {tags && tags.map((tag) => (
+            <MenuItem 
+              key={tag.id} 
+              value={tag.id} 
+              onClick={(event) => {
+                handleTagSelect(recipeId, event.target.value); 
+                handleClose();
+              }}
+            >
+              {tag.name}
+            </MenuItem>
+          ))}
+        </Menu>
+      )}
     </>
   );
 };

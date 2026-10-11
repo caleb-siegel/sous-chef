@@ -208,6 +208,41 @@ function playTimerChime() {
     }
 }
 
+// Sort comments / cooked instances in reverse chronological order (most recent first)
+export function sortCookedInstances(instances) {
+    if (!Array.isArray(instances)) return [];
+
+    const parseDateToMs = (dateVal) => {
+        if (!dateVal) return 0;
+        if (dateVal instanceof Date) return dateVal.getTime();
+        const parsed = new Date(dateVal).getTime();
+        return isNaN(parsed) ? 0 : parsed;
+    };
+
+    return [...instances].sort((a, b) => {
+        // Primary: creation timestamp (when the comment/instance was created), falling back to cooked_date
+        const dateA = a?.created_at || a?.cooked_date;
+        const dateB = b?.created_at || b?.cooked_date;
+
+        const timeA = parseDateToMs(dateA);
+        const timeB = parseDateToMs(dateB);
+
+        if (timeB !== timeA) {
+            return timeB - timeA;
+        }
+
+        // Secondary tie-breaker: cooked_date (event date)
+        const cookedA = parseDateToMs(a?.cooked_date);
+        const cookedB = parseDateToMs(b?.cooked_date);
+        if (cookedB !== cookedA) {
+            return cookedB - cookedA;
+        }
+
+        // Tertiary tie-breaker: database id
+        return (b?.id || 0) - (a?.id || 0);
+    });
+}
+
 function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
     const context = useOutletContext() || {};
     const backendUrl = context.backendUrl || '';
@@ -276,7 +311,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     // Cooked Instances & Reviews
     const getInitialCookedInstances = (rec) => {
-        return (rec?.user_recipes || []).flatMap(user_recipe =>
+        const raw = (rec?.user_recipes || []).flatMap(user_recipe =>
             (user_recipe.cooked_instances || []).map(ci => ({
                 ...ci,
                 user_name: user_recipe.user?.first_name
@@ -284,6 +319,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                     : (user_recipe.user?.name || 'Fellow Foodie')
             }))
         );
+        return sortCookedInstances(raw);
     };
 
     const [cookedInstances, setCookedInstances] = useState(getInitialCookedInstances(recipe));
@@ -606,10 +642,11 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                     ? `${user.first_name} ${user.last_name || ''}`.trim()
                     : (user?.name || 'You');
 
-                setCookedInstances(prev => [
-                    { ...newEntry, user_name: userName },
-                    ...prev
-                ]);
+                const newInstanceItem = { ...newEntry, user_name: userName };
+                setCookedInstances(prev => sortCookedInstances([
+                    newInstanceItem,
+                    ...prev.filter(item => item.id !== newInstanceItem.id)
+                ]));
                 setCookedComment('');
                 setShowCookedForm(false);
                 setSnackbar({ open: true, message: 'Cook log & note posted! 🍳', severity: 'success' });
@@ -637,6 +674,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
     const progressPercent = instructionsList.length > 0
         ? Math.round((completedStepsCount / instructionsList.length) * 100)
         : 0;
+    const sortedCookedInstances = sortCookedInstances(cookedInstances);
 
     if (!recipe || !recipe.id) {
         return (
@@ -1172,7 +1210,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                             <div>
                                 <h2 className="recipe-section-title">
                                     <span>Cook Log & Notes</span>
-                                    <span className="recipe-count-pill">{cookedInstances.length}</span>
+                                    <span className="recipe-count-pill">{sortedCookedInstances.length}</span>
                                 </h2>
                                 <Typography variant="caption" color="textSecondary">
                                     Track cooking dates, notes, and tips from home chefs
@@ -1257,7 +1295,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
                         {/* List of Cooked Instances */}
                         <div className="recipe-logs-feed">
-                            {cookedInstances.length === 0 ? (
+                            {sortedCookedInstances.length === 0 ? (
                                 <Box sx={{ py: 3, textAlign: 'center', color: 'var(--rc-text-muted)' }}>
                                     <FastfoodIcon sx={{ fontSize: 40, opacity: 0.4, mb: 1 }} />
                                     <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
@@ -1265,7 +1303,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                                     </Typography>
                                 </Box>
                             ) : (
-                                cookedInstances.map((ci, index) => {
+                                sortedCookedInstances.map((ci, index) => {
                                     const initial = (ci.user_name || 'F')[0].toUpperCase();
                                     return (
                                         <div key={ci.id || index} className="recipe-log-item">
