@@ -5,8 +5,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useWakeLock } from './utils/wakeLock';
 
 function App() {
+  const { isLocked: isWakeLocked } = useWakeLock();
   const [user, setUser] = useState(() => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -165,7 +167,7 @@ function App() {
     <Container disableGutters maxWidth={false} sx={{ height: '100vh', width: '100%', padding: '0px' }}>
       <Typography component={'span'}>
         <Navbar logout={logout} user={user} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
-        <Outlet context={{ user, attemptLogin, logout, backendUrl, googleLogin, isLoggingIn }} />
+        <Outlet context={{ user, attemptLogin, logout, backendUrl, googleLogin, isLoggingIn, isWakeLocked }} />
       </Typography>
     </Container>
   );

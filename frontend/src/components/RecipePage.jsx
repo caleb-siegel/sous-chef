@@ -49,9 +49,11 @@ import FastfoodIcon from '@mui/icons-material/Fastfood';
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
 
 import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import RecipeCardsOptions from './RecipeCardsOptions';
+import { useWakeLock } from '../utils/wakeLock';
 import './RecipePage.css';
 
 // Culinary fraction formatter
@@ -94,6 +96,40 @@ export function formatQuantity(qty, scale = 1) {
     }
 
     return Number(val.toFixed(2)).toString();
+}
+
+// Parse scale input (supports decimals "0.25", fractions "1/4", "1/3", mixed "2 1/2", and integers "20" or "20x")
+export function parseScaleInput(inputStr) {
+    if (!inputStr || typeof inputStr !== 'string') return null;
+    const str = inputStr.trim().replace(/[×x]$/i, '').trim();
+    if (!str) return null;
+
+    if (str.includes('/')) {
+        const parts = str.split(/\s+/);
+        if (parts.length === 2) {
+            const whole = parseFloat(parts[0]);
+            const fracParts = parts[1].split('/');
+            if (fracParts.length === 2) {
+                const num = parseFloat(fracParts[0]);
+                const den = parseFloat(fracParts[1]);
+                if (!isNaN(whole) && !isNaN(num) && !isNaN(den) && den > 0) {
+                    return whole + (num / den);
+                }
+            }
+        } else if (parts.length === 1) {
+            const fracParts = str.split('/');
+            if (fracParts.length === 2) {
+                const num = parseFloat(fracParts[0]);
+                const den = parseFloat(fracParts[1]);
+                if (!isNaN(num) && !isNaN(den) && den > 0) {
+                    return num / den;
+                }
+            }
+        }
+    }
+
+    const val = parseFloat(str);
+    return (!isNaN(val) && val > 0) ? val : null;
 }
 
 // Robust instruction step parser
@@ -176,9 +212,38 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
     const backendUrl = context.backendUrl || '';
     const navigate = useNavigate();
 
+    // Screen Wake Lock
+    const { isLocked: isWakeLocked } = useWakeLock();
+
     // Scale / Servings
     const [scale, setScale] = useState(1);
+    const [scaleLabel, setScaleLabel] = useState('1×');
+    const [isCustomScale, setIsCustomScale] = useState(false);
+    const [showCustomScaleBar, setShowCustomScaleBar] = useState(false);
+    const [customScaleText, setCustomScaleText] = useState('');
     const scalePresets = [0.5, 1, 1.5, 2, 3];
+
+    const handleApplyCustomScale = (customValStr = customScaleText) => {
+        const parsed = parseScaleInput(customValStr);
+        if (parsed !== null) {
+            setScale(parsed);
+            setIsCustomScale(true);
+            const cleanLabel = customValStr.trim().replace(/[×x]$/i, '') + '×';
+            setScaleLabel(cleanLabel);
+            setSnackbar({ open: true, message: `Recipe ingredients scaled to ${cleanLabel}! ⚖️`, severity: 'success' });
+            setShowCustomScaleBar(false);
+        } else {
+            setSnackbar({ open: true, message: 'Please enter a valid scale (e.g. 1/4, 2.5, or 20)', severity: 'warning' });
+        }
+    };
+
+    const handleSelectPreset = (preset) => {
+        setScale(preset);
+        setScaleLabel(`${preset}×`);
+        setIsCustomScale(false);
+        setShowCustomScaleBar(false);
+        setCustomScaleText('');
+    };
 
     // Checklist states
     const [checkedIngredients, setCheckedIngredients] = useState({});
@@ -648,6 +713,22 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                         </button>
                     </Tooltip>
 
+                    {/* Screen Wake Lock Indicator */}
+                    <Tooltip title={isWakeLocked ? "Screen Stay-Awake active: your computer won't sleep or shut off while browsing recipes!" : "Screen Stay-Awake active"}>
+                        <div
+                            className="recipe-action-pill"
+                            style={{
+                                cursor: 'default',
+                                background: 'var(--rc-primary-subtle)',
+                                borderColor: 'rgba(63, 255, 194, 0.4)',
+                                color: '#0d9488'
+                            }}
+                        >
+                            <WbSunnyIcon fontSize="small" style={{ fontSize: 16, color: '#f59e0b' }} />
+                            <span>Screen On</span>
+                        </div>
+                    </Tooltip>
+
                     {/* Edit & Delete for Admin / Author */}
                     {user && (user.id === 2 || user.id === recipe.created_by_user_id) && (
                         <RecipeCardsOptions
@@ -868,19 +949,76 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
                         {/* Servings / Scale Controller */}
                         <div className="recipe-scaler-box">
-                            <span className="recipe-scaler-label">Scale Servings:</span>
-                            <div className="recipe-scaler-options">
-                                {scalePresets.map(preset => (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                <span className="recipe-scaler-label">
+                                    Scale Servings: <strong>{scaleLabel || `${scale}×`}</strong>
+                                </span>
+                                <div className="recipe-scaler-options">
+                                    {scalePresets.map(preset => (
+                                        <button
+                                            key={preset}
+                                            type="button"
+                                            className={`recipe-scale-chip ${scale === preset && !isCustomScale ? 'selected' : ''}`}
+                                            onClick={() => handleSelectPreset(preset)}
+                                        >
+                                            {preset}×
+                                        </button>
+                                    ))}
                                     <button
-                                        key={preset}
                                         type="button"
-                                        className={`recipe-scale-chip ${scale === preset ? 'selected' : ''}`}
-                                        onClick={() => setScale(preset)}
+                                        className={`recipe-scale-chip ${isCustomScale || showCustomScaleBar ? 'selected' : ''}`}
+                                        onClick={() => setShowCustomScaleBar(prev => !prev)}
+                                        title="Enter custom multiplier (e.g. 1/4, 20x)"
                                     >
-                                        {preset}×
+                                        {isCustomScale ? `${scaleLabel} (Custom)` : 'Custom...'}
                                     </button>
-                                ))}
+                                </div>
                             </div>
+
+                            {showCustomScaleBar && (
+                                <div className="recipe-custom-scale-bar">
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--rc-text-muted)' }}>Multiplier:</span>
+                                    <input
+                                        type="text"
+                                        className="recipe-custom-scale-input"
+                                        placeholder="e.g. 1/4 or 20"
+                                        value={customScaleText}
+                                        onChange={(e) => setCustomScaleText(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleApplyCustomScale();
+                                            }
+                                        }}
+                                        autoFocus
+                                    />
+                                    <button
+                                        type="button"
+                                        className="recipe-scale-chip selected"
+                                        onClick={() => handleApplyCustomScale()}
+                                    >
+                                        Apply
+                                    </button>
+
+                                    {/* Quick shortcut chips */}
+                                    <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        {['1/4', '1/3', '5x', '10x', '20x'].map(shortcut => (
+                                            <button
+                                                key={shortcut}
+                                                type="button"
+                                                className="recipe-scale-chip"
+                                                style={{ fontSize: '0.75rem', padding: '0.2rem 0.45rem' }}
+                                                onClick={() => {
+                                                    setCustomScaleText(shortcut);
+                                                    handleApplyCustomScale(shortcut);
+                                                }}
+                                            >
+                                                {shortcut}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Interactive Ingredients Checklist */}
@@ -1225,16 +1363,23 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                             </div>
                         </div>
 
-                        <button className="cook-mode-close-btn" onClick={() => setIsCookMode(false)}>
-                            ✕ Exit Cook Mode
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: '#3FFFC2', background: 'rgba(63, 255, 194, 0.12)', padding: '0.3rem 0.75rem', borderRadius: 9999, border: '1px solid rgba(63, 255, 194, 0.3)' }}>
+                                <WbSunnyIcon style={{ fontSize: 15, color: '#f59e0b' }} />
+                                <span>Screen Kept Awake</span>
+                            </div>
+
+                            <button className="cook-mode-close-btn" onClick={() => setIsCookMode(false)}>
+                                ✕ Exit Cook Mode
+                            </button>
+                        </div>
                     </div>
 
                     <div className="cook-mode-content">
                         {/* Drawer with Ingredients */}
                         <aside className="cook-mode-ingredients-drawer">
                             <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', color: 'var(--rc-primary)' }}>
-                                Ingredients ({scale}×)
+                                Ingredients ({scaleLabel || `${scale}×`})
                             </h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                                 {recipe.recipe_ingredients && recipe.recipe_ingredients.map(ing => {

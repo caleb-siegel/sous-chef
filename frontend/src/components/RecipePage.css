@@ -418,6 +418,36 @@
   box-shadow: 0 2px 8px rgba(255, 125, 69, 0.35);
 }
 
+.recipe-custom-scale-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--rc-border);
+  width: 100%;
+  animation: fadeInRecipe 0.2s ease-out;
+}
+
+.recipe-custom-scale-input {
+  background: var(--rc-surface);
+  border: 1px solid var(--rc-border);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--rc-text-main);
+  outline: none;
+  width: 130px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.recipe-custom-scale-input:focus {
+  border-color: var(--rc-secondary);
+  box-shadow: 0 0 0 2px var(--rc-secondary-subtle);
+}
+
 /* Interactive Checklist Items */
 .recipe-ingredients-list {
   display: flex;
