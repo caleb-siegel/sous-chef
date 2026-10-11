@@ -20,6 +20,7 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ShoppingList from './ShoppingList';
 import { useOutletContext } from "react-router-dom";
 import AddToMealPrep from './AddToMealPrep';
+import { getRecipeSlug } from '../utils/slugify';
 
 // Draggable Recipe component
 const DraggableRecipe = ({ prep, onDelete }) => {
@@ -33,7 +34,7 @@ const DraggableRecipe = ({ prep, onDelete }) => {
 
     return (
         <div ref={drag}>
-            <a href={`/recipes/${prep.recipe.id}`} style={{ textDecoration: 'none', opacity: isDragging ? 0.5 : 1 }}>
+            <a href={`/recipes/${getRecipeSlug(prep.recipe)}`} style={{ textDecoration: 'none', opacity: isDragging ? 0.5 : 1 }}>
                 <Tooltip title={prep.recipe.name}>
                     <Chip
                         color="primary"

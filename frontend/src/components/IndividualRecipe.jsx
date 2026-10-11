@@ -4,6 +4,7 @@ import { useOutletContext } from "react-router-dom";
 import { Box, CircularProgress, Container, Alert } from '@mui/material';
 import RecipePage from './RecipePage';
 import RecipeEditPage from './RecipeEditPage';
+import { getRecipeSlug } from '../utils/slugify';
 
 function IndividualRecipe() {
     const { user, backendUrl } = useOutletContext();
@@ -17,7 +18,7 @@ function IndividualRecipe() {
     useEffect(() => {
         setLoading(true);
         setError(null);
-        fetch(`${backendUrl}/api/recipes/${id}`)
+        fetch(`${backendUrl}/api/recipes/${encodeURIComponent(id)}`)
         .then((response) => {
             if (!response.ok) {
                 throw new Error(`Failed to load recipe (status: ${response.status})`);
@@ -27,6 +28,12 @@ function IndividualRecipe() {
         .then((data) => {
             setRecipe(data);
             setLoading(false);
+            if (data && data.name) {
+                const targetSlug = getRecipeSlug(data);
+                if (targetSlug && id !== targetSlug && window.history && window.history.replaceState) {
+                    window.history.replaceState(null, '', `/recipes/${targetSlug}`);
+                }
+            }
         })
         .catch((err) => {
             console.error("Error fetching recipe:", err);
@@ -65,7 +72,7 @@ function IndividualRecipe() {
             key={recipe.id}
             recipe={recipe} 
             user={user} 
-            id={id} 
+            id={recipe.id} 
             editRecipe={editRecipe} 
             handleEditRecipe={handleEditRecipe}
         /> 
@@ -73,9 +80,10 @@ function IndividualRecipe() {
             key={recipe.id}
             recipe={recipe} 
             user={user} 
-            id={id} 
+            id={recipe.id} 
             editRecipe={editRecipe} 
             setEditRecipe={setEditRecipe}
+            setRecipe={setRecipe}
         />
     )
 }

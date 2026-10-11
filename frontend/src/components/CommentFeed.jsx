@@ -10,6 +10,7 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SearchIcon from '@mui/icons-material/Search';
+import { getRecipeSlug } from '../utils/slugify';
 
 // Generate consistent colors for user avatars based on user name
 const stringToColor = (string) => {
@@ -271,7 +272,7 @@ function CommentFeed() {
                                                         Recipe
                                                     </Typography>
                                                     <Link 
-                                                        to={`/recipes/${item.recipe_id}`} 
+                                                        to={`/recipes/${getRecipeSlug(item.recipe_name || item.recipe_id)}`} 
                                                         style={{ 
                                                             textDecoration: 'none', 
                                                             color: theme.palette.primary.main, 

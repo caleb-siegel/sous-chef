@@ -54,6 +54,7 @@ import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import RecipeCardsOptions from './RecipeCardsOptions';
 import { useWakeLock } from '../utils/wakeLock';
+import { getRecipeSlug } from '../utils/slugify';
 import './RecipePage.css';
 
 // Culinary fraction formatter
@@ -309,6 +310,9 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
         if (recipe?.meal_preps || recipe?.meal_prep) {
             setMealPrepsList(recipe.meal_preps || recipe.meal_prep);
         }
+        if (recipe?.name) {
+            document.title = `${recipe.name} | Sous-Chef`;
+        }
     }, [recipe]);
 
     // Fetch user tags
@@ -513,8 +517,10 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
 
     // Share & Copy
     const handleShare = () => {
+        const slug = getRecipeSlug(recipe);
+        const shareUrl = slug ? `${window.location.origin}/recipes/${slug}` : window.location.href;
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(window.location.href);
+            navigator.clipboard.writeText(shareUrl);
             setSnackbar({ open: true, message: 'Recipe link copied to clipboard! 🔗', severity: 'success' });
         }
     };

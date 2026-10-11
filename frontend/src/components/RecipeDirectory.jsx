@@ -15,6 +15,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import PersonIcon from '@mui/icons-material/Person';
 import { useOutletContext } from "react-router-dom";
+import { getRecipeSlug } from "../utils/slugify";
 
 function RecipeDirectory() {
     const {user} = useOutletContext();
@@ -570,7 +571,7 @@ function RecipeDirectory() {
                 position: 'relative'
             }}>
                 {recipeList?.map((recipe) => (
-                    <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>
+                    <a href={`/recipes/${getRecipeSlug(recipe)}`} key={recipe.id} style={{ textDecoration: 'none' }}>
                         <Card key={recipe.id} sx={{ maxWidth: 345, margin: '10px', padding: '10px', borderRadius: "1rem" }}>
                             <CardHeader
                             title={recipe.name}

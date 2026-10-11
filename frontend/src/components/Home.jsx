@@ -3,6 +3,7 @@ import { Container, Paper, Button, Stack, Avatar, Typography, Alert, CircularPro
 import { Link } from "react-router-dom"
 import { useOutletContext } from "react-router-dom";
 import HomeSkeleton from "./HomeSkeleton";
+import { getRecipeSlug } from "../utils/slugify";
 
 function Home() {
     const {user} = useOutletContext();
@@ -151,7 +152,7 @@ function Home() {
                         <Stack direction="row" sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
                             {recipes.map(recipe => {
                                 return recipe.picture !== "" && 
-                                <a href={`/recipes/${recipe.id}`} key={recipe.id} style={{ textDecoration: 'none' }}>
+                                <a href={`/recipes/${getRecipeSlug(recipe)}`} key={recipe.id} style={{ textDecoration: 'none' }}>
                                     <Avatar alt={recipe.name} src={recipe.picture} sx={{ width: dimension, height: dimension }}/>
                                 </a>
                             })}
