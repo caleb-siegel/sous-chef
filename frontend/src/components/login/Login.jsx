@@ -5,16 +5,14 @@ import { Paper, Button, Typography, Divider, Box } from '@mui/material';
 import { GoogleIcon } from './CustomIcons';
 
 function Login() {
-    const { backendUrl } = useOutletContext();
+    const { backendUrl, attemptLogin, googleLogin, isLoggingIn } = useOutletContext();
 
     const [accountForm, setAccountForm] = useState(false)
     const [newName, setNewName] = useState("")
     const [newPassword, setNewPassword] = useState("")
-    const { attemptLogin } = useOutletContext();
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [createAccount, setCreateAccount] = useState(false);
-    const { googleLogin } = useOutletContext();
 
 
     function createUser(e) {
@@ -61,7 +59,7 @@ function Login() {
                 <div>
                     <Typography variant="h2">Sign In</Typography>
                     <br/>
-                    <LoginForm submitText={"Login"} handleSubmit={handleSubmit} handleChangeUsername={handleChangeUsername} name={name} handleChangePassword={handleChangePassword} password={password}/>
+                    <LoginForm submitText={"Login"} handleSubmit={handleSubmit} handleChangeUsername={handleChangeUsername} name={name} handleChangePassword={handleChangePassword} password={password} loading={isLoggingIn} />
                     <br/>
                     {/* <Typography variant="h2">OR</Typography>
                     <br/>
@@ -84,9 +82,10 @@ function Login() {
                         variant="contained"
                         color='primary'
                         onClick={googleLogin}
+                        disabled={isLoggingIn}
                         startIcon={<GoogleIcon />}
                         >
-                        Sign in with Google
+                        {isLoggingIn ? "Signing in..." : "Sign in with Google"}
                     </Button>
                 </Box>
             </div>

@@ -38,7 +38,6 @@ import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useOutletContext } from "react-router-dom";
 import RecipePage from './RecipePage';
 
@@ -57,39 +56,182 @@ const STANDARD_CATEGORIES = [
     { name: "other", label: "Other", icon: "✨" }
 ];
 
-const FILTER_DEFINITIONS = [
-    { key: 'category', label: 'Category', icon: <CategoryIcon color="primary" fontSize="small" />, description: 'Filter by Breakfast, Chicken, Fish, Dessert, etc.' },
-    { key: 'includeIngredient', label: 'Must Contain Ingredient', icon: <AddCircleOutlineIcon sx={{ color: '#10b981' }} fontSize="small" />, description: 'Require specific ingredients (e.g. garlic, lemon)' },
-    { key: 'excludeIngredient', label: 'Must NOT Contain Ingredient', icon: <RemoveCircleOutlineIcon sx={{ color: '#ef4444' }} fontSize="small" />, description: 'Exclude unwanted ingredients (e.g. nuts, mushrooms)' },
-    { key: 'cookbook', label: 'Cookbook / Source', icon: <MenuBookIcon color="primary" fontSize="small" />, description: 'Filter by specific cookbooks or recipe sources' },
-    { key: 'sourceCategory', label: 'Source Type', icon: <CategoryIcon color="secondary" fontSize="small" />, description: 'Filter by Website, Cookbook, Instagram, Life' },
-    { key: 'tag', label: 'System Tags', icon: <LocalOfferIcon color="primary" fontSize="small" />, description: 'Filter by vegan, passover, dinner, etc.' },
-    { key: 'userTag', label: 'User Tags', icon: <PersonPinIcon color="secondary" fontSize="small" />, description: 'Filter by eaten, interest, not a reorder' },
-    { key: 'scope', label: 'Recipe Scope', icon: <PersonPinIcon color="primary" fontSize="small" />, description: 'Choose between All Recipes and My Saved Recipes' },
+const FILTER_GROUPS = [
+    {
+        title: "User Tags",
+        filters: [
+            {
+                key: 'includeUserTag',
+                label: 'Include User Tags',
+                badge: 'Include',
+                badgeColor: 'success',
+                icon: <CheckCircleIcon sx={{ color: '#10b981' }} fontSize="small" />,
+                description: 'Require personal tags (e.g. eaten, interest)'
+            },
+            {
+                key: 'excludeUserTag',
+                label: 'Exclude User Tags',
+                badge: 'Exclude',
+                badgeColor: 'error',
+                icon: <BlockIcon sx={{ color: '#ef4444' }} fontSize="small" />,
+                description: 'Exclude personal tags (e.g. not a reorder)'
+            }
+        ]
+    },
+    {
+        title: "Categories",
+        filters: [
+            {
+                key: 'includeCategory',
+                label: 'Include Categories',
+                badge: 'Include',
+                badgeColor: 'success',
+                icon: <CheckCircleIcon sx={{ color: '#10b981' }} fontSize="small" />,
+                description: 'Require Breakfast, Chicken, Fish, etc.'
+            },
+            {
+                key: 'excludeCategory',
+                label: 'Exclude Categories',
+                badge: 'Exclude',
+                badgeColor: 'error',
+                icon: <BlockIcon sx={{ color: '#ef4444' }} fontSize="small" />,
+                description: 'Exclude Breakfast, Chicken, Fish, etc.'
+            }
+        ]
+    },
+    {
+        title: "Ingredients",
+        filters: [
+            {
+                key: 'includeIngredient',
+                label: 'Must Contain Ingredient',
+                badge: 'Include',
+                badgeColor: 'success',
+                icon: <AddCircleOutlineIcon sx={{ color: '#10b981' }} fontSize="small" />,
+                description: 'Require specific ingredients (e.g. garlic, lemon)'
+            },
+            {
+                key: 'excludeIngredient',
+                label: 'Must NOT Contain Ingredient',
+                badge: 'Exclude',
+                badgeColor: 'error',
+                icon: <RemoveCircleOutlineIcon sx={{ color: '#ef4444' }} fontSize="small" />,
+                description: 'Exclude unwanted ingredients (e.g. nuts, mushrooms)'
+            }
+        ]
+    },
+    {
+        title: "System Tags",
+        filters: [
+            {
+                key: 'includeTag',
+                label: 'Include System Tags',
+                badge: 'Include',
+                badgeColor: 'success',
+                icon: <CheckCircleIcon sx={{ color: '#10b981' }} fontSize="small" />,
+                description: 'Require tags like vegan, passover, dinner'
+            },
+            {
+                key: 'excludeTag',
+                label: 'Exclude System Tags',
+                badge: 'Exclude',
+                badgeColor: 'error',
+                icon: <BlockIcon sx={{ color: '#ef4444' }} fontSize="small" />,
+                description: 'Exclude tags like passover, dinner'
+            }
+        ]
+    },
+    {
+        title: "Cookbooks & Sources",
+        filters: [
+            {
+                key: 'includeCookbook',
+                label: 'Include Cookbooks / Sources',
+                badge: 'Include',
+                badgeColor: 'success',
+                icon: <CheckCircleIcon sx={{ color: '#10b981' }} fontSize="small" />,
+                description: 'Filter by specific cookbooks or recipe sources'
+            },
+            {
+                key: 'excludeCookbook',
+                label: 'Exclude Cookbooks / Sources',
+                badge: 'Exclude',
+                badgeColor: 'error',
+                icon: <BlockIcon sx={{ color: '#ef4444' }} fontSize="small" />,
+                description: 'Exclude specific cookbooks or sources'
+            }
+        ]
+    },
+    {
+        title: "Source Types",
+        filters: [
+            {
+                key: 'includeSourceCategory',
+                label: 'Include Source Types',
+                badge: 'Include',
+                badgeColor: 'success',
+                icon: <CheckCircleIcon sx={{ color: '#10b981' }} fontSize="small" />,
+                description: 'Include Website, Cookbook, Instagram, Life'
+            },
+            {
+                key: 'excludeSourceCategory',
+                label: 'Exclude Source Types',
+                badge: 'Exclude',
+                badgeColor: 'error',
+                icon: <BlockIcon sx={{ color: '#ef4444' }} fontSize="small" />,
+                description: 'Exclude Website, Cookbook, Instagram, Life'
+            }
+        ]
+    },
+    {
+        title: "Scope",
+        filters: [
+            {
+                key: 'scope',
+                label: 'Recipe Scope',
+                badge: 'Scope',
+                badgeColor: 'primary',
+                icon: <PersonPinIcon color="primary" fontSize="small" />,
+                description: 'Choose between All Recipes and My Saved Recipes'
+            }
+        ]
+    }
 ];
+
+const ALL_FILTER_DEFS = FILTER_GROUPS.flatMap(g => g.filters);
 
 function RandomizeRecipe() {
     const { user, backendUrl } = useOutletContext();
 
-    // Active filter modules list
+    // Active filter modules list (order of addition)
     const [activeFilters, setActiveFilters] = useState([]);
 
     // Filter values state
     const [scope, setScope] = useState('all'); // 'all' | 'user'
-    const [categories, setCategories] = useState([]);
-    const [categoryMode, setCategoryMode] = useState('include'); // 'include' | 'exclude'
-    const [cookbooks, setCookbooks] = useState([]);
-    const [cookbookMode, setCookbookMode] = useState('include');
-    const [sourceCategories, setSourceCategories] = useState([]);
-    const [sourceCategoryMode, setSourceCategoryMode] = useState('include');
-    const [tags, setTags] = useState([]);
-    const [tagMode, setTagMode] = useState('include');
-    const [userTags, setUserTags] = useState([]);
-    const [userTagMode, setUserTagMode] = useState('include');
+
+    // Categories
+    const [includeCategories, setIncludeCategories] = useState([]);
+    const [excludeCategories, setExcludeCategories] = useState([]);
+
+    // Cookbooks
+    const [includeCookbooks, setIncludeCookbooks] = useState([]);
+    const [excludeCookbooks, setExcludeCookbooks] = useState([]);
+
+    // Source Categories
+    const [includeSourceCategories, setIncludeSourceCategories] = useState([]);
+    const [excludeSourceCategories, setExcludeSourceCategories] = useState([]);
+
+    // System Tags
+    const [includeTags, setIncludeTags] = useState([]);
+    const [excludeTags, setExcludeTags] = useState([]);
+
+    // User Tags
+    const [includeUserTags, setIncludeUserTags] = useState([]);
+    const [excludeUserTags, setExcludeUserTags] = useState([]);
+
+    // Ingredients
     const [includeIngredients, setIncludeIngredients] = useState([]);
     const [excludeIngredients, setExcludeIngredients] = useState([]);
-
-    // Ingredient input text
     const [includeInput, setIncludeInput] = useState('');
     const [excludeInput, setExcludeInput] = useState('');
 
@@ -134,48 +276,39 @@ function RandomizeRecipe() {
             .catch(err => console.error("Error fetching user tags:", err));
     }, [backendUrl]);
 
-    // Build filter payload based on only active filter modules
+    // Build filter payload based on active filter modules
     const buildFilterPayload = useCallback((isCountOnly = false) => {
-        const hasScope = activeFilters.includes('scope');
-        const hasCategories = activeFilters.includes('category') && categories.length > 0;
-        const hasCookbooks = activeFilters.includes('cookbook') && cookbooks.length > 0;
-        const hasSourceCategories = activeFilters.includes('sourceCategory') && sourceCategories.length > 0;
-        const hasTags = activeFilters.includes('tag') && tags.length > 0;
-        const hasUserTags = activeFilters.includes('userTag') && userTags.length > 0;
-        const hasIncludeIngs = activeFilters.includes('includeIngredient') && includeIngredients.length > 0;
-        const hasExcludeIngs = activeFilters.includes('excludeIngredient') && excludeIngredients.length > 0;
-
         return {
-            scope: hasScope && scope === 'user' ? 'user' : 'all',
+            scope: activeFilters.includes('scope') && scope === 'user' ? 'user' : 'all',
             user_id: user?.id,
-            categories: hasCategories ? categories : [],
-            category_mode: categoryMode,
-            cookbooks: hasCookbooks ? cookbooks : [],
-            cookbook_mode: cookbookMode,
-            source_categories: hasSourceCategories ? sourceCategories : [],
-            source_category_mode: sourceCategoryMode,
-            tags: hasTags ? tags : [],
-            tag_mode: tagMode,
-            user_tags: hasUserTags ? userTags : [],
-            user_tag_mode: userTagMode,
-            include_ingredients: hasIncludeIngs ? includeIngredients : [],
-            exclude_ingredients: hasExcludeIngs ? excludeIngredients : [],
+            include_categories: activeFilters.includes('includeCategory') ? includeCategories : [],
+            exclude_categories: activeFilters.includes('excludeCategory') ? excludeCategories : [],
+            include_cookbooks: activeFilters.includes('includeCookbook') ? includeCookbooks : [],
+            exclude_cookbooks: activeFilters.includes('excludeCookbook') ? excludeCookbooks : [],
+            include_source_categories: activeFilters.includes('includeSourceCategory') ? includeSourceCategories : [],
+            exclude_source_categories: activeFilters.includes('excludeSourceCategory') ? excludeSourceCategories : [],
+            include_tags: activeFilters.includes('includeTag') ? includeTags : [],
+            exclude_tags: activeFilters.includes('excludeTag') ? excludeTags : [],
+            include_user_tags: activeFilters.includes('includeUserTag') ? includeUserTags : [],
+            exclude_user_tags: activeFilters.includes('excludeUserTag') ? excludeUserTags : [],
+            include_ingredients: activeFilters.includes('includeIngredient') ? includeIngredients : [],
+            exclude_ingredients: activeFilters.includes('excludeIngredient') ? excludeIngredients : [],
             count_only: isCountOnly
         };
     }, [
         activeFilters,
         scope,
         user,
-        categories,
-        categoryMode,
-        cookbooks,
-        cookbookMode,
-        sourceCategories,
-        sourceCategoryMode,
-        tags,
-        tagMode,
-        userTags,
-        userTagMode,
+        includeCategories,
+        excludeCategories,
+        includeCookbooks,
+        excludeCookbooks,
+        includeSourceCategories,
+        excludeSourceCategories,
+        includeTags,
+        excludeTags,
+        includeUserTags,
+        excludeUserTags,
         includeIngredients,
         excludeIngredients
     ]);
@@ -248,25 +381,35 @@ function RandomizeRecipe() {
     const handleRemoveFilter = (filterKey) => {
         setActiveFilters(prev => prev.filter(k => k !== filterKey));
         switch (filterKey) {
-            case 'category':
-                setCategories([]);
-                setCategoryMode('include');
+            case 'includeCategory':
+                setIncludeCategories([]);
                 break;
-            case 'cookbook':
-                setCookbooks([]);
-                setCookbookMode('include');
+            case 'excludeCategory':
+                setExcludeCategories([]);
                 break;
-            case 'sourceCategory':
-                setSourceCategories([]);
-                setSourceCategoryMode('include');
+            case 'includeCookbook':
+                setIncludeCookbooks([]);
                 break;
-            case 'tag':
-                setTags([]);
-                setTagMode('include');
+            case 'excludeCookbook':
+                setExcludeCookbooks([]);
                 break;
-            case 'userTag':
-                setUserTags([]);
-                setUserTagMode('include');
+            case 'includeSourceCategory':
+                setIncludeSourceCategories([]);
+                break;
+            case 'excludeSourceCategory':
+                setExcludeSourceCategories([]);
+                break;
+            case 'includeTag':
+                setIncludeTags([]);
+                break;
+            case 'excludeTag':
+                setExcludeTags([]);
+                break;
+            case 'includeUserTag':
+                setIncludeUserTags([]);
+                break;
+            case 'excludeUserTag':
+                setExcludeUserTags([]);
                 break;
             case 'includeIngredient':
                 setIncludeIngredients([]);
@@ -288,16 +431,16 @@ function RandomizeRecipe() {
     const handleResetAll = () => {
         setActiveFilters([]);
         setScope('all');
-        setCategories([]);
-        setCategoryMode('include');
-        setCookbooks([]);
-        setCookbookMode('include');
-        setSourceCategories([]);
-        setSourceCategoryMode('include');
-        setTags([]);
-        setTagMode('include');
-        setUserTags([]);
-        setUserTagMode('include');
+        setIncludeCategories([]);
+        setExcludeCategories([]);
+        setIncludeCookbooks([]);
+        setExcludeCookbooks([]);
+        setIncludeSourceCategories([]);
+        setExcludeSourceCategories([]);
+        setIncludeTags([]);
+        setExcludeTags([]);
+        setIncludeUserTags([]);
+        setExcludeUserTags([]);
         setIncludeIngredients([]);
         setExcludeIngredients([]);
         setIncludeInput('');
@@ -305,11 +448,19 @@ function RandomizeRecipe() {
         setErrorMessage(null);
     };
 
-    // Category helpers
-    const toggleCategory = (catName) => {
-        setCategories(prev =>
+    // Category toggle handlers (auto-remove from opposite list if selected)
+    const toggleIncludeCategory = (catName) => {
+        setIncludeCategories(prev =>
             prev.includes(catName) ? prev.filter(c => c !== catName) : [...prev, catName]
         );
+        setExcludeCategories(prev => prev.filter(c => c !== catName));
+    };
+
+    const toggleExcludeCategory = (catName) => {
+        setExcludeCategories(prev =>
+            prev.includes(catName) ? prev.filter(c => c !== catName) : [...prev, catName]
+        );
+        setIncludeCategories(prev => prev.filter(c => c !== catName));
     };
 
     // Ingredient helpers
@@ -329,8 +480,8 @@ function RandomizeRecipe() {
         }
     };
 
-    // Filters available to add in the menu
-    const availableFilterDefs = FILTER_DEFINITIONS.filter(def => !activeFilters.includes(def.key));
+    // Filters available to add in menu
+    const availableFilterDefs = ALL_FILTER_DEFS.filter(def => !activeFilters.includes(def.key));
 
     return (
         <Container maxWidth="md" sx={{ py: 4 }}>
@@ -512,42 +663,78 @@ function RandomizeRecipe() {
                         </Button>
                     )}
 
-                    {/* Menu for Add Filter */}
+                    {/* Menu for Add Filter organized by groups */}
                     <Menu
                         anchorEl={menuAnchorEl}
                         open={Boolean(menuAnchorEl)}
                         onClose={() => setMenuAnchorEl(null)}
                         PaperProps={{
                             elevation: 4,
-                            sx: { borderRadius: 2, minWidth: 260, mt: 0.5 }
+                            sx: { borderRadius: 2.5, minWidth: 290, maxHeight: 480, mt: 0.5 }
                         }}
                     >
-                        <Typography variant="caption" sx={{ px: 2, py: 1, display: 'block', color: 'text.secondary', fontWeight: 700 }}>
-                            CHOOSE A FILTER TO ADD
+                        <Typography variant="caption" sx={{ px: 2, py: 1, display: 'block', color: 'text.secondary', fontWeight: 800 }}>
+                            SELECT A FILTER TO ADD
                         </Typography>
                         <Divider sx={{ my: 0.5 }} />
-                        {availableFilterDefs.map((def) => (
-                            <MenuItem
-                                key={def.key}
-                                onClick={() => handleAddFilter(def.key)}
-                                sx={{ py: 1, px: 2 }}
-                            >
-                                <ListItemIcon sx={{ minWidth: 32 }}>
-                                    {def.icon}
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={def.label}
-                                    secondary={def.description}
-                                    primaryTypographyProps={{ fontWeight: 600, fontSize: '0.9rem' }}
-                                    secondaryTypographyProps={{ fontSize: '0.75rem' }}
-                                />
-                            </MenuItem>
-                        ))}
+
+                        {FILTER_GROUPS.map((group) => {
+                            const unaddedInGroup = group.filters.filter(f => !activeFilters.includes(f.key));
+                            if (unaddedInGroup.length === 0) return null;
+
+                            return (
+                                <Box key={group.title}>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            px: 2,
+                                            pt: 1,
+                                            pb: 0.3,
+                                            display: 'block',
+                                            color: '#64748b',
+                                            fontWeight: 700,
+                                            letterSpacing: '0.4px',
+                                            fontSize: '0.7rem'
+                                        }}
+                                    >
+                                        {group.title.toUpperCase()}
+                                    </Typography>
+                                    {unaddedInGroup.map((def) => (
+                                        <MenuItem
+                                            key={def.key}
+                                            onClick={() => handleAddFilter(def.key)}
+                                            sx={{ py: 0.8, px: 2 }}
+                                        >
+                                            <ListItemIcon sx={{ minWidth: 32 }}>
+                                                {def.icon}
+                                            </ListItemIcon>
+                                            <ListItemText
+                                                primary={
+                                                    <Box display="flex" alignItems="center" gap={1}>
+                                                        <span>{def.label}</span>
+                                                        <Chip
+                                                            size="small"
+                                                            label={def.badge}
+                                                            color={def.badgeColor}
+                                                            sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                                                        />
+                                                    </Box>
+                                                }
+                                                secondary={def.description}
+                                                primaryTypographyProps={{ fontWeight: 600, fontSize: '0.875rem' }}
+                                                secondaryTypographyProps={{ fontSize: '0.75rem' }}
+                                            />
+                                        </MenuItem>
+                                    ))}
+                                    <Divider sx={{ my: 0.5 }} />
+                                </Box>
+                            );
+                        })}
                     </Menu>
                 </Box>
             </Box>
 
-            {/* Quick Add Suggestions if no filters or few filters active */}
+            {/* Quick Add Suggestions if no filters active */}
             {activeFilters.length === 0 && (
                 <Paper
                     variant="outlined"
@@ -568,14 +755,21 @@ function RandomizeRecipe() {
                         Randomizing from all {matchCount !== null ? matchCount : ''} recipes. Click below to add a filter:
                     </Typography>
                     <Box display="flex" flexWrap="wrap" justifyContent="center" gap={1}>
-                        {FILTER_DEFINITIONS.slice(0, 4).map(def => (
+                        {[
+                            { key: 'includeUserTag', label: '+ Include User Tags', color: 'success' },
+                            { key: 'excludeUserTag', label: '- Exclude User Tags', color: 'error' },
+                            { key: 'includeCategory', label: '+ Include Categories', color: 'primary' },
+                            { key: 'includeIngredient', label: '+ Must Contain Ingredient', color: 'success' },
+                            { key: 'excludeIngredient', label: '- Exclude Ingredient', color: 'error' },
+                            { key: 'includeCookbook', label: '+ Include Cookbooks', color: 'primary' },
+                        ].map(item => (
                             <Chip
-                                key={def.key}
+                                key={item.key}
                                 icon={<AddIcon fontSize="small" />}
-                                label={def.label}
-                                onClick={() => handleAddFilter(def.key)}
+                                label={item.label}
+                                onClick={() => handleAddFilter(item.key)}
                                 variant="outlined"
-                                color="primary"
+                                color={item.color}
                                 sx={{ fontWeight: 600, cursor: 'pointer', borderRadius: 2 }}
                             />
                         ))}
@@ -585,488 +779,992 @@ function RandomizeRecipe() {
 
             {/* Active Filters List (Modular Cards) */}
             <Stack spacing={2} mb={3}>
-                {/* 1. Category Filter Card */}
-                {activeFilters.includes('category') && (
-                    <Card variant="outlined" sx={{ borderRadius: 2.5, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <CategoryIcon color="primary" fontSize="small" />
-                                    <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
-                                        Category
-                                    </Typography>
-                                    {categories.length > 0 && (
-                                        <Chip size="small" label={`${categories.length} selected`} color="primary" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} />
-                                    )}
-                                </Box>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <ToggleButtonGroup
-                                        value={categoryMode}
-                                        exclusive
-                                        onChange={(e, val) => val && setCategoryMode(val)}
-                                        size="small"
-                                    >
-                                        <ToggleButton value="include" color="success" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            <CheckCircleIcon sx={{ fontSize: 14, mr: 0.4 }} /> Include
-                                        </ToggleButton>
-                                        <ToggleButton value="exclude" color="error" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            <BlockIcon sx={{ fontSize: 14, mr: 0.4 }} /> Exclude
-                                        </ToggleButton>
-                                    </ToggleButtonGroup>
+                {activeFilters.map(filterKey => {
+                    switch (filterKey) {
+                        /* 1. Include Categories */
+                        case 'includeCategory':
+                            return (
+                                <Card
+                                    key="includeCategory"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <CheckCircleIcon sx={{ color: '#16a34a' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#15803d">
+                                                    Categories to Include
+                                                </Typography>
+                                                <Chip size="small" label="Include" color="success" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                                {includeCategories.length > 0 && (
+                                                    <Chip size="small" label={`${includeCategories.length} selected`} color="primary" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} />
+                                                )}
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('excludeCategory') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        startIcon={<BlockIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('excludeCategory')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#fca5a5' }}
+                                                    >
+                                                        + Exclude Categories
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('includeCategory')} color="default">
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
 
-                                    <Tooltip title="Remove Filter">
-                                        <IconButton size="small" onClick={() => handleRemoveFilter('category')} color="default">
-                                            <CloseIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-                            </Box>
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1.2}>
+                                            Recipe must match ANY of the selected categories:
+                                        </Typography>
 
-                            <Typography variant="caption" color="text.secondary" display="block" mb={1.2}>
-                                {categoryMode === 'include' ? "Must match ANY of the selected categories:" : "Must NOT match ANY of the selected categories:"}
-                            </Typography>
+                                        <Box display="flex" flexWrap="wrap" gap={0.8}>
+                                            {STANDARD_CATEGORIES.map(cat => {
+                                                const isSelected = includeCategories.includes(cat.name);
+                                                return (
+                                                    <Chip
+                                                        key={cat.name}
+                                                        label={`${cat.icon} ${cat.label}`}
+                                                        onClick={() => toggleIncludeCategory(cat.name)}
+                                                        color={isSelected ? 'primary' : 'default'}
+                                                        variant={isSelected ? 'filled' : 'outlined'}
+                                                        size="small"
+                                                        sx={{
+                                                            fontWeight: isSelected ? 700 : 500,
+                                                            borderRadius: 1.5,
+                                                            cursor: 'pointer',
+                                                            py: 1.6
+                                                        }}
+                                                    />
+                                                );
+                                            })}
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            );
 
-                            <Box display="flex" flexWrap="wrap" gap={0.8}>
-                                {STANDARD_CATEGORIES.map(cat => {
-                                    const isSelected = categories.includes(cat.name);
-                                    return (
-                                        <Chip
-                                            key={cat.name}
-                                            label={`${cat.icon} ${cat.label}`}
-                                            onClick={() => toggleCategory(cat.name)}
-                                            color={isSelected ? (categoryMode === 'include' ? 'primary' : 'error') : 'default'}
-                                            variant={isSelected ? 'filled' : 'outlined'}
-                                            size="small"
-                                            sx={{
-                                                fontWeight: isSelected ? 700 : 500,
-                                                borderRadius: 1.5,
-                                                cursor: 'pointer',
-                                                py: 1.6
+                        /* 2. Exclude Categories */
+                        case 'excludeCategory':
+                            return (
+                                <Card
+                                    key="excludeCategory"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #fecaca', bgcolor: '#fef2f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <BlockIcon sx={{ color: '#dc2626' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#b91c1c">
+                                                    Categories to Exclude
+                                                </Typography>
+                                                <Chip size="small" label="Exclude" color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                                {excludeCategories.length > 0 && (
+                                                    <Chip size="small" label={`${excludeCategories.length} excluded`} color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} />
+                                                )}
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('includeCategory') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="success"
+                                                        startIcon={<CheckCircleIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('includeCategory')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#86efac' }}
+                                                    >
+                                                        + Include Categories
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('excludeCategory')} color="default">
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
+
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1.2}>
+                                            Recipe must NOT match ANY of the selected categories:
+                                        </Typography>
+
+                                        <Box display="flex" flexWrap="wrap" gap={0.8}>
+                                            {STANDARD_CATEGORIES.map(cat => {
+                                                const isSelected = excludeCategories.includes(cat.name);
+                                                return (
+                                                    <Chip
+                                                        key={cat.name}
+                                                        label={`${cat.icon} ${cat.label}`}
+                                                        onClick={() => toggleExcludeCategory(cat.name)}
+                                                        color={isSelected ? 'error' : 'default'}
+                                                        variant={isSelected ? 'filled' : 'outlined'}
+                                                        size="small"
+                                                        sx={{
+                                                            fontWeight: isSelected ? 700 : 500,
+                                                            borderRadius: 1.5,
+                                                            cursor: 'pointer',
+                                                            py: 1.6
+                                                        }}
+                                                    />
+                                                );
+                                            })}
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            );
+
+                        /* 3. Must Contain Ingredient */
+                        case 'includeIngredient':
+                            return (
+                                <Card
+                                    key="includeIngredient"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <AddCircleOutlineIcon sx={{ color: '#16a34a' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#15803d">
+                                                    Must Contain Ingredient
+                                                </Typography>
+                                                <Chip size="small" label="Include" color="success" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('excludeIngredient') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        startIcon={<RemoveCircleOutlineIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('excludeIngredient')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#fca5a5' }}
+                                                    >
+                                                        + Exclude Ingredient
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('includeIngredient')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
+
+                                        <Box display="flex" gap={1} mb={1.2}>
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                placeholder="Type an ingredient (e.g. garlic, chicken, lemon) and press Enter"
+                                                value={includeInput}
+                                                onChange={(e) => setIncludeInput(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        handleAddIncludeIngredient();
+                                                    }
+                                                }}
+                                                sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                            />
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                size="small"
+                                                onClick={handleAddIncludeIngredient}
+                                                sx={{ fontWeight: 600, px: 2 }}
+                                            >
+                                                Add
+                                            </Button>
+                                        </Box>
+
+                                        <Box display="flex" flexWrap="wrap" gap={0.8} minHeight="24px">
+                                            {includeIngredients.map(ing => (
+                                                <Chip
+                                                    key={ing}
+                                                    label={`+ ${ing}`}
+                                                    color="primary"
+                                                    size="small"
+                                                    onDelete={() => setIncludeIngredients(prev => prev.filter(i => i !== ing))}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))}
+                                            {includeIngredients.length === 0 && (
+                                                <Typography variant="caption" color="text.secondary">
+                                                    Type ingredient above and click Add.
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            );
+
+                        /* 4. Must NOT Contain Ingredient */
+                        case 'excludeIngredient':
+                            return (
+                                <Card
+                                    key="excludeIngredient"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #fecaca', bgcolor: '#fef2f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <RemoveCircleOutlineIcon sx={{ color: '#dc2626' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#b91c1c">
+                                                    Must NOT Contain Ingredient
+                                                </Typography>
+                                                <Chip size="small" label="Exclude" color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('includeIngredient') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="success"
+                                                        startIcon={<AddCircleOutlineIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('includeIngredient')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#86efac' }}
+                                                    >
+                                                        + Include Ingredient
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('excludeIngredient')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
+
+                                        <Box display="flex" gap={1} mb={1.2}>
+                                            <TextField
+                                                size="small"
+                                                fullWidth
+                                                placeholder="Type an ingredient to exclude (e.g. cilantro, nuts, mushrooms)"
+                                                value={excludeInput}
+                                                onChange={(e) => setExcludeInput(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        handleAddExcludeIngredient();
+                                                    }
+                                                }}
+                                                sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                            />
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                size="small"
+                                                onClick={handleAddExcludeIngredient}
+                                                sx={{ fontWeight: 600, px: 2 }}
+                                            >
+                                                Add
+                                            </Button>
+                                        </Box>
+
+                                        <Box display="flex" flexWrap="wrap" gap={0.8} minHeight="24px">
+                                            {excludeIngredients.map(ing => (
+                                                <Chip
+                                                    key={ing}
+                                                    label={`- ${ing}`}
+                                                    color="error"
+                                                    size="small"
+                                                    onDelete={() => setExcludeIngredients(prev => prev.filter(i => i !== ing))}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))}
+                                            {excludeIngredients.length === 0 && (
+                                                <Typography variant="caption" color="text.secondary">
+                                                    Type ingredient above to exclude.
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            );
+
+                        /* 5. Include User Tags */
+                        case 'includeUserTag':
+                            return (
+                                <Card
+                                    key="includeUserTag"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <CheckCircleIcon sx={{ color: '#16a34a' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#15803d">
+                                                    User Tags to Include
+                                                </Typography>
+                                                <Chip size="small" label="Include" color="success" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                                {includeUserTags.length > 0 && (
+                                                    <Chip size="small" label={`${includeUserTags.length} selected`} color="primary" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} />
+                                                )}
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('excludeUserTag') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        startIcon={<BlockIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('excludeUserTag')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#fca5a5' }}
+                                                    >
+                                                        + Exclude User Tags
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('includeUserTag')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
+
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                                            Recipe must have ANY of the selected user tags:
+                                        </Typography>
+
+                                        <Autocomplete
+                                            multiple
+                                            id="include-user-tag-select"
+                                            options={availableUserTags.map(ut => ut.name)}
+                                            value={includeUserTags}
+                                            onChange={(event, newValue) => {
+                                                setIncludeUserTags(newValue);
+                                                // Remove selected from exclude if present
+                                                setExcludeUserTags(prev => prev.filter(t => !newValue.includes(t)));
                                             }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder={includeUserTags.length === 0 ? "Select user tags to include (e.g. eaten, interest)..." : ""}
+                                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                                />
+                                            )}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip
+                                                        {...getTagProps({ index })}
+                                                        key={option}
+                                                        label={`+ ${option}`}
+                                                        size="small"
+                                                        color="primary"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ))
+                                            }
                                         />
-                                    );
-                                })}
-                            </Box>
-                        </CardContent>
-                    </Card>
-                )}
+                                    </CardContent>
+                                </Card>
+                            );
 
-                {/* 2. Must Contain Ingredients Card */}
-                {activeFilters.includes('includeIngredient') && (
-                    <Card variant="outlined" sx={{ borderRadius: 2.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <AddCircleOutlineIcon sx={{ color: '#16a34a' }} fontSize="small" />
-                                    <Typography variant="subtitle1" fontWeight={700} color="#15803d">
-                                        Must Contain Ingredient
-                                    </Typography>
-                                </Box>
-                                <Tooltip title="Remove Filter">
-                                    <IconButton size="small" onClick={() => handleRemoveFilter('includeIngredient')}>
-                                        <CloseIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
-
-                            <Box display="flex" gap={1} mb={1.2}>
-                                <TextField
-                                    size="small"
-                                    fullWidth
-                                    placeholder="Type an ingredient (e.g. garlic, chicken, lemon) and press Enter"
-                                    value={includeInput}
-                                    onChange={(e) => setIncludeInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleAddIncludeIngredient();
-                                        }
-                                    }}
-                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
-                                />
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    size="small"
-                                    onClick={handleAddIncludeIngredient}
-                                    sx={{ fontWeight: 600, px: 2 }}
+                        /* 6. Exclude User Tags */
+                        case 'excludeUserTag':
+                            return (
+                                <Card
+                                    key="excludeUserTag"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #fecaca', bgcolor: '#fef2f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
                                 >
-                                    Add
-                                </Button>
-                            </Box>
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <BlockIcon sx={{ color: '#dc2626' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#b91c1c">
+                                                    User Tags to Exclude
+                                                </Typography>
+                                                <Chip size="small" label="Exclude" color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                                {excludeUserTags.length > 0 && (
+                                                    <Chip size="small" label={`${excludeUserTags.length} excluded`} color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} />
+                                                )}
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('includeUserTag') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="success"
+                                                        startIcon={<CheckCircleIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('includeUserTag')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#86efac' }}
+                                                    >
+                                                        + Include User Tags
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('excludeUserTag')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
 
-                            <Box display="flex" flexWrap="wrap" gap={0.8} minHeight="24px">
-                                {includeIngredients.map(ing => (
-                                    <Chip
-                                        key={ing}
-                                        label={`+ ${ing}`}
-                                        color="primary"
-                                        size="small"
-                                        onDelete={() => setIncludeIngredients(prev => prev.filter(i => i !== ing))}
-                                        sx={{ fontWeight: 600 }}
-                                    />
-                                ))}
-                                {includeIngredients.length === 0 && (
-                                    <Typography variant="caption" color="text.secondary">
-                                        Type ingredient above and click Add.
-                                    </Typography>
-                                )}
-                            </Box>
-                        </CardContent>
-                    </Card>
-                )}
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                                            Recipe must NOT have ANY of the selected user tags:
+                                        </Typography>
 
-                {/* 3. Must NOT Contain Ingredients Card */}
-                {activeFilters.includes('excludeIngredient') && (
-                    <Card variant="outlined" sx={{ borderRadius: 2.5, border: '1px solid #fecaca', bgcolor: '#fef2f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <RemoveCircleOutlineIcon sx={{ color: '#dc2626' }} fontSize="small" />
-                                    <Typography variant="subtitle1" fontWeight={700} color="#b91c1c">
-                                        Must NOT Contain Ingredient
-                                    </Typography>
-                                </Box>
-                                <Tooltip title="Remove Filter">
-                                    <IconButton size="small" onClick={() => handleRemoveFilter('excludeIngredient')}>
-                                        <CloseIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
+                                        <Autocomplete
+                                            multiple
+                                            id="exclude-user-tag-select"
+                                            options={availableUserTags.map(ut => ut.name)}
+                                            value={excludeUserTags}
+                                            onChange={(event, newValue) => {
+                                                setExcludeUserTags(newValue);
+                                                // Remove selected from include if present
+                                                setIncludeUserTags(prev => prev.filter(t => !newValue.includes(t)));
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder={excludeUserTags.length === 0 ? "Select user tags to exclude (e.g. not a reorder)..." : ""}
+                                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                                />
+                                            )}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip
+                                                        {...getTagProps({ index })}
+                                                        key={option}
+                                                        label={`- ${option}`}
+                                                        size="small"
+                                                        color="error"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ))
+                                            }
+                                        />
+                                    </CardContent>
+                                </Card>
+                            );
 
-                            <Box display="flex" gap={1} mb={1.2}>
-                                <TextField
-                                    size="small"
-                                    fullWidth
-                                    placeholder="Type an ingredient to exclude (e.g. cilantro, nuts, mushrooms)"
-                                    value={excludeInput}
-                                    onChange={(e) => setExcludeInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleAddExcludeIngredient();
-                                        }
-                                    }}
-                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
-                                />
-                                <Button
-                                    variant="contained"
-                                    color="error"
-                                    size="small"
-                                    onClick={handleAddExcludeIngredient}
-                                    sx={{ fontWeight: 600, px: 2 }}
+                        /* 7. Include System Tags */
+                        case 'includeTag':
+                            return (
+                                <Card
+                                    key="includeTag"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
                                 >
-                                    Add
-                                </Button>
-                            </Box>
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <CheckCircleIcon sx={{ color: '#16a34a' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#15803d">
+                                                    System Tags to Include
+                                                </Typography>
+                                                <Chip size="small" label="Include" color="success" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                                {includeTags.length > 0 && (
+                                                    <Chip size="small" label={`${includeTags.length} selected`} color="primary" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} />
+                                                )}
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('excludeTag') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        startIcon={<BlockIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('excludeTag')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#fca5a5' }}
+                                                    >
+                                                        + Exclude Tags
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('includeTag')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
 
-                            <Box display="flex" flexWrap="wrap" gap={0.8} minHeight="24px">
-                                {excludeIngredients.map(ing => (
-                                    <Chip
-                                        key={ing}
-                                        label={`- ${ing}`}
-                                        color="error"
-                                        size="small"
-                                        onDelete={() => setExcludeIngredients(prev => prev.filter(i => i !== ing))}
-                                        sx={{ fontWeight: 600 }}
-                                    />
-                                ))}
-                                {excludeIngredients.length === 0 && (
-                                    <Typography variant="caption" color="text.secondary">
-                                        Type ingredient above to exclude.
-                                    </Typography>
-                                )}
-                            </Box>
-                        </CardContent>
-                    </Card>
-                )}
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                                            Recipe must match ANY of the selected system tags:
+                                        </Typography>
 
-                {/* 4. Cookbook / Source Card */}
-                {activeFilters.includes('cookbook') && (
-                    <Card variant="outlined" sx={{ borderRadius: 2.5, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <MenuBookIcon color="primary" fontSize="small" />
-                                    <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
-                                        Cookbook / Source
-                                    </Typography>
-                                </Box>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <ToggleButtonGroup
-                                        value={cookbookMode}
-                                        exclusive
-                                        onChange={(e, val) => val && setCookbookMode(val)}
-                                        size="small"
-                                    >
-                                        <ToggleButton value="include" color="success" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            Include
-                                        </ToggleButton>
-                                        <ToggleButton value="exclude" color="error" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            Exclude
-                                        </ToggleButton>
-                                    </ToggleButtonGroup>
-                                    <Tooltip title="Remove Filter">
-                                        <IconButton size="small" onClick={() => handleRemoveFilter('cookbook')}>
-                                            <CloseIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-                            </Box>
-
-                            <Autocomplete
-                                multiple
-                                id="cookbook-select"
-                                options={availableCookbooks}
-                                value={cookbooks}
-                                onChange={(event, newValue) => setCookbooks(newValue)}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        variant="outlined"
-                                        size="small"
-                                        placeholder={cookbooks.length === 0 ? "Select cookbooks or authors..." : ""}
-                                    />
-                                )}
-                                renderTags={(value, getTagProps) =>
-                                    value.map((option, index) => (
-                                        <Chip
-                                            {...getTagProps({ index })}
-                                            key={option}
-                                            label={option}
-                                            size="small"
-                                            color={cookbookMode === 'include' ? 'primary' : 'error'}
+                                        <Autocomplete
+                                            multiple
+                                            id="include-tags-select"
+                                            options={availableTags.map(t => t.name)}
+                                            value={includeTags}
+                                            onChange={(event, newValue) => {
+                                                setIncludeTags(newValue);
+                                                setExcludeTags(prev => prev.filter(t => !newValue.includes(t)));
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder={includeTags.length === 0 ? "Select tags (e.g. vegan, passover, dinner)..." : ""}
+                                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                                />
+                                            )}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip
+                                                        {...getTagProps({ index })}
+                                                        key={option}
+                                                        label={`+ ${option}`}
+                                                        size="small"
+                                                        color="primary"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ))
+                                            }
                                         />
-                                    ))
-                                }
-                            />
-                        </CardContent>
-                    </Card>
-                )}
+                                    </CardContent>
+                                </Card>
+                            );
 
-                {/* 5. Source Category Card */}
-                {activeFilters.includes('sourceCategory') && (
-                    <Card variant="outlined" sx={{ borderRadius: 2.5, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <CategoryIcon color="secondary" fontSize="small" />
-                                    <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
-                                        Source Type
-                                    </Typography>
-                                </Box>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <ToggleButtonGroup
-                                        value={sourceCategoryMode}
-                                        exclusive
-                                        onChange={(e, val) => val && setSourceCategoryMode(val)}
-                                        size="small"
-                                    >
-                                        <ToggleButton value="include" color="success" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            Include
-                                        </ToggleButton>
-                                        <ToggleButton value="exclude" color="error" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            Exclude
-                                        </ToggleButton>
-                                    </ToggleButtonGroup>
-                                    <Tooltip title="Remove Filter">
-                                        <IconButton size="small" onClick={() => handleRemoveFilter('sourceCategory')}>
-                                            <CloseIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-                            </Box>
+                        /* 8. Exclude System Tags */
+                        case 'excludeTag':
+                            return (
+                                <Card
+                                    key="excludeTag"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #fecaca', bgcolor: '#fef2f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <BlockIcon sx={{ color: '#dc2626' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#b91c1c">
+                                                    System Tags to Exclude
+                                                </Typography>
+                                                <Chip size="small" label="Exclude" color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                                {excludeTags.length > 0 && (
+                                                    <Chip size="small" label={`${excludeTags.length} excluded`} color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 600 }} />
+                                                )}
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('includeTag') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="success"
+                                                        startIcon={<CheckCircleIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('includeTag')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#86efac' }}
+                                                    >
+                                                        + Include Tags
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('excludeTag')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
 
-                            <Autocomplete
-                                multiple
-                                id="source-cat-select"
-                                options={availableSourceCategories.map(sc => sc.name)}
-                                value={sourceCategories}
-                                onChange={(event, newValue) => setSourceCategories(newValue)}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        variant="outlined"
-                                        size="small"
-                                        placeholder={sourceCategories.length === 0 ? "Select source types (Website, Instagram, Cookbook)..." : ""}
-                                    />
-                                )}
-                                renderTags={(value, getTagProps) =>
-                                    value.map((option, index) => (
-                                        <Chip
-                                            {...getTagProps({ index })}
-                                            key={option}
-                                            label={option}
-                                            size="small"
-                                            color={sourceCategoryMode === 'include' ? 'primary' : 'error'}
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                                            Recipe must NOT match ANY of the selected system tags:
+                                        </Typography>
+
+                                        <Autocomplete
+                                            multiple
+                                            id="exclude-tags-select"
+                                            options={availableTags.map(t => t.name)}
+                                            value={excludeTags}
+                                            onChange={(event, newValue) => {
+                                                setExcludeTags(newValue);
+                                                setIncludeTags(prev => prev.filter(t => !newValue.includes(t)));
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder={excludeTags.length === 0 ? "Select tags to exclude..." : ""}
+                                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                                />
+                                            )}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip
+                                                        {...getTagProps({ index })}
+                                                        key={option}
+                                                        label={`- ${option}`}
+                                                        size="small"
+                                                        color="error"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ))
+                                            }
                                         />
-                                    ))
-                                }
-                            />
-                        </CardContent>
-                    </Card>
-                )}
+                                    </CardContent>
+                                </Card>
+                            );
 
-                {/* 6. System Tags Card */}
-                {activeFilters.includes('tag') && (
-                    <Card variant="outlined" sx={{ borderRadius: 2.5, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <LocalOfferIcon color="primary" fontSize="small" />
-                                    <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
-                                        System Tags
-                                    </Typography>
-                                </Box>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <ToggleButtonGroup
-                                        value={tagMode}
-                                        exclusive
-                                        onChange={(e, val) => val && setTagMode(val)}
-                                        size="small"
-                                    >
-                                        <ToggleButton value="include" color="success" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            Include
-                                        </ToggleButton>
-                                        <ToggleButton value="exclude" color="error" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            Exclude
-                                        </ToggleButton>
-                                    </ToggleButtonGroup>
-                                    <Tooltip title="Remove Filter">
-                                        <IconButton size="small" onClick={() => handleRemoveFilter('tag')}>
-                                            <CloseIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-                            </Box>
+                        /* 9. Include Cookbooks */
+                        case 'includeCookbook':
+                            return (
+                                <Card
+                                    key="includeCookbook"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <CheckCircleIcon sx={{ color: '#16a34a' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#15803d">
+                                                    Cookbooks / Sources to Include
+                                                </Typography>
+                                                <Chip size="small" label="Include" color="success" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('excludeCookbook') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        startIcon={<BlockIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('excludeCookbook')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#fca5a5' }}
+                                                    >
+                                                        + Exclude Cookbooks
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('includeCookbook')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
 
-                            <Autocomplete
-                                multiple
-                                id="system-tags-select"
-                                options={availableTags.map(t => t.name)}
-                                value={tags}
-                                onChange={(event, newValue) => setTags(newValue)}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        variant="outlined"
-                                        size="small"
-                                        placeholder={tags.length === 0 ? "Select tags (e.g. vegan, passover, dinner)..." : ""}
-                                    />
-                                )}
-                                renderTags={(value, getTagProps) =>
-                                    value.map((option, index) => (
-                                        <Chip
-                                            {...getTagProps({ index })}
-                                            key={option}
-                                            label={option}
-                                            size="small"
-                                            color={tagMode === 'include' ? 'primary' : 'error'}
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                                            Recipe must be from ANY of the selected sources:
+                                        </Typography>
+
+                                        <Autocomplete
+                                            multiple
+                                            id="include-cookbook-select"
+                                            options={availableCookbooks}
+                                            value={includeCookbooks}
+                                            onChange={(event, newValue) => {
+                                                setIncludeCookbooks(newValue);
+                                                setExcludeCookbooks(prev => prev.filter(c => !newValue.includes(c)));
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder={includeCookbooks.length === 0 ? "Select cookbooks or authors to include..." : ""}
+                                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                                />
+                                            )}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip
+                                                        {...getTagProps({ index })}
+                                                        key={option}
+                                                        label={`+ ${option}`}
+                                                        size="small"
+                                                        color="primary"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ))
+                                            }
                                         />
-                                    ))
-                                }
-                            />
-                        </CardContent>
-                    </Card>
-                )}
+                                    </CardContent>
+                                </Card>
+                            );
 
-                {/* 7. User Tags Card */}
-                {activeFilters.includes('userTag') && (
-                    <Card variant="outlined" sx={{ borderRadius: 2.5, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <PersonPinIcon color="secondary" fontSize="small" />
-                                    <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
-                                        User Tags
-                                    </Typography>
-                                </Box>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <ToggleButtonGroup
-                                        value={userTagMode}
-                                        exclusive
-                                        onChange={(e, val) => val && setUserTagMode(val)}
-                                        size="small"
-                                    >
-                                        <ToggleButton value="include" color="success" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            Include
-                                        </ToggleButton>
-                                        <ToggleButton value="exclude" color="error" sx={{ px: 1.2, py: 0.3, fontSize: '0.75rem', fontWeight: 600 }}>
-                                            Exclude
-                                        </ToggleButton>
-                                    </ToggleButtonGroup>
-                                    <Tooltip title="Remove Filter">
-                                        <IconButton size="small" onClick={() => handleRemoveFilter('userTag')}>
-                                            <CloseIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-                            </Box>
+                        /* 10. Exclude Cookbooks */
+                        case 'excludeCookbook':
+                            return (
+                                <Card
+                                    key="excludeCookbook"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #fecaca', bgcolor: '#fef2f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <BlockIcon sx={{ color: '#dc2626' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#b91c1c">
+                                                    Cookbooks / Sources to Exclude
+                                                </Typography>
+                                                <Chip size="small" label="Exclude" color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('includeCookbook') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="success"
+                                                        startIcon={<CheckCircleIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('includeCookbook')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#86efac' }}
+                                                    >
+                                                        + Include Cookbooks
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('excludeCookbook')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
 
-                            <Autocomplete
-                                multiple
-                                id="user-tag-select"
-                                options={availableUserTags.map(ut => ut.name)}
-                                value={userTags}
-                                onChange={(event, newValue) => setUserTags(newValue)}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        variant="outlined"
-                                        size="small"
-                                        placeholder={userTags.length === 0 ? "Select user tags (e.g. eaten, interest, not a reorder)..." : ""}
-                                    />
-                                )}
-                                renderTags={(value, getTagProps) =>
-                                    value.map((option, index) => (
-                                        <Chip
-                                            {...getTagProps({ index })}
-                                            key={option}
-                                            label={option}
-                                            size="small"
-                                            color={userTagMode === 'include' ? 'primary' : 'error'}
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                                            Recipe must NOT be from ANY of the selected sources:
+                                        </Typography>
+
+                                        <Autocomplete
+                                            multiple
+                                            id="exclude-cookbook-select"
+                                            options={availableCookbooks}
+                                            value={excludeCookbooks}
+                                            onChange={(event, newValue) => {
+                                                setExcludeCookbooks(newValue);
+                                                setIncludeCookbooks(prev => prev.filter(c => !newValue.includes(c)));
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder={excludeCookbooks.length === 0 ? "Select cookbooks or authors to exclude..." : ""}
+                                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                                />
+                                            )}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip
+                                                        {...getTagProps({ index })}
+                                                        key={option}
+                                                        label={`- ${option}`}
+                                                        size="small"
+                                                        color="error"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ))
+                                            }
                                         />
-                                    ))
-                                }
-                            />
-                        </CardContent>
-                    </Card>
-                )}
+                                    </CardContent>
+                                </Card>
+                            );
 
-                {/* 8. Scope Card */}
-                {activeFilters.includes('scope') && (
-                    <Card variant="outlined" sx={{ borderRadius: 2.5, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                        <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <PersonPinIcon color="primary" fontSize="small" />
-                                    <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
-                                        Recipe Scope
-                                    </Typography>
-                                </Box>
-                                <Tooltip title="Remove Filter">
-                                    <IconButton size="small" onClick={() => handleRemoveFilter('scope')}>
-                                        <CloseIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
+                        /* 11. Include Source Category */
+                        case 'includeSourceCategory':
+                            return (
+                                <Card
+                                    key="includeSourceCategory"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #bbf7d0', bgcolor: '#f0fdf4', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <CheckCircleIcon sx={{ color: '#16a34a' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#15803d">
+                                                    Source Types to Include
+                                                </Typography>
+                                                <Chip size="small" label="Include" color="success" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('excludeSourceCategory') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        startIcon={<BlockIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('excludeSourceCategory')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#fca5a5' }}
+                                                    >
+                                                        + Exclude Source Types
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('includeSourceCategory')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
 
-                            <ToggleButtonGroup
-                                value={scope}
-                                exclusive
-                                onChange={(e, val) => val && setScope(val)}
-                                size="small"
-                            >
-                                <ToggleButton value="all" sx={{ px: 2.5, fontWeight: 600 }}>
-                                    🌐 All Recipes
-                                </ToggleButton>
-                                <ToggleButton value="user" sx={{ px: 2.5, fontWeight: 600 }}>
-                                    ⭐ My Saved Recipes Only
-                                </ToggleButton>
-                            </ToggleButtonGroup>
-                        </CardContent>
-                    </Card>
-                )}
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                                            Recipe must be from ANY of the selected source types:
+                                        </Typography>
+
+                                        <Autocomplete
+                                            multiple
+                                            id="include-source-cat-select"
+                                            options={availableSourceCategories.map(sc => sc.name)}
+                                            value={includeSourceCategories}
+                                            onChange={(event, newValue) => {
+                                                setIncludeSourceCategories(newValue);
+                                                setExcludeSourceCategories(prev => prev.filter(sc => !newValue.includes(sc)));
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder={includeSourceCategories.length === 0 ? "Select source types (Website, Instagram, Cookbook)..." : ""}
+                                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                                />
+                                            )}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip
+                                                        {...getTagProps({ index })}
+                                                        key={option}
+                                                        label={`+ ${option}`}
+                                                        size="small"
+                                                        color="primary"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ))
+                                            }
+                                        />
+                                    </CardContent>
+                                </Card>
+                            );
+
+                        /* 12. Exclude Source Category */
+                        case 'excludeSourceCategory':
+                            return (
+                                <Card
+                                    key="excludeSourceCategory"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #fecaca', bgcolor: '#fef2f2', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <BlockIcon sx={{ color: '#dc2626' }} fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#b91c1c">
+                                                    Source Types to Exclude
+                                                </Typography>
+                                                <Chip size="small" label="Exclude" color="error" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700 }} />
+                                            </Box>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                {!activeFilters.includes('includeSourceCategory') && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="success"
+                                                        startIcon={<CheckCircleIcon sx={{ fontSize: 13 }} />}
+                                                        onClick={() => handleAddFilter('includeSourceCategory')}
+                                                        sx={{ textTransform: 'none', fontSize: '0.75rem', py: 0.3, px: 1, borderRadius: 1.5, borderColor: '#86efac' }}
+                                                    >
+                                                        + Include Source Types
+                                                    </Button>
+                                                )}
+                                                <Tooltip title="Remove Filter">
+                                                    <IconButton size="small" onClick={() => handleRemoveFilter('excludeSourceCategory')}>
+                                                        <CloseIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
+
+                                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+                                            Recipe must NOT be from ANY of the selected source types:
+                                        </Typography>
+
+                                        <Autocomplete
+                                            multiple
+                                            id="exclude-source-cat-select"
+                                            options={availableSourceCategories.map(sc => sc.name)}
+                                            value={excludeSourceCategories}
+                                            onChange={(event, newValue) => {
+                                                setExcludeSourceCategories(newValue);
+                                                setIncludeSourceCategories(prev => prev.filter(sc => !newValue.includes(sc)));
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder={excludeSourceCategories.length === 0 ? "Select source types to exclude..." : ""}
+                                                    sx={{ bgcolor: '#ffffff', borderRadius: 1 }}
+                                                />
+                                            )}
+                                            renderTags={(value, getTagProps) =>
+                                                value.map((option, index) => (
+                                                    <Chip
+                                                        {...getTagProps({ index })}
+                                                        key={option}
+                                                        label={`- ${option}`}
+                                                        size="small"
+                                                        color="error"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ))
+                                            }
+                                        />
+                                    </CardContent>
+                                </Card>
+                            );
+
+                        /* 13. Scope */
+                        case 'scope':
+                            return (
+                                <Card
+                                    key="scope"
+                                    variant="outlined"
+                                    sx={{ borderRadius: 2.5, border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+                                >
+                                    <CardContent sx={{ p: { xs: 2, sm: 2.5 }, pb: '16px !important' }}>
+                                        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                            <Box display="flex" alignItems="center" gap={1}>
+                                                <PersonPinIcon color="primary" fontSize="small" />
+                                                <Typography variant="subtitle1" fontWeight={700} color="#1e293b">
+                                                    Recipe Scope
+                                                </Typography>
+                                            </Box>
+                                            <Tooltip title="Remove Filter">
+                                                <IconButton size="small" onClick={() => handleRemoveFilter('scope')}>
+                                                    <CloseIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Box>
+
+                                        <ToggleButtonGroup
+                                            value={scope}
+                                            exclusive
+                                            onChange={(e, val) => val && setScope(val)}
+                                            size="small"
+                                        >
+                                            <ToggleButton value="all" sx={{ px: 2.5, fontWeight: 600 }}>
+                                                🌐 All Recipes
+                                            </ToggleButton>
+                                            <ToggleButton value="user" sx={{ px: 2.5, fontWeight: 600 }}>
+                                                ⭐ My Saved Recipes Only
+                                            </ToggleButton>
+                                        </ToggleButtonGroup>
+                                    </CardContent>
+                                </Card>
+                            );
+
+                        default:
+                            return null;
+                    }
+                })}
             </Stack>
 
             {/* Randomized Recipe Result */}

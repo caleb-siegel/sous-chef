@@ -22,6 +22,8 @@ function App() {
       ? `http://${window.location.hostname}:5555`
       : "https://souschef-backend.vercel.app");
 
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   useEffect(() => {
     // Check with the backend for the latest session data
     fetch(`${backendUrl}/api/check_session`, {
@@ -30,6 +32,7 @@ function App() {
       .then((res) => {
         if (res.status === 401) {
           localStorage.removeItem("user");
+          localStorage.removeItem("auth_token");
           setUser(null);
           return null;
         }
@@ -40,6 +43,9 @@ function App() {
       })
       .then((freshUser) => {
         if (freshUser) {
+          if (freshUser.token) {
+            localStorage.setItem("auth_token", freshUser.token);
+          }
           setUser(freshUser);
           localStorage.setItem("user", JSON.stringify(freshUser));
         }
@@ -49,17 +55,8 @@ function App() {
       });
   }, [backendUrl]);
 
-  //   useEffect(() => {
-  //     fetch(`${backendUrl}/api/check_session`, {
-  //         credentials: 'include'
-  //     }).then((res) => {
-  //         if (res.ok) {
-  //             res.json().then((user) => setUser(user));
-  //         }
-  //     });
-  // }, []);
-
   function attemptLogin(userInfo) {
+    setIsLoggingIn(true);
     fetch(`${backendUrl}/api/login`, {
       method: "POST",
       headers: {
@@ -76,18 +73,25 @@ function App() {
         throw res;
       })
       .then((data) => {
+        if (data.token) {
+          localStorage.setItem("auth_token", data.token);
+        }
         setUser(data);
         localStorage.setItem("user", JSON.stringify(data));
         navigate("/recipes");
       })
       .catch((e) => {
-        alert('incorrect username or password')
+        alert('incorrect username or password');
         console.log(e);
+      })
+      .finally(() => {
+        setIsLoggingIn(false);
       });
   }
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (codeResponse) => {
+      setIsLoggingIn(true);
       try {
         // Get user info from Google
         const userResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -118,29 +122,36 @@ function App() {
         }
 
         const data = await backendResponse.json();
+        const loggedInUser = data.user || data;
+        if (data.token || loggedInUser.token) {
+          localStorage.setItem("auth_token", data.token || loggedInUser.token);
+        }
 
-        // ✅ Change this line - remove the callback
-        setUser(data.user);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        setUser(loggedInUser);
+        localStorage.setItem("user", JSON.stringify(loggedInUser));
+        navigate("/recipes");
 
       } catch (error) {
         console.error('Error during login:', error);
+      } finally {
+        setIsLoggingIn(false);
       }
     },
     onError: (error) => {
       console.error('Google Login Failed:', error);
+      setIsLoggingIn(false);
     },
     flow: 'implicit',
     scope: 'email profile',
   });
 
   function logout() {
-    fetch(`${backendUrl}/api/logout`, { method: "DELETE", credentials: "include" }).then((res) => {
-      if (res.ok) {
+    fetch(`${backendUrl}/api/logout`, { method: "DELETE", credentials: "include" })
+      .finally(() => {
         localStorage.removeItem("user");
+        localStorage.removeItem("auth_token");
         setUser(null);
-      }
-    });
+      });
   }
 
   const [darkMode, setDarkMode] = useState(false);
@@ -154,7 +165,7 @@ function App() {
     <Container disableGutters maxWidth={false} sx={{ height: '100vh', width: '100%', padding: '0px' }}>
       <Typography component={'span'}>
         <Navbar logout={logout} user={user} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
-        <Outlet context={{ user, attemptLogin, logout, backendUrl, googleLogin }} />
+        <Outlet context={{ user, attemptLogin, logout, backendUrl, googleLogin, isLoggingIn }} />
       </Typography>
     </Container>
   );
