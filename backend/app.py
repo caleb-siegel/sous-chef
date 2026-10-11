@@ -56,12 +56,38 @@ CORS(app,
 )
 
 from datetime import timedelta
-app.permanent_session_lifetime = timedelta(days=31)
+from itsdangerous import URLSafeTimedSerializer
+
+auth_serializer = URLSafeTimedSerializer(app.secret_key or "default-flask-secret-key-sous-chef")
+
+def generate_auth_token(user_id):
+    return auth_serializer.dumps({"user_id": user_id})
+
+def get_user_id_from_token(token):
+    try:
+        data = auth_serializer.loads(token, max_age=60 * 60 * 24 * 90) # 90 days validity
+        return data.get("user_id")
+    except Exception as e:
+        logger.debug(f"Invalid or expired auth token: {e}")
+        return None
+
+def get_current_user_id():
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ", 1)[1].strip()
+        uid = get_user_id_from_token(token)
+        if uid:
+            return uid
+    return session.get("user_id")
+
+app.permanent_session_lifetime = timedelta(days=60)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=60)
 is_production = os.getenv('FLASK_ENV') == 'production' or bool(os.getenv('VERCEL')) or os.getenv('ENV') == 'production'
 app.config['SESSION_COOKIE_SAMESITE'] = 'None' if is_production else 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = is_production
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_PERMANENT'] = True
+app.config['SESSION_REFRESH_EACH_REQUEST'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 
 bcrypt = Bcrypt(app)
@@ -75,12 +101,16 @@ def root():
 
 @app.get('/api/check_session')
 def check_session():
-    user_id = session.get('user_id')
+    user_id = get_current_user_id()
     print(f'check session user_id={user_id}')
     if user_id:
         user = db.session.get(User, user_id)
         if user:
-            return user.to_dict(rules=['-password_hash']), 200
+            session.permanent = True
+            session["user_id"] = user.id
+            user_data = user.to_dict()
+            user_data['token'] = generate_auth_token(user.id)
+            return user_data, 200
     return {"message": "No user logged in"}, 401
 
 @app.delete('/api/logout')
@@ -108,7 +138,9 @@ def login():
             session.permanent = True
             session["user_id"] = user.id
             full_user = db.session.get(User, user.id)
-            return full_user.to_dict(rules=['-password_hash']), 200
+            user_data = full_user.to_dict()
+            user_data['token'] = generate_auth_token(user.id)
+            return user_data, 200
         else:
             return { "error": "Invalid username or password" }, 401
         
@@ -171,10 +203,14 @@ def google_auth():
             # Set session
             session.permanent = True
             session["user_id"] = user.id
+            token = generate_auth_token(user.id)
+            user_data = user.to_dict()
+            user_data['token'] = token
             
             return jsonify({
                 'success': True,
-                'user': user.to_dict()
+                'user': user_data,
+                'token': token
             })
             
         return jsonify({'error': 'Invalid user info'}), 400
@@ -261,7 +297,7 @@ def recipes():
         return filter_recipes()
 
     elif request.method == 'POST':
-        user_id = session.get('user_id') or request.json.get('created_by_user_id') or request.json.get('user_id')
+        user_id = get_current_user_id() or request.json.get('created_by_user_id') or request.json.get('user_id')
         new_recipe = Recipe(
             name=request.json.get("name"),
             picture=request.json.get("picture"),
@@ -491,22 +527,69 @@ def random_recipe():
             return [v.strip() for v in val.split(',') if v.strip()]
         return [str(val)]
 
-    categories = to_list(data.get('categories') or data.get('category'))
-    category_mode = data.get('category_mode', 'include').lower() # 'include' or 'exclude'
-    cookbooks = to_list(data.get('cookbooks') or data.get('cookbook'))
-    cookbook_mode = data.get('cookbook_mode', 'include').lower()
-    source_categories = to_list(data.get('source_categories') or data.get('source_category'))
-    source_category_mode = data.get('source_category_mode', 'include').lower()
-    tags = to_list(data.get('tags') or data.get('tag'))
-    tag_mode = data.get('tag_mode', 'include').lower()
-    user_tags = to_list(data.get('user_tags') or data.get('user_tag'))
-    user_tag_mode = data.get('user_tag_mode', 'include').lower()
+    # Category filters
+    include_categories = to_list(data.get('include_categories'))
+    exclude_categories = to_list(data.get('exclude_categories'))
+    legacy_cats = to_list(data.get('categories') or data.get('category'))
+    legacy_cat_mode = data.get('category_mode', 'include').lower()
+    if legacy_cats:
+        if legacy_cat_mode == 'exclude' and not exclude_categories:
+            exclude_categories = legacy_cats
+        elif legacy_cat_mode != 'exclude' and not include_categories:
+            include_categories = legacy_cats
+
+    # Cookbook / Source filters
+    include_cookbooks = to_list(data.get('include_cookbooks'))
+    exclude_cookbooks = to_list(data.get('exclude_cookbooks'))
+    legacy_cookbooks = to_list(data.get('cookbooks') or data.get('cookbook'))
+    legacy_cookbook_mode = data.get('cookbook_mode', 'include').lower()
+    if legacy_cookbooks:
+        if legacy_cookbook_mode == 'exclude' and not exclude_cookbooks:
+            exclude_cookbooks = legacy_cookbooks
+        elif legacy_cookbook_mode != 'exclude' and not include_cookbooks:
+            include_cookbooks = legacy_cookbooks
+
+    # Source Category filters
+    include_source_categories = to_list(data.get('include_source_categories'))
+    exclude_source_categories = to_list(data.get('exclude_source_categories'))
+    legacy_sc = to_list(data.get('source_categories') or data.get('source_category'))
+    legacy_sc_mode = data.get('source_category_mode', 'include').lower()
+    if legacy_sc:
+        if legacy_sc_mode == 'exclude' and not exclude_source_categories:
+            exclude_source_categories = legacy_sc
+        elif legacy_sc_mode != 'exclude' and not include_source_categories:
+            include_source_categories = legacy_sc
+
+    # Tag filters
+    include_tags = to_list(data.get('include_tags'))
+    exclude_tags = to_list(data.get('exclude_tags'))
+    legacy_tags = to_list(data.get('tags') or data.get('tag'))
+    legacy_tag_mode = data.get('tag_mode', 'include').lower()
+    if legacy_tags:
+        if legacy_tag_mode == 'exclude' and not exclude_tags:
+            exclude_tags = legacy_tags
+        elif legacy_tag_mode != 'exclude' and not include_tags:
+            include_tags = legacy_tags
+
+    # User Tag filters
+    include_user_tags = to_list(data.get('include_user_tags'))
+    exclude_user_tags = to_list(data.get('exclude_user_tags'))
+    legacy_ut = to_list(data.get('user_tags') or data.get('user_tag'))
+    legacy_ut_mode = data.get('user_tag_mode', 'include').lower()
+    if legacy_ut:
+        if legacy_ut_mode == 'exclude' and not exclude_user_tags:
+            exclude_user_tags = legacy_ut
+        elif legacy_ut_mode != 'exclude' and not include_user_tags:
+            include_user_tags = legacy_ut
+
+    # Ingredient filters
     include_ingredients = to_list(data.get('include_ingredients') or data.get('ingredient'))
     exclude_ingredients = to_list(data.get('exclude_ingredients') or data.get('exclude_ingredient'))
+    
     scope = data.get('scope', 'all').lower() # 'all' or 'user' / 'my_recipes'
     
     # Determine user_id if scope is user
-    user_id = data.get('user_id') or session.get('user_id')
+    user_id = data.get('user_id') or get_current_user_id()
     try:
         user_id = int(user_id) if user_id else None
     except (ValueError, TypeError):
@@ -523,85 +606,101 @@ def random_recipe():
     filters = []
 
     # Category filters
-    if categories:
-        cat_conds = [get_category_filter(c) for c in categories]
+    if include_categories:
+        cat_conds = [get_category_filter(c) for c in include_categories]
         cat_conds = [c for c in cat_conds if c is not None]
         if cat_conds:
-            if category_mode == 'exclude':
-                # Exclude recipes matching any of these categories
-                filters.append(and_(*[~c for c in cat_conds]))
-            else:
-                # Include recipes matching any of these categories (OR)
-                filters.append(or_(*cat_conds))
+            filters.append(or_(*cat_conds))
+
+    if exclude_categories:
+        cat_conds = [get_category_filter(c) for c in exclude_categories]
+        cat_conds = [c for c in cat_conds if c is not None]
+        if cat_conds:
+            filters.append(and_(*[~c for c in cat_conds]))
 
     # Cookbook / Source filters
-    if cookbooks:
-        if cookbook_mode == 'exclude':
-            filters.append(~Recipe.source.in_(cookbooks))
-        else:
-            filters.append(Recipe.source.in_(cookbooks))
+    if include_cookbooks:
+        filters.append(Recipe.source.in_(include_cookbooks))
+    if exclude_cookbooks:
+        filters.append(~Recipe.source.in_(exclude_cookbooks))
 
     # Source Category filters
-    if source_categories:
+    def resolve_sc_ids(sc_list):
         sc_ids = []
         sc_names = []
-        for sc in source_categories:
+        for sc in sc_list:
             if sc.isdigit():
                 sc_ids.append(int(sc))
             else:
                 sc_names.append(sc.lower())
-        
         sc_obj_ids = [s.id for s in Source_Category.query.all() if s.name.lower() in sc_names]
-        all_sc_ids = list(set(sc_ids + sc_obj_ids))
-        if all_sc_ids:
-            if source_category_mode == 'exclude':
-                filters.append(~Recipe.source_category_id.in_(all_sc_ids))
-            else:
-                filters.append(Recipe.source_category_id.in_(all_sc_ids))
+        return list(set(sc_ids + sc_obj_ids))
+
+    if include_source_categories:
+        include_sc_ids = resolve_sc_ids(include_source_categories)
+        if include_sc_ids:
+            filters.append(Recipe.source_category_id.in_(include_sc_ids))
+
+    if exclude_source_categories:
+        exclude_sc_ids = resolve_sc_ids(exclude_source_categories)
+        if exclude_sc_ids:
+            filters.append(~Recipe.source_category_id.in_(exclude_sc_ids))
 
     # Tag filters
-    if tags:
+    def resolve_tag_ids(tag_list):
         tag_ids = []
         tag_names = []
-        for t in tags:
+        for t in tag_list:
             if t.isdigit():
                 tag_ids.append(int(t))
             else:
                 tag_names.append(t.lower())
-        
         tag_obj_ids = [t.id for t in Tag.query.all() if t.name.lower() in tag_names]
-        all_tag_ids = list(set(tag_ids + tag_obj_ids))
-        if all_tag_ids:
-            if tag_mode == 'exclude':
-                filters.append(~Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(all_tag_ids)))
-            else:
-                filters.append(Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(all_tag_ids)))
+        return list(set(tag_ids + tag_obj_ids))
+
+    if include_tags:
+        include_tag_ids = resolve_tag_ids(include_tags)
+        if include_tag_ids:
+            filters.append(Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(include_tag_ids)))
+
+    if exclude_tags:
+        exclude_tag_ids = resolve_tag_ids(exclude_tags)
+        if exclude_tag_ids:
+            filters.append(~Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(exclude_tag_ids)))
 
     # User Tag filters
-    if user_tags:
+    def resolve_ut_ids(ut_list):
         ut_ids = []
         ut_names = []
-        for ut in user_tags:
+        for ut in ut_list:
             if ut.isdigit():
                 ut_ids.append(int(ut))
             else:
                 ut_names.append(ut.lower())
-        
         ut_obj_ids = [u.id for u in User_Tag.query.all() if u.name.lower() in ut_names]
-        all_ut_ids = list(set(ut_ids + ut_obj_ids))
-        if all_ut_ids:
-            ut_cond = Recipe_Tag.tag_id.in_(all_ut_ids)
+        return list(set(ut_ids + ut_obj_ids))
+
+    if include_user_tags:
+        include_ut_ids = resolve_ut_ids(include_user_tags)
+        if include_ut_ids:
             if user_id:
                 user_tag_filter = Recipe.user_recipe_tags.any(
-                    and_(User_Recipe_Tag.user_tag_id.in_(all_ut_ids), User_Recipe_Tag.user_id == user_id)
+                    and_(User_Recipe_Tag.user_tag_id.in_(include_ut_ids), User_Recipe_Tag.user_id == user_id)
                 )
             else:
-                user_tag_filter = Recipe.user_recipe_tags.any(User_Recipe_Tag.user_tag_id.in_(all_ut_ids))
-            
-            if user_tag_mode == 'exclude':
-                filters.append(~user_tag_filter)
+                user_tag_filter = Recipe.user_recipe_tags.any(User_Recipe_Tag.user_tag_id.in_(include_ut_ids))
+            filters.append(user_tag_filter)
+
+    if exclude_user_tags:
+        exclude_ut_ids = resolve_ut_ids(exclude_user_tags)
+        if exclude_ut_ids:
+            if user_id:
+                user_tag_filter = Recipe.user_recipe_tags.any(
+                    and_(User_Recipe_Tag.user_tag_id.in_(exclude_ut_ids), User_Recipe_Tag.user_id == user_id)
+                )
             else:
-                filters.append(user_tag_filter)
+                user_tag_filter = Recipe.user_recipe_tags.any(User_Recipe_Tag.user_tag_id.in_(exclude_ut_ids))
+            filters.append(~user_tag_filter)
 
     # Ingredient inclusion filters
     if include_ingredients:
@@ -684,7 +783,8 @@ def recipe_id(id):
 def user_recipes():
     if request.method == 'GET':
         user_recipes = []
-        for user_recipe in User_Recipe.query.filter_by(user_id=session.get('user_id')).order_by(User_Recipe.id.desc()).all():
+        user_id = get_current_user_id() or request.args.get('user_id')
+        for user_recipe in User_Recipe.query.filter_by(user_id=user_id).order_by(User_Recipe.id.desc()).all():
             user_recipe_dict = user_recipe.to_dict()
             user_recipes.append(user_recipe_dict)
 
@@ -862,7 +962,7 @@ def recipe_ingredient(id):
 @app.route('/api/mealprep', methods=['GET', 'POST'])
 def meal_prep():
     if request.method == 'GET':
-        user_id = session.get('user_id') or request.args.get('user_id')
+        user_id = get_current_user_id() or request.args.get('user_id')
         if user_id:
             try:
                 user_id = int(user_id)
@@ -890,7 +990,7 @@ def meal_prep():
         elif isinstance(recipe_val, str):
             recipe_name = recipe_val
 
-        user_id = request.json.get("user_id") or session.get("user_id")
+        user_id = request.json.get("user_id") or get_current_user_id()
 
         new_meal_prep = Meal_Prep(
             user_id=user_id,
@@ -950,7 +1050,7 @@ def meal_prep():
 @app.route('/api/shopping_list', methods=['GET', 'POST'])
 def shopping_list():
     if request.method == 'GET':
-        user_id = session.get('user_id') or request.args.get('user_id')
+        user_id = get_current_user_id() or request.args.get('user_id')
         if user_id:
             try:
                 user_id = int(user_id)
@@ -970,7 +1070,7 @@ def shopping_list():
 
 @app.route('/api/user_shopping_list')
 def user_shopping_list():
-    user_id = session.get('user_id') or request.args.get('user_id')
+    user_id = get_current_user_id() or request.args.get('user_id')
     if user_id:
         try:
             user_id = int(user_id)
@@ -1209,7 +1309,7 @@ def cooked_instances():
     
     elif request.method == 'POST':
         data = request.json or {}
-        user_id = session.get('user_id') or data.get('user_id')
+        user_id = get_current_user_id() or data.get('user_id')
         recipe_id = data.get('recipe_id')
         user_recipe_id = data.get('user_recipe_id')
 
@@ -1406,9 +1506,7 @@ def restaurant_menu_items(id):
 
 @app.route('/api/user_restaurant_notes', methods=['GET', 'POST'])
 def user_restaurant_notes():
-    user_id = session.get('user_id')
-    print(f"DEBUG: Session keys: {list(session.keys())}")
-    print(f"DEBUG: Session user_id: {user_id}")
+    user_id = get_current_user_id()
     if not user_id:
         return {"error": "Unauthorized"}, 401
         
@@ -1437,7 +1535,7 @@ def user_restaurant_notes():
 
 @app.route('/api/user_restaurant_notes/<int:id>', methods=['PATCH', 'DELETE'])
 def user_restaurant_note_by_id(id):
-    user_id = session.get('user_id')
+    user_id = get_current_user_id()
     note = db.session.get(User_Restaurant_Note, id)
     if not note or note.user_id != user_id:
         return {"error": "Note not found or unauthorized"}, 404
