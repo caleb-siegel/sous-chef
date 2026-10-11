@@ -1,0 +1,69 @@
+/* ==========================================================================
+   Recipe Tags Autocomplete & Suggestions Styles
+   ========================================================================== */
+
+.tag-component-root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.tag-suggestions-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding-top: 0.25rem;
+}
+
+.tag-suggestions-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 0.2rem;
+}
+
+.tag-suggestion-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 3px 9px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tag-suggestion-pill:hover {
+  background: rgba(63, 255, 194, 0.2);
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.4);
+  transform: translateY(-1px);
+}
+
+.tag-option-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 6px 10px;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+
+.tag-option-item.is-selected {
+  background: rgba(63, 255, 194, 0.12);
+  font-weight: 600;
+  color: #047857;
+}

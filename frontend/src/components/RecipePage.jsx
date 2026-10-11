@@ -833,8 +833,11 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                         <UserRecipeTagsMenu
                             recipeId={recipe.id}
                             tags={userTags}
+                            existingTagIds={(userRecipeTags || [])
+                                .filter(urt => !user || urt.user_id === user?.id)
+                                .map(urt => urt.user_tag_id || urt.user_tag?.id)}
                             handleTagSelect={handleTagSelect}
-                            color="secondary"
+                            label="+ Add Tag"
                         />
                     )}
 

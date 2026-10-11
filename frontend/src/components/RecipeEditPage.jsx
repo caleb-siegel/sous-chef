@@ -17,7 +17,8 @@ import {
     Alert,
     Tooltip,
     Divider,
-    InputAdornment
+    InputAdornment,
+    Autocomplete
 } from '@mui/material';
 
 // Icons
@@ -32,10 +33,13 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import LinkIcon from '@mui/icons-material/Link';
 import NotesIcon from '@mui/icons-material/Notes';
 import LabelIcon from '@mui/icons-material/Label';
+import LocalOfferOutlinedIcon from '@mui/icons-material/LocalOfferOutlined';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import ImageIcon from '@mui/icons-material/Image';
 
+import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import { parseInstructions } from './RecipePage';
+import './Tag.css';
 import './RecipeEditPage.css';
 
 const UNIT_OPTIONS = [
@@ -88,6 +92,10 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
     const [availableTags, setAvailableTags] = useState([]);
     const [selectedTagToAdd, setSelectedTagToAdd] = useState('');
 
+    // User Personal Tags
+    const [userRecipeTags, setUserRecipeTags] = useState(recipe?.user_recipe_tags || []);
+    const [userTags, setUserTags] = useState([]);
+
     // Categories
     const [availableCategories, setAvailableCategories] = useState([]);
 
@@ -116,6 +124,13 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
                     if (Array.isArray(data)) setAvailableTags(data);
                 })
                 .catch(err => console.warn('Could not fetch tags:', err));
+
+            fetch(`${backendUrl}/api/user_tag_names`)
+                .then(r => r.json())
+                .then(data => {
+                    if (Array.isArray(data)) setUserTags(data);
+                })
+                .catch(err => console.warn('Could not fetch user tags:', err));
 
             fetch(`${backendUrl}/api/category_names`)
                 .then(r => r.json())
@@ -205,6 +220,45 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
             }
         } catch (err) {
             console.error('Failed to delete tag:', err);
+        }
+    };
+
+    // User Personal Tag Handlers
+    const handleUserTagSelect = async (recId, tagId) => {
+        if (!tagId || !user) return;
+        try {
+            const res = await fetch(`${backendUrl}/api/userrecipetags`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    user_id: user.id,
+                    recipe_id: recId,
+                    user_tag_id: Number(tagId)
+                })
+            });
+            if (res.ok) {
+                const newURT = await res.json();
+                setUserRecipeTags(prev => [...prev, newURT]);
+                setSnackbar({ open: true, message: 'Personal tag added!', severity: 'success' });
+            }
+        } catch (err) {
+            console.error('Failed to add personal tag:', err);
+        }
+    };
+
+    const handleDeleteUserTag = async (urtId) => {
+        try {
+            const res = await fetch(`${backendUrl}/api/userrecipetags/${urtId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            if (res.ok) {
+                setUserRecipeTags(prev => prev.filter(urt => urt.id !== urtId));
+                setSnackbar({ open: true, message: 'Personal tag removed', severity: 'info' });
+            }
+        } catch (err) {
+            console.error('Failed to delete personal tag:', err);
         }
     };
 
@@ -523,16 +577,19 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
                         </div>
                     </div>
 
-                    {/* Recipe Tags Card */}
+                    {/* Recipe Tags & Personal Tags Card */}
                     <div className="recipe-edit-card">
                         <div className="recipe-edit-card-header">
                             <h2 className="recipe-edit-card-title">
                                 <LabelIcon style={{ color: 'var(--rc-primary-dark)' }} />
                                 <span>Categories & Tags</span>
                             </h2>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--rd-text-muted)' }}>
+                                {recipeTags.length} category tag{recipeTags.length === 1 ? '' : 's'}
+                            </span>
                         </div>
 
-                        {/* Current Tags Chips */}
+                        {/* Current Category Tags Chips */}
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                             {recipeTags.length > 0 ? (
                                 recipeTags.map(rt => {
@@ -541,42 +598,172 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
                                         <Chip
                                             key={rt.id}
                                             label={rt.tag.name}
-                                            color="primary"
-                                            variant="outlined"
+                                            size="small"
+                                            icon={<LocalOfferOutlinedIcon sx={{ fontSize: '13px !important', color: '#059669 !important' }} />}
                                             onDelete={() => handleDeleteTag(rt.id)}
-                                            sx={{ fontWeight: 600 }}
+                                            sx={{
+                                                fontWeight: 600,
+                                                fontSize: '0.78rem',
+                                                bgcolor: 'rgba(63, 255, 194, 0.18)',
+                                                color: '#047857',
+                                                border: '1px solid rgba(5, 150, 105, 0.28)',
+                                                borderRadius: '9999px',
+                                                '& .MuiChip-deleteIcon': {
+                                                    color: '#059669',
+                                                    '&:hover': { color: '#b91c1c' }
+                                                }
+                                            }}
                                         />
                                     );
                                 })
                             ) : (
-                                <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
-                                    No category tags assigned yet.
+                                <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', fontSize: '0.85rem' }}>
+                                    No category tags assigned yet. Select from below to add.
                                 </Typography>
                             )}
                         </Box>
 
-                        {/* Add Tag Dropdown */}
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                            <FormControl size="small" fullWidth>
-                                <InputLabel id="add-tag-select-label">Add a tag...</InputLabel>
-                                <Select
-                                    labelId="add-tag-select-label"
-                                    value={selectedTagToAdd}
-                                    label="Add a tag..."
-                                    onChange={(e) => {
-                                        setSelectedTagToAdd(e.target.value);
-                                        handleAddTag(e.target.value);
-                                    }}
-                                >
-                                    {availableTags
-                                        .filter(t => !recipeTags.some(rt => rt.tag && rt.tag.id === t.id))
-                                        .map(tag => (
-                                            <MenuItem key={tag.id} value={tag.id}>{tag.name}</MenuItem>
-                                        ))
+                        {/* Modern Tag Autocomplete Selector */}
+                        <Box sx={{ mt: 1 }}>
+                            <Autocomplete
+                                id="recipe-edit-add-tag-autocomplete"
+                                options={availableTags.filter(t => !recipeTags.some(rt => rt.tag && rt.tag.id === t.id))}
+                                getOptionLabel={(option) => (option && option.name) ? option.name : ''}
+                                value={null}
+                                onChange={(event, newValue) => {
+                                    if (newValue && newValue.id) {
+                                        handleAddTag(newValue.id);
                                     }
-                                </Select>
-                            </FormControl>
+                                }}
+                                fullWidth
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        size="small"
+                                        placeholder="Search or select a tag to add..."
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <LocalOfferOutlinedIcon sx={{ fontSize: 16, color: '#059669', ml: 0.5 }} />
+                                                </InputAdornment>
+                                            ),
+                                            sx: {
+                                                borderRadius: '12px',
+                                                backgroundColor: '#ffffff',
+                                                '&:hover fieldset': {
+                                                    borderColor: 'var(--rc-primary-dark, #059669)',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: 'var(--rc-primary-dark, #059669)',
+                                                    borderWidth: '2px',
+                                                },
+                                            }
+                                        }}
+                                    />
+                                )}
+                                renderOption={(props, option) => (
+                                    <li {...props} key={option.id}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', py: 0.5 }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <span style={{ color: '#059669', fontWeight: 700 }}>#</span>
+                                                <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>{option.name}</span>
+                                            </Box>
+                                            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#059669' }}>
+                                                + Add
+                                            </span>
+                                        </Box>
+                                    </li>
+                                )}
+                                slotProps={{
+                                    paper: {
+                                        sx: {
+                                            borderRadius: '14px',
+                                            mt: 0.5,
+                                            border: '1px solid rgba(226, 232, 240, 0.9)',
+                                            boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.14)',
+                                        }
+                                    }
+                                }}
+                            />
                         </Box>
+
+                        {/* Quick-Add Popular Tag Suggestions */}
+                        {availableTags.filter(t => !recipeTags.some(rt => rt.tag && rt.tag.id === t.id)).slice(0, 6).length > 0 && (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, alignItems: 'center', mt: 1.5 }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, mr: 0.25, letterSpacing: '0.04em' }}>
+                                    QUICK ADD:
+                                </Typography>
+                                {availableTags
+                                    .filter(t => !recipeTags.some(rt => rt.tag && rt.tag.id === t.id))
+                                    .slice(0, 6)
+                                    .map(tag => (
+                                        <button
+                                            key={tag.id}
+                                            type="button"
+                                            className="tag-suggestion-pill"
+                                            onClick={() => handleAddTag(tag.id)}
+                                        >
+                                            <AddIcon sx={{ fontSize: 12, color: '#059669' }} />
+                                            <span>{tag.name}</span>
+                                        </button>
+                                    ))
+                                }
+                            </Box>
+                        )}
+
+                        {/* Personal Tags Section */}
+                        {user && (
+                            <Box sx={{ mt: 3, pt: 2.5, borderTop: '1px dashed #e2e8f0' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.88rem' }}>
+                                            ★ My Personal Tags
+                                        </Typography>
+                                        <span style={{ fontSize: '0.72rem', color: 'var(--rd-text-muted)', fontWeight: 500 }}>
+                                            (Visible only to you)
+                                        </span>
+                                    </Box>
+                                    <UserRecipeTagsMenu
+                                        recipeId={recipe.id}
+                                        tags={userTags}
+                                        existingTagIds={userRecipeTags.filter(urt => urt.user_id === user.id).map(urt => urt.user_tag_id || urt.user_tag?.id)}
+                                        handleTagSelect={handleUserTagSelect}
+                                        label="+ Add Personal Tag"
+                                    />
+                                </Box>
+
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                    {userRecipeTags.filter(urt => urt.user_id === user.id && urt.user_tag).length > 0 ? (
+                                        userRecipeTags.filter(urt => urt.user_id === user.id && urt.user_tag).map(urt => (
+                                            <Chip
+                                                key={urt.id}
+                                                label={`★ ${urt.user_tag.name}`}
+                                                size="small"
+                                                onDelete={() => handleDeleteUserTag(urt.id)}
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    fontSize: '0.78rem',
+                                                    bgcolor: 'rgba(255, 125, 69, 0.12)',
+                                                    color: '#c2410c',
+                                                    border: '1px solid rgba(255, 125, 69, 0.35)',
+                                                    borderRadius: '9999px',
+                                                    '& .MuiChip-deleteIcon': {
+                                                        color: '#ea580c',
+                                                        fontSize: '16px',
+                                                        '&:hover': { color: '#b91c1c' }
+                                                    }
+                                                }}
+                                            />
+                                        ))
+                                    ) : (
+                                        <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic', fontSize: '0.82rem' }}>
+                                            No personal tags added to this recipe yet. Click "+ Add Personal Tag" above.
+                                        </Typography>
+                                    )}
+                                </Box>
+                            </Box>
+                        )}
                     </div>
 
                     {/* Personal Chef Notes */}

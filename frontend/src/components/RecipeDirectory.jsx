@@ -3,7 +3,7 @@ import {
     Box, Typography, Button, IconButton, Tooltip, Dialog, 
     DialogTitle, DialogContent, DialogActions, TextField, 
     Autocomplete, Skeleton, Alert, Select, MenuItem, FormControl, 
-    InputLabel, useMediaQuery, useTheme 
+    InputLabel, Chip, useMediaQuery, useTheme 
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
@@ -74,10 +74,25 @@ function RecipeDirectory() {
     const [addRecipeOpen, setAddRecipeOpen] = useState(false);
     const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
 
-    // Advanced include/exclude state (preserving Filter component capabilities)
-    const [filterType, setFilterType] = useState('include');
-    const [filterBy, setFilterBy] = useState('recipeName');
-    const [filterValue, setFilterValue] = useState('');
+    // Advanced multi-criteria include/exclude state
+    const [includeUserTags, setIncludeUserTags] = useState([]);
+    const [excludeUserTags, setExcludeUserTags] = useState([]);
+    const [includeTags, setIncludeTags] = useState([]);
+    const [excludeTags, setExcludeTags] = useState([]);
+    const [includeIngredients, setIncludeIngredients] = useState([]);
+    const [excludeIngredients, setExcludeIngredients] = useState([]);
+    const [includeRecipeNames, setIncludeRecipeNames] = useState([]);
+    const [excludeRecipeNames, setExcludeRecipeNames] = useState([]);
+
+    const activeFiltersCount = 
+        includeUserTags.length + 
+        excludeUserTags.length + 
+        includeTags.length + 
+        excludeTags.length + 
+        includeIngredients.length + 
+        excludeIngredients.length +
+        includeRecipeNames.length +
+        excludeRecipeNames.length;
 
     // Fetch recipes by category
     const fetchRecipes = async (category = "all") => {
@@ -336,42 +351,79 @@ function RecipeDirectory() {
             });
         }
 
-        // 3. Advanced Filter component filters (if applied)
-        if (filterValue.trim()) {
-            const fVal = filterValue.toLowerCase().trim();
+        // 3. User Tags filtering
+        if (includeUserTags.length > 0) {
             list = list.filter(recipe => {
-                if (filterType === "include") {
-                    if (filterBy === "recipeName") {
-                        return recipe.name && recipe.name.toLowerCase().includes(fVal);
-                    } else if (filterBy === "tag") {
-                        return recipe.recipe_tags?.some(t => t.tag?.name && t.tag.name.toLowerCase() === fVal);
-                    } else if (filterBy === "usertag" && user?.id) {
-                        return recipe.user_recipe_tags?.some(t => t.user_tag?.name && t.user_tag.name.toLowerCase() === fVal && t.user_id === user.id);
-                    } else if (filterBy === "ingredients") {
-                        return recipe.recipe_ingredients?.some(ing => {
-                            const iName = typeof ing === 'string' ? ing : ing.ingredient_name;
-                            return iName && iName.toLowerCase().includes(fVal);
-                        });
-                    }
-                } else if (filterType === "exclude") {
-                    if (filterBy === "recipeName") {
-                        return !recipe.name || !recipe.name.toLowerCase().includes(fVal);
-                    } else if (filterBy === "tag") {
-                        return !recipe.recipe_tags?.some(t => t.tag?.name && t.tag.name.toLowerCase() === fVal);
-                    } else if (filterBy === "usertag" && user?.id) {
-                        return !recipe.user_recipe_tags?.some(t => t.user_tag?.name && t.user_tag.name.toLowerCase() === fVal && t.user_id === user.id);
-                    } else if (filterBy === "ingredients") {
-                        return !recipe.recipe_ingredients?.some(ing => {
-                            const iName = typeof ing === 'string' ? ing : ing.ingredient_name;
-                            return iName && iName.toLowerCase().includes(fVal);
-                        });
-                    }
-                }
-                return true;
+                const rTags = (recipe.user_recipe_tags || [])
+                    .filter(urt => !user?.id || String(urt.user_id) === String(user.id) || !urt.user_id)
+                    .map(urt => urt.user_tag?.name?.toLowerCase())
+                    .filter(Boolean);
+                return includeUserTags.every(req => rTags.includes(req.toLowerCase()));
             });
         }
 
-        // 4. Sorting
+        if (excludeUserTags.length > 0) {
+            list = list.filter(recipe => {
+                const rTags = (recipe.user_recipe_tags || [])
+                    .filter(urt => !user?.id || String(urt.user_id) === String(user.id) || !urt.user_id)
+                    .map(urt => urt.user_tag?.name?.toLowerCase())
+                    .filter(Boolean);
+                return !excludeUserTags.some(avoid => rTags.includes(avoid.toLowerCase()));
+            });
+        }
+
+        // 4. Recipe Tags filtering
+        if (includeTags.length > 0) {
+            list = list.filter(recipe => {
+                const rTags = (recipe.recipe_tags || [])
+                    .map(t => t.tag?.name?.toLowerCase())
+                    .filter(Boolean);
+                return includeTags.every(req => rTags.includes(req.toLowerCase()));
+            });
+        }
+
+        if (excludeTags.length > 0) {
+            list = list.filter(recipe => {
+                const rTags = (recipe.recipe_tags || [])
+                    .map(t => t.tag?.name?.toLowerCase())
+                    .filter(Boolean);
+                return !excludeTags.some(avoid => rTags.includes(avoid.toLowerCase()));
+            });
+        }
+
+        // 5. Ingredients filtering
+        if (includeIngredients.length > 0) {
+            list = list.filter(recipe => {
+                const rIngs = (recipe.recipe_ingredients || [])
+                    .map(ing => (typeof ing === 'string' ? ing : ing.ingredient_name || '').toLowerCase());
+                return includeIngredients.every(req => rIngs.some(i => i.includes(req.toLowerCase())));
+            });
+        }
+
+        if (excludeIngredients.length > 0) {
+            list = list.filter(recipe => {
+                const rIngs = (recipe.recipe_ingredients || [])
+                    .map(ing => (typeof ing === 'string' ? ing : ing.ingredient_name || '').toLowerCase());
+                return !excludeIngredients.some(avoid => rIngs.some(i => i.includes(avoid.toLowerCase())));
+            });
+        }
+
+        // 5.5. Recipe Name filtering
+        if (includeRecipeNames.length > 0) {
+            list = list.filter(recipe => {
+                const rName = (recipe.name || '').toLowerCase();
+                return includeRecipeNames.every(term => rName.includes(term.toLowerCase()));
+            });
+        }
+
+        if (excludeRecipeNames.length > 0) {
+            list = list.filter(recipe => {
+                const rName = (recipe.name || '').toLowerCase();
+                return !excludeRecipeNames.some(avoid => rName.includes(avoid.toLowerCase()));
+            });
+        }
+
+        // 6. Sorting
         list.sort((a, b) => {
             if (sortBy === "created-desc") {
                 const parseDate = (d) => {
@@ -410,7 +462,23 @@ function RecipeDirectory() {
         });
 
         return list;
-    }, [recipes, userCollectionFilter, user, userRecipes, searchQuery, chosenCookbook, filterValue, filterType, filterBy, sortBy]);
+    }, [
+        recipes, 
+        userCollectionFilter, 
+        user, 
+        userRecipes, 
+        searchQuery, 
+        chosenCookbook, 
+        includeUserTags, 
+        excludeUserTags, 
+        includeTags, 
+        excludeTags, 
+        includeIngredients, 
+        excludeIngredients, 
+        includeRecipeNames,
+        excludeRecipeNames,
+        sortBy
+    ]);
 
     // Progressive rendering (infinite scroll batching) to prevent DOM bloat with ~1000 recipes
     const INITIAL_BATCH = 48;
@@ -420,7 +488,21 @@ function RecipeDirectory() {
     // Reset displayLimit whenever any filter, search, or sort changes
     useEffect(() => {
         setDisplayLimit(INITIAL_BATCH);
-    }, [searchQuery, userCollectionFilter, categorizationButtons, chosenCookbook, filterValue, filterType, filterBy, sortBy]);
+    }, [
+        searchQuery, 
+        userCollectionFilter, 
+        categorizationButtons, 
+        chosenCookbook, 
+        includeUserTags, 
+        excludeUserTags, 
+        includeTags, 
+        excludeTags, 
+        includeIngredients, 
+        excludeIngredients, 
+        includeRecipeNames,
+        excludeRecipeNames,
+        sortBy
+    ]);
 
     // Infinite scroll listener to smoothly load more recipes as user scrolls down
     useEffect(() => {
@@ -445,7 +527,14 @@ function RecipeDirectory() {
         setCategorizationButtons("all");
         setUserCollectionFilter("allrecipes");
         setChosenCookbook("");
-        setFilterValue("");
+        setIncludeUserTags([]);
+        setExcludeUserTags([]);
+        setIncludeTags([]);
+        setExcludeTags([]);
+        setIncludeIngredients([]);
+        setExcludeIngredients([]);
+        setIncludeRecipeNames([]);
+        setExcludeRecipeNames([]);
         setAdvancedFilterOpen(false);
     };
 
@@ -454,7 +543,7 @@ function RecipeDirectory() {
         categorizationButtons !== "all" || 
         userCollectionFilter !== "allrecipes" || 
         chosenCookbook || 
-        filterValue.trim()
+        activeFiltersCount > 0
     );
 
     return (
@@ -607,16 +696,28 @@ function RecipeDirectory() {
                         </FormControl>
 
                         {/* Advanced Filter Toggle */}
-                        <Tooltip title={advancedFilterOpen ? "Hide advanced filters" : "Show advanced filters"}>
+                        <Tooltip title="Open advanced filter modal">
                             <button
                                 type="button"
-                                className={`rd-cat-chip ${advancedFilterOpen || filterValue ? 'active' : ''}`}
-                                onClick={() => setAdvancedFilterOpen(prev => !prev)}
-                                style={{ padding: '0.45rem 0.8rem' }}
+                                className={`rd-cat-chip ${advancedFilterOpen || activeFiltersCount > 0 ? 'active' : ''}`}
+                                onClick={() => setAdvancedFilterOpen(true)}
+                                style={{ padding: '0.45rem 0.8rem', position: 'relative' }}
                             >
                                 <FilterAltIcon fontSize="small" />
                                 {!isMobile && <span>Filters</span>}
-                                {filterValue && <span style={{ color: 'var(--rd-primary-dark)', fontWeight: 800 }}>•</span>}
+                                {activeFiltersCount > 0 && (
+                                    <span style={{ 
+                                        backgroundColor: 'var(--rd-primary-dark)', 
+                                        color: '#ffffff', 
+                                        borderRadius: '9999px', 
+                                        fontSize: '0.72rem', 
+                                        padding: '0.1rem 0.45rem', 
+                                        fontWeight: 800,
+                                        marginLeft: '0.2rem'
+                                    }}>
+                                        {activeFiltersCount}
+                                    </span>
+                                )}
                             </button>
                         </Tooltip>
 
@@ -663,23 +764,134 @@ function RecipeDirectory() {
                     )}
                 </div>
 
-                {/* Collapsible Advanced Filter Drawer */}
-                {advancedFilterOpen && (
-                    <div className="rd-advanced-filter-panel">
-                        <Filter 
-                            recipes={recipes} 
-                            setRecipes={setRecipes} 
-                            handleAddRecipe={() => {}} 
-                            filterValue={filterValue} 
-                            handleFilterValueChange={(e) => setFilterValue(e.target.value)} 
-                            filterType={filterType} 
-                            handleFilterTypeChange={(e) => setFilterType(e.target.value)} 
-                            filterBy={filterBy} 
-                            handleFilterByChange={(e) => setFilterBy(e.target.value)} 
-                            tags={tags} 
-                            userTags={userTags}
-                        />
-                    </div>
+                {/* Active Filter Chips Bar (Instant View & Dismissal) */}
+                {activeFiltersCount > 0 && (
+                    <Box 
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: 1,
+                            p: 1.5,
+                            mt: 1.5,
+                            bgcolor: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: 3,
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                        }}
+                    >
+                        <Typography 
+                            variant="caption" 
+                            sx={{ 
+                                fontWeight: 800, 
+                                color: '#475569', 
+                                textTransform: 'uppercase', 
+                                letterSpacing: '0.6px',
+                                fontSize: '0.75rem',
+                                mr: 0.5
+                            }}
+                        >
+                            Active Filters ({activeFiltersCount}):
+                        </Typography>
+
+                        {includeUserTags.map(tag => (
+                            <Chip
+                                key={`inc-ut-${tag}`}
+                                label={`+ User Tag: ${tag}`}
+                                size="small"
+                                color="success"
+                                onDelete={() => setIncludeUserTags(prev => prev.filter(t => t !== tag))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+                        {excludeUserTags.map(tag => (
+                            <Chip
+                                key={`exc-ut-${tag}`}
+                                label={`− User Tag: ${tag}`}
+                                size="small"
+                                color="error"
+                                onDelete={() => setExcludeUserTags(prev => prev.filter(t => t !== tag))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+                        {includeTags.map(tag => (
+                            <Chip
+                                key={`inc-tag-${tag}`}
+                                label={`+ Tag: ${tag}`}
+                                size="small"
+                                color="success"
+                                onDelete={() => setIncludeTags(prev => prev.filter(t => t !== tag))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+                        {excludeTags.map(tag => (
+                            <Chip
+                                key={`exc-tag-${tag}`}
+                                label={`− Tag: ${tag}`}
+                                size="small"
+                                color="error"
+                                onDelete={() => setExcludeTags(prev => prev.filter(t => t !== tag))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+                        {includeIngredients.map(ing => (
+                            <Chip
+                                key={`inc-ing-${ing}`}
+                                label={`+ Ing: ${ing}`}
+                                size="small"
+                                color="success"
+                                onDelete={() => setIncludeIngredients(prev => prev.filter(i => i !== ing))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+                        {excludeIngredients.map(ing => (
+                            <Chip
+                                key={`exc-ing-${ing}`}
+                                label={`− Ing: ${ing}`}
+                                size="small"
+                                color="error"
+                                onDelete={() => setExcludeIngredients(prev => prev.filter(i => i !== ing))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+                        {includeRecipeNames.map(term => (
+                            <Chip
+                                key={`inc-name-${term}`}
+                                label={`+ Name: "${term}"`}
+                                size="small"
+                                color="success"
+                                onDelete={() => setIncludeRecipeNames(prev => prev.filter(t => t !== term))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+                        {excludeRecipeNames.map(term => (
+                            <Chip
+                                key={`exc-name-${term}`}
+                                label={`− Name: "${term}"`}
+                                size="small"
+                                color="error"
+                                onDelete={() => setExcludeRecipeNames(prev => prev.filter(t => t !== term))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+
+                        <Button
+                            size="small"
+                            color="error"
+                            onClick={handleClearFilters}
+                            sx={{
+                                ml: 'auto',
+                                fontSize: '0.78rem',
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                py: 0.2,
+                                px: 1.2,
+                                borderRadius: 2
+                            }}
+                        >
+                            Clear all
+                        </Button>
+                    </Box>
                 )}
             </div>
 
@@ -825,8 +1037,10 @@ function RecipeDirectory() {
                                             <UserRecipeTagsMenu 
                                                 recipeId={recipe.id} 
                                                 tags={userTags} 
+                                                existingTagIds={(recipe.user_recipe_tags || [])
+                                                    .filter(urt => !user || urt.user_id === user?.id)
+                                                    .map(urt => urt.user_tag_id || urt.user_tag?.id)}
                                                 handleTagSelect={handleTagSelect} 
-                                                color="secondary"
                                             />
                                         )}
                                     </div>
@@ -912,6 +1126,32 @@ function RecipeDirectory() {
                 recipes={recipes} 
                 setRecipes={setRecipes} 
                 tags={tags}
+            />
+
+            {/* Advanced Filter Modal */}
+            <Filter 
+                open={advancedFilterOpen}
+                onClose={() => setAdvancedFilterOpen(false)}
+                includeUserTags={includeUserTags}
+                setIncludeUserTags={setIncludeUserTags}
+                excludeUserTags={excludeUserTags}
+                setExcludeUserTags={setExcludeUserTags}
+                includeTags={includeTags}
+                setIncludeTags={setIncludeTags}
+                excludeTags={excludeTags}
+                setExcludeTags={setExcludeTags}
+                includeIngredients={includeIngredients}
+                setIncludeIngredients={setIncludeIngredients}
+                excludeIngredients={excludeIngredients}
+                setExcludeIngredients={setExcludeIngredients}
+                includeRecipeNames={includeRecipeNames}
+                setIncludeRecipeNames={setIncludeRecipeNames}
+                excludeRecipeNames={excludeRecipeNames}
+                setExcludeRecipeNames={setExcludeRecipeNames}
+                tags={tags}
+                userTags={userTags}
+                recipes={recipes}
+                user={user}
             />
         </div>
     );

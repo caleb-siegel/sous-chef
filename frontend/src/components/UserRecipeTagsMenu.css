@@ -1,0 +1,225 @@
+/* ==========================================================================
+   User Recipe Tags Menu & Popover Styles
+   ========================================================================== */
+
+.urt-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: inherit;
+  background: rgba(255, 125, 69, 0.08);
+  color: var(--rd-secondary-dark, #ea580c);
+  border: 1px dashed rgba(255, 125, 69, 0.45);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.urt-trigger-btn:hover {
+  background: rgba(255, 125, 69, 0.16);
+  border-color: #FF7D45;
+  border-style: solid;
+  color: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(255, 125, 69, 0.2);
+}
+
+.urt-trigger-btn.is-active {
+  background: #FF7D45;
+  color: #ffffff;
+  border-color: #FF7D45;
+  border-style: solid;
+}
+
+.urt-popover-paper {
+  width: 280px;
+  max-width: 90vw;
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.18), 0 6px 14px -2px rgba(15, 23, 42, 0.08) !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
+}
+
+.urt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 8px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.urt-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+.urt-count-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.urt-search-wrapper {
+  position: relative;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.urt-search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.urt-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 26px 6px 28px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.urt-search-input:focus {
+  border-color: #FF7D45;
+  box-shadow: 0 0 0 3px rgba(255, 125, 69, 0.15);
+}
+
+.urt-search-clear {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+}
+
+.urt-search-clear:hover {
+  color: #475569;
+}
+
+.urt-list {
+  max-height: 210px;
+  overflow-y: auto;
+  padding: 6px;
+  margin: 0;
+  list-style: none;
+}
+
+.urt-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.urt-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.urt-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 8px;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.1s;
+  box-sizing: border-box;
+}
+
+.urt-item:hover:not(.is-disabled) {
+  background: rgba(255, 125, 69, 0.08);
+}
+
+.urt-item-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #334155;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.urt-tag-bullet {
+  color: #FF7D45;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.urt-item.is-disabled {
+  opacity: 0.6;
+  cursor: default;
+  background: #f8fafc;
+}
+
+.urt-added-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 6px;
+  border-radius: 9999px;
+}
+
+.urt-add-action {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #ea580c;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.urt-item:hover .urt-add-action {
+  opacity: 1;
+}
+
+
+.urt-empty-state {
+  text-align: center;
+  padding: 16px 12px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
