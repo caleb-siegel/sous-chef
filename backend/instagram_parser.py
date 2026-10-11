@@ -1,6 +1,7 @@
 import yt_dlp
 import json
 import re
+import os
 import logging
 
 # Set up logger
@@ -28,6 +29,16 @@ def extract_instagram_caption(instagram_url):
         'extract_flat': False,
         'skip_download': True,  # Don't download, just get metadata
     }
+    
+    # Optional cookies file support (via environment variable or local cookies.txt)
+    cookie_file = os.getenv('INSTAGRAM_COOKIES_FILE')
+    if not cookie_file:
+        local_cookie = os.path.join(os.path.dirname(__file__), 'cookies.txt')
+        if os.path.exists(local_cookie):
+            cookie_file = local_cookie
+    if cookie_file and os.path.exists(cookie_file):
+        logger.info(f"Using cookies file: {cookie_file}")
+        ydl_opts['cookiefile'] = cookie_file
     
     try:
         logger.info("Extracting metadata with yt-dlp...")
