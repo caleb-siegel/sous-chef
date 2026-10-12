@@ -25,22 +25,23 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
     setMobileOpen((prev) => !prev);
   };
 
+  const isSuperUser = Boolean(user && (user.id === 2 || user.id === "2"));
+
   const navLinks = [
     { name: "Home", path: "/", icon: <HomeRounded className="sc-header-nav-icon" />, end: true },
     { name: "Recipes", path: "/recipes", icon: <MenuBookRounded className="sc-header-nav-icon" /> },
-    { name: "Restaurants", path: "/restaurants", icon: <StorefrontRounded className="sc-header-nav-icon" /> },
+    ...(isSuperUser
+      ? [{ name: "Restaurants", path: "/restaurants", icon: <StorefrontRounded className="sc-header-nav-icon" /> }]
+      : []),
     { name: "Meal Prep", path: "/mealprep", icon: <CalendarMonthRounded className="sc-header-nav-icon" /> },
-    { name: "Feed", path: "/feed", icon: <DynamicFeedRounded className="sc-header-nav-icon" /> },
+    ...(isSuperUser
+      ? [{ name: "Feed", path: "/feed", icon: <DynamicFeedRounded className="sc-header-nav-icon" /> }]
+      : []),
     { name: "Spice It Up", path: "/random", icon: <AutoAwesomeRounded className="sc-header-nav-icon" /> },
+    ...(isSuperUser
+      ? [{ name: "Add New Tag", path: "/newtag", icon: <LocalOfferRounded className="sc-header-nav-icon" /> }]
+      : []),
   ];
-
-  if (user && user.id === 2) {
-    navLinks.push({
-      name: "Add New Tag",
-      path: "/newtag",
-      icon: <LocalOfferRounded className="sc-header-nav-icon" />,
-    });
-  }
 
 
   const userDisplayName = user
