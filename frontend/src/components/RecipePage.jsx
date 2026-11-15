@@ -55,6 +55,7 @@ import UserRecipeTagsMenu from './UserRecipeTagsMenu';
 import RecipeCardsOptions from './RecipeCardsOptions';
 import { useWakeLock } from '../utils/wakeLock';
 import { getRecipeSlug } from '../utils/slugify';
+import { scaleAndOptimizeMeasurement } from '../utils/unitConverter';
 import './RecipePage.css';
 
 // Culinary fraction formatter
@@ -565,8 +566,9 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
         if (!recipe?.recipe_ingredients) return;
         const text = recipe.recipe_ingredients
             .map(ing => {
-                const q = formatQuantity(ing.ingredient_quantity, scale);
-                const u = ing.ingredient_unit ? ` ${ing.ingredient_unit}` : '';
+                const measurement = scaleAndOptimizeMeasurement(ing.ingredient_quantity, ing.ingredient_unit, scale);
+                const q = measurement.quantityStr;
+                const u = measurement.unit ? ` ${measurement.unit}` : '';
                 const n = ing.ingredient_name || '';
                 const note = ing.ingredient_note ? ` (${ing.ingredient_note})` : '';
                 return `• ${q}${u} ${n}${note}`.trim();
@@ -1073,7 +1075,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                             {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 ? (
                                 recipe.recipe_ingredients.map(ing => {
                                     const isChecked = Boolean(checkedIngredients[ing.id]);
-                                    const formattedQty = formatQuantity(ing.ingredient_quantity, scale);
+                                    const measurement = scaleAndOptimizeMeasurement(ing.ingredient_quantity, ing.ingredient_unit, scale);
 
                                     return (
                                         <div
@@ -1095,9 +1097,9 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                                             </div>
 
                                             <div className="recipe-ingredient-content">
-                                                {formattedQty && (
+                                                {measurement.quantityStr && (
                                                     <span className="recipe-ingredient-qty">
-                                                        {formattedQty} {ing.ingredient_unit}
+                                                        {measurement.quantityStr} {measurement.unit}
                                                     </span>
                                                 )}
                                                 <span className="recipe-ingredient-name">
@@ -1430,7 +1432,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                             </h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                                 {recipe.recipe_ingredients && recipe.recipe_ingredients.map(ing => {
-                                    const qty = formatQuantity(ing.ingredient_quantity, scale);
+                                    const measurement = scaleAndOptimizeMeasurement(ing.ingredient_quantity, ing.ingredient_unit, scale);
                                     const isDone = Boolean(checkedIngredients[ing.id]);
                                     return (
                                         <div
@@ -1451,7 +1453,7 @@ function RecipePage({ recipe, user, editRecipe, handleEditRecipe }) {
                                                 {isDone ? '✓' : '○'}
                                             </span>
                                             <span style={{ fontSize: '0.9rem', textDecoration: isDone ? 'line-through' : 'none' }}>
-                                                {qty && <strong>{qty} {ing.ingredient_unit} </strong>}
+                                                {measurement.quantityStr && <strong>{measurement.quantityStr} {measurement.unit} </strong>}
                                                 {ing.ingredient_name}
                                             </span>
                                         </div>

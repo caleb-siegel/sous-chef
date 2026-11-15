@@ -45,8 +45,10 @@ function AddRecipe({
         { ingredient_quantity: '', ingredient_unit: '', ingredient_name: '', ingredient_note: '' }
     ]);
 
-    // Categories
+    // Categories & Ingredients
     const [sourceCategories, setSourceCategories] = useState([]);
+    const [canonicalIngredients, setCanonicalIngredients] = useState([]);
+
     useEffect(() => {
         if (!backendUrl) return;
         fetch(`${backendUrl}/api/category_names`)
@@ -55,6 +57,13 @@ function AddRecipe({
                 if (Array.isArray(data)) setSourceCategories(data);
             })
             .catch((err) => console.warn("Could not load categories:", err));
+
+        fetch(`${backendUrl}/api/ingredients`)
+            .then((response) => response.json())
+            .then((data) => {
+                if (Array.isArray(data)) setCanonicalIngredients(data);
+            })
+            .catch((err) => console.warn("Could not load ingredients:", err));
     }, [backendUrl]);
 
     // Tags & Import methods
@@ -121,6 +130,7 @@ function AddRecipe({
             // Populate form fields
             if (data.name) setName(data.name);
             if (data.instructions) setRecipeInstructions(data.instructions);
+            if (data.picture) setPicture(data.picture);
             if (data.ingredients && data.ingredients.length > 0) {
                 const formattedIngredients = data.ingredients.map(ing => ({
                     ingredient_name: ing.ingredient_name || '',
@@ -314,6 +324,7 @@ function AddRecipe({
                             credentials: "include",
                             body: JSON.stringify({
                                 recipe_id: newRecipeData.id,
+                                ingredient_id: ing.ingredient_id || null,
                                 ingredient_name: ing.ingredient_name.trim(),
                                 ingredient_quantity: parseFloat(ing.ingredient_quantity) || 0,
                                 ingredient_unit: ing.ingredient_unit || '',
@@ -646,6 +657,7 @@ function AddRecipe({
                                 index={index} 
                                 ingredients={ingredients} 
                                 setIngredients={setIngredients}
+                                canonicalIngredients={canonicalIngredients}
                             />
                         ))}
 

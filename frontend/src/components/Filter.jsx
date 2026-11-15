@@ -24,10 +24,16 @@ import PersonPinIcon from '@mui/icons-material/PersonPin';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import KitchenIcon from '@mui/icons-material/Kitchen';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import PublicIcon from '@mui/icons-material/Public';
+import HomeIcon from '@mui/icons-material/Home';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import BlockIcon from '@mui/icons-material/Block';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import LayersIcon from '@mui/icons-material/Layers';
+import { getRecipeSourceCategory, SOURCE_CATEGORIES, getSourceCategoryMeta } from '../utils/sourceCategory';
 
 function Filter({
     open = false,
@@ -40,6 +46,14 @@ function Filter({
     setIncludeTags,
     excludeTags = [],
     setExcludeTags,
+    includeSourceCategories = [],
+    setIncludeSourceCategories,
+    excludeSourceCategories = [],
+    setExcludeSourceCategories,
+    includeSources = [],
+    setIncludeSources,
+    excludeSources = [],
+    setExcludeSources,
     includeIngredients = [],
     setIncludeIngredients,
     excludeIngredients = [],
@@ -50,6 +64,7 @@ function Filter({
     setExcludeRecipeNames,
     tags = [],
     userTags = [],
+    sourceCategories = [],
     recipes = [],
     user
 }) {
@@ -58,6 +73,8 @@ function Filter({
     const [ingExcludeInput, setIngExcludeInput] = useState('');
     const [nameIncludeInput, setNameIncludeInput] = useState('');
     const [nameExcludeInput, setNameExcludeInput] = useState('');
+    const [sourceIncludeInput, setSourceIncludeInput] = useState('');
+    const [sourceExcludeInput, setSourceExcludeInput] = useState('');
 
     const availableUserTagNames = useMemo(() => {
         return (userTags || []).map(ut => ut.name).filter(Boolean);
@@ -70,6 +87,34 @@ function Filter({
     // Unique recipe names for autocompleting title keywords
     const availableRecipeTitles = useMemo(() => {
         return Array.from(new Set((recipes || []).map(r => r.name).filter(Boolean))).sort();
+    }, [recipes]);
+
+    // Available source categories (Instagram, Life, Cookbook, Website, Restaurant)
+    const availableSourceCategoryNames = useMemo(() => {
+        const set = new Set(SOURCE_CATEGORIES.map(c => c.name));
+        (sourceCategories || []).forEach(sc => {
+            if (sc?.name) set.add(sc.name);
+        });
+        (recipes || []).forEach(r => {
+            const cat = getRecipeSourceCategory(r);
+            if (cat && cat !== 'Other') set.add(cat);
+        });
+        return Array.from(set);
+    }, [sourceCategories, recipes]);
+
+    // Recipe counts per source category in currently loaded recipes
+    const sourceCategoryCounts = useMemo(() => {
+        const counts = {};
+        (recipes || []).forEach(r => {
+            const cat = getRecipeSourceCategory(r);
+            counts[cat] = (counts[cat] || 0) + 1;
+        });
+        return counts;
+    }, [recipes]);
+
+    // Unique specific source names (e.g. cookbooks, authors, handles)
+    const availableSpecificSources = useMemo(() => {
+        return Array.from(new Set((recipes || []).map(r => r.source).filter(Boolean))).sort();
     }, [recipes]);
 
     // Fast toggle helpers for 1-click chip clicking
@@ -109,6 +154,54 @@ function Filter({
         }
     };
 
+    const toggleIncludeSourceCategory = (cat) => {
+        if (!setIncludeSourceCategories) return;
+        if (includeSourceCategories.includes(cat)) {
+            setIncludeSourceCategories(prev => prev.filter(c => c !== cat));
+        } else {
+            setIncludeSourceCategories(prev => [...prev, cat]);
+            if (setExcludeSourceCategories) {
+                setExcludeSourceCategories(prev => prev.filter(c => c !== cat));
+            }
+        }
+    };
+
+    const toggleExcludeSourceCategory = (cat) => {
+        if (!setExcludeSourceCategories) return;
+        if (excludeSourceCategories.includes(cat)) {
+            setExcludeSourceCategories(prev => prev.filter(c => c !== cat));
+        } else {
+            setExcludeSourceCategories(prev => [...prev, cat]);
+            if (setIncludeSourceCategories) {
+                setIncludeSourceCategories(prev => prev.filter(c => c !== cat));
+            }
+        }
+    };
+
+    const toggleIncludeSpecificSource = (src) => {
+        if (!setIncludeSources) return;
+        if (includeSources.includes(src)) {
+            setIncludeSources(prev => prev.filter(s => s !== src));
+        } else {
+            setIncludeSources(prev => [...prev, src]);
+            if (setExcludeSources) {
+                setExcludeSources(prev => prev.filter(s => s !== src));
+            }
+        }
+    };
+
+    const toggleExcludeSpecificSource = (src) => {
+        if (!setExcludeSources) return;
+        if (excludeSources.includes(src)) {
+            setExcludeSources(prev => prev.filter(s => s !== src));
+        } else {
+            setExcludeSources(prev => [...prev, src]);
+            if (setIncludeSources) {
+                setIncludeSources(prev => prev.filter(s => s !== src));
+            }
+        }
+    };
+
     const handleAddIncludeIngredient = (valToAdd) => {
         const val = (valToAdd || ingIncludeInput).trim();
         if (val && !includeIngredients.some(i => i.toLowerCase() === val.toLowerCase())) {
@@ -145,11 +238,37 @@ function Filter({
         }
     };
 
+    const handleAddIncludeSpecificSource = (valToAdd) => {
+        const val = (valToAdd || sourceIncludeInput).trim();
+        if (val && setIncludeSources && !includeSources.some(s => s.toLowerCase() === val.toLowerCase())) {
+            setIncludeSources(prev => [...prev, val]);
+            setSourceIncludeInput('');
+            if (setExcludeSources) {
+                setExcludeSources(prev => prev.filter(s => s.toLowerCase() !== val.toLowerCase()));
+            }
+        }
+    };
+
+    const handleAddExcludeSpecificSource = (valToAdd) => {
+        const val = (valToAdd || sourceExcludeInput).trim();
+        if (val && setExcludeSources && !excludeSources.some(s => s.toLowerCase() === val.toLowerCase())) {
+            setExcludeSources(prev => [...prev, val]);
+            setSourceExcludeInput('');
+            if (setIncludeSources) {
+                setIncludeSources(prev => prev.filter(s => s.toLowerCase() !== val.toLowerCase()));
+            }
+        }
+    };
+
     const handleClearAll = () => {
         setIncludeUserTags([]);
         setExcludeUserTags([]);
         setIncludeTags([]);
         setExcludeTags([]);
+        if (setIncludeSourceCategories) setIncludeSourceCategories([]);
+        if (setExcludeSourceCategories) setExcludeSourceCategories([]);
+        if (setIncludeSources) setIncludeSources([]);
+        if (setExcludeSources) setExcludeSources([]);
         setIncludeIngredients([]);
         setExcludeIngredients([]);
         setIncludeRecipeNames([]);
@@ -158,13 +277,18 @@ function Filter({
         setIngExcludeInput('');
         setNameIncludeInput('');
         setNameExcludeInput('');
+        setSourceIncludeInput('');
+        setSourceExcludeInput('');
     };
 
     const userTagCount = includeUserTags.length + excludeUserTags.length;
     const tagCount = includeTags.length + excludeTags.length;
+    const sourceCategoryCount = includeSourceCategories.length + excludeSourceCategories.length;
+    const specificSourceCount = includeSources.length + excludeSources.length;
+    const totalSourceCount = sourceCategoryCount + specificSourceCount;
     const ingCount = includeIngredients.length + excludeIngredients.length;
     const nameCount = includeRecipeNames.length + excludeRecipeNames.length;
-    const totalFilterCount = userTagCount + tagCount + ingCount + nameCount;
+    const totalFilterCount = userTagCount + tagCount + totalSourceCount + ingCount + nameCount;
 
     // Real-time matching preview
     const matchingCount = useMemo(() => {
@@ -172,6 +296,38 @@ function Filter({
         if (totalFilterCount === 0) return recipes.length;
 
         return recipes.filter(recipe => {
+            // Source Category Exclusions
+            if (excludeSourceCategories.length > 0) {
+                const rCat = getRecipeSourceCategory(recipe).toLowerCase();
+                if (excludeSourceCategories.some(c => c.toLowerCase() === rCat)) {
+                    return false;
+                }
+            }
+
+            // Source Category Inclusions
+            if (includeSourceCategories.length > 0) {
+                const rCat = getRecipeSourceCategory(recipe).toLowerCase();
+                if (!includeSourceCategories.some(c => c.toLowerCase() === rCat)) {
+                    return false;
+                }
+            }
+
+            // Specific Source Exclusions
+            if (excludeSources.length > 0) {
+                const rSource = (recipe.source || '').toLowerCase();
+                if (excludeSources.some(s => rSource.includes(s.toLowerCase()))) {
+                    return false;
+                }
+            }
+
+            // Specific Source Inclusions
+            if (includeSources.length > 0) {
+                const rSource = (recipe.source || '').toLowerCase();
+                if (!includeSources.some(s => rSource.includes(s.toLowerCase()))) {
+                    return false;
+                }
+            }
+
             // Recipe Name Exclusions
             if (excludeRecipeNames.length > 0) {
                 const rName = (recipe.name || '').toLowerCase();
@@ -252,6 +408,10 @@ function Filter({
         }).length;
     }, [
         recipes,
+        includeSourceCategories,
+        excludeSourceCategories,
+        includeSources,
+        excludeSources,
         includeUserTags,
         excludeUserTags,
         includeTags,
@@ -271,6 +431,27 @@ function Filter({
     // Common quick name keywords suggestions
     const commonIncludeNames = ['chicken', 'salmon', 'salad', 'soup', 'pasta', 'bowl', 'pie', 'roast'];
     const commonExcludeNames = ['spicy', 'fried', 'liver', 'raw', 'bacon'];
+
+    // Helper for rendering category icon/emoji
+    const renderCategoryIcon = (categoryName) => {
+        const meta = getSourceCategoryMeta(categoryName);
+        if (categoryName.toLowerCase() === 'instagram') {
+            return <InstagramIcon sx={{ fontSize: 16, color: '#E1306C' }} />;
+        }
+        if (categoryName.toLowerCase() === 'life') {
+            return <HomeIcon sx={{ fontSize: 16, color: '#059669' }} />;
+        }
+        if (categoryName.toLowerCase() === 'cookbook') {
+            return <MenuBookIcon sx={{ fontSize: 16, color: '#2563eb' }} />;
+        }
+        if (categoryName.toLowerCase() === 'website') {
+            return <PublicIcon sx={{ fontSize: 16, color: '#d97706' }} />;
+        }
+        if (categoryName.toLowerCase() === 'restaurant') {
+            return <RestaurantIcon sx={{ fontSize: 16, color: '#7c3aed' }} />;
+        }
+        return meta ? <span>{meta.emoji}</span> : null;
+    };
 
     return (
         <Dialog
@@ -324,7 +505,7 @@ function Filter({
                             Filter Recipes
                         </Typography>
                         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                            Combine includes and excludes across tags, ingredients, and recipe names
+                            Combine includes and excludes across tags, sources (Instagram vs Life), ingredients, and recipe names
                         </Typography>
                     </Box>
                 </Box>
@@ -378,6 +559,17 @@ function Filter({
                                 <span>Course & Diet</span>
                                 {tagCount > 0 && (
                                     <Chip label={tagCount} size="small" color="primary" sx={{ height: 18, fontSize: '0.7rem', fontWeight: 800 }} />
+                                )}
+                            </Box>
+                        }
+                    />
+                    <Tab
+                        label={
+                            <Box display="flex" alignItems="center" gap={1}>
+                                <AutoStoriesIcon sx={{ fontSize: 18 }} />
+                                <span>Source</span>
+                                {totalSourceCount > 0 && (
+                                    <Chip label={totalSourceCount} size="small" color="info" sx={{ height: 18, fontSize: '0.7rem', fontWeight: 800 }} />
                                 )}
                             </Box>
                         }
@@ -456,7 +648,7 @@ function Filter({
                                     <Box display="flex" alignItems="center" gap={1} mb={1.5}>
                                         <CheckCircleOutlineIcon sx={{ color: '#059669', fontSize: 20 }} />
                                         <Typography variant="subtitle2" fontWeight={750} color="#065f46">
-                                            Include User Tags (Must Have)
+                                             Include User Tags (Must Have)
                                         </Typography>
                                     </Box>
 
@@ -776,8 +968,329 @@ function Filter({
                     </Box>
                 )}
 
-                {/* TAB 2: INGREDIENTS */}
+                {/* TAB 2: RECIPE SOURCE (Instagram vs Life vs Cookbook vs Website vs Restaurant) */}
                 {currentTab === 2 && (
+                    <Box>
+                        <Box mb={2}>
+                            <Typography variant="body2" color="text.secondary">
+                                Filter by recipe origin: search specifically for <strong>Instagram reels</strong>, <strong>Life recipes</strong>, <strong>Cookbooks</strong>, or <strong>Websites</strong>.
+                            </Typography>
+                        </Box>
+
+                        {/* Section A: Origin Category (Instagram, Life, Cookbook, Website, Restaurant) */}
+                        <Grid container spacing={2} mb={3}>
+                            {/* Column 1: Include Source Type */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    variant="outlined"
+                                    sx={{
+                                        p: 2,
+                                        borderRadius: 2.5,
+                                        bgcolor: '#ffffff',
+                                        borderColor: includeSourceCategories.length > 0 ? '#10b981' : '#e2e8f0',
+                                        borderWidth: includeSourceCategories.length > 0 ? 1.5 : 1,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        height: '100%'
+                                    }}
+                                >
+                                    <Box display="flex" alignItems="center" gap={1} mb={1.5}>
+                                        <CheckCircleOutlineIcon sx={{ color: '#059669', fontSize: 20 }} />
+                                        <Box>
+                                            <Typography variant="subtitle2" fontWeight={750} color="#065f46">
+                                                Include Source Type (Must Be From)
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Select one or more origins (e.g. Instagram or Life)
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+
+                                    <Autocomplete
+                                        multiple
+                                        size="small"
+                                        options={availableSourceCategoryNames}
+                                        value={includeSourceCategories}
+                                        onChange={(e, val) => {
+                                            if (setIncludeSourceCategories) setIncludeSourceCategories(val);
+                                            if (setExcludeSourceCategories) setExcludeSourceCategories(prev => prev.filter(c => !val.includes(c)));
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                placeholder={includeSourceCategories.length === 0 ? "Select sources to include (Instagram, Life...)" : ""}
+                                                size="small"
+                                            />
+                                        )}
+                                        renderTags={(value, getTagProps) =>
+                                            value.map((option, index) => (
+                                                <Chip
+                                                    {...getTagProps({ index })}
+                                                    key={option}
+                                                    icon={renderCategoryIcon(option)}
+                                                    label={`+ ${option}`}
+                                                    size="small"
+                                                    color="success"
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))
+                                        }
+                                        sx={{ mb: 2 }}
+                                    />
+
+                                    <Typography variant="caption" fontWeight={700} color="#64748b" mb={1} sx={{ display: 'block' }}>
+                                        Quick Pick Origin (Click to Include):
+                                    </Typography>
+                                    <Box display="flex" flexWrap="wrap" gap={0.8}>
+                                        {availableSourceCategoryNames.map(cat => {
+                                            const isIncluded = includeSourceCategories.includes(cat);
+                                            const isExcluded = excludeSourceCategories.includes(cat);
+                                            const count = sourceCategoryCounts[cat] || 0;
+                                            return (
+                                                <Chip
+                                                    key={`pick-sc-inc-${cat}`}
+                                                    icon={renderCategoryIcon(cat)}
+                                                    label={
+                                                        <span>
+                                                            <strong>{cat}</strong>{' '}
+                                                            <span style={{ opacity: 0.75, fontSize: '0.74rem' }}>({count})</span>
+                                                        </span>
+                                                    }
+                                                    size="small"
+                                                    clickable
+                                                    onClick={() => toggleIncludeSourceCategory(cat)}
+                                                    color={isIncluded ? "success" : "default"}
+                                                    variant={isIncluded ? "filled" : "outlined"}
+                                                    sx={{
+                                                        fontWeight: isIncluded ? 700 : 500,
+                                                        opacity: isExcluded ? 0.4 : 1,
+                                                        cursor: isExcluded ? 'not-allowed' : 'pointer',
+                                                        py: 1.8,
+                                                        borderRadius: 2.5
+                                                    }}
+                                                />
+                                            );
+                                        })}
+                                    </Box>
+                                </Paper>
+                            </Grid>
+
+                            {/* Column 2: Exclude Source Type */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    variant="outlined"
+                                    sx={{
+                                        p: 2,
+                                        borderRadius: 2.5,
+                                        bgcolor: '#ffffff',
+                                        borderColor: excludeSourceCategories.length > 0 ? '#f43f5e' : '#e2e8f0',
+                                        borderWidth: excludeSourceCategories.length > 0 ? 1.5 : 1,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        height: '100%'
+                                    }}
+                                >
+                                    <Box display="flex" alignItems="center" gap={1} mb={1.5}>
+                                        <BlockIcon sx={{ color: '#e11d48', fontSize: 20 }} />
+                                        <Box>
+                                            <Typography variant="subtitle2" fontWeight={750} color="#9f1239">
+                                                Exclude Source Type (Avoid / Skip)
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                Hide recipes from unwanted source origins
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+
+                                    <Autocomplete
+                                        multiple
+                                        size="small"
+                                        options={availableSourceCategoryNames}
+                                        value={excludeSourceCategories}
+                                        onChange={(e, val) => {
+                                            if (setExcludeSourceCategories) setExcludeSourceCategories(val);
+                                            if (setIncludeSourceCategories) setIncludeSourceCategories(prev => prev.filter(c => !val.includes(c)));
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                placeholder={excludeSourceCategories.length === 0 ? "Select sources to exclude..." : ""}
+                                                size="small"
+                                            />
+                                        )}
+                                        renderTags={(value, getTagProps) =>
+                                            value.map((option, index) => (
+                                                <Chip
+                                                    {...getTagProps({ index })}
+                                                    key={option}
+                                                    icon={renderCategoryIcon(option)}
+                                                    label={`− ${option}`}
+                                                    size="small"
+                                                    color="error"
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))
+                                        }
+                                        sx={{ mb: 2 }}
+                                    />
+
+                                    <Typography variant="caption" fontWeight={700} color="#64748b" mb={1} sx={{ display: 'block' }}>
+                                        Quick Pick Origin (Click to Exclude):
+                                    </Typography>
+                                    <Box display="flex" flexWrap="wrap" gap={0.8}>
+                                        {availableSourceCategoryNames.map(cat => {
+                                            const isIncluded = includeSourceCategories.includes(cat);
+                                            const isExcluded = excludeSourceCategories.includes(cat);
+                                            const count = sourceCategoryCounts[cat] || 0;
+                                            return (
+                                                <Chip
+                                                    key={`pick-sc-exc-${cat}`}
+                                                    icon={renderCategoryIcon(cat)}
+                                                    label={
+                                                        <span>
+                                                            <strong>{cat}</strong>{' '}
+                                                            <span style={{ opacity: 0.75, fontSize: '0.74rem' }}>({count})</span>
+                                                        </span>
+                                                    }
+                                                    size="small"
+                                                    clickable
+                                                    onClick={() => toggleExcludeSourceCategory(cat)}
+                                                    color={isExcluded ? "error" : "default"}
+                                                    variant={isExcluded ? "filled" : "outlined"}
+                                                    sx={{
+                                                        fontWeight: isExcluded ? 700 : 500,
+                                                        opacity: isIncluded ? 0.4 : 1,
+                                                        cursor: isIncluded ? 'not-allowed' : 'pointer',
+                                                        py: 1.8,
+                                                        borderRadius: 2.5
+                                                    }}
+                                                />
+                                            );
+                                        })}
+                                    </Box>
+                                </Paper>
+                            </Grid>
+                        </Grid>
+
+                        {/* Section B: Specific Publication / Author / Cookbook Name */}
+                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, bgcolor: '#ffffff' }}>
+                            <Box display="flex" alignItems="center" gap={1} mb={1}>
+                                <MenuBookIcon sx={{ color: '#6366f1', fontSize: 20 }} />
+                                <Typography variant="subtitle2" fontWeight={750} color="#1e1b4b">
+                                    Specific Cookbook, Author, or Creator
+                                </Typography>
+                            </Box>
+                            <Typography variant="caption" color="text.secondary" mb={2} sx={{ display: 'block' }}>
+                                Target or avoid specific book titles (e.g. <em>Dinner Done</em>) or creator handles.
+                            </Typography>
+
+                            <Grid container spacing={2}>
+                                {/* Include Specific Source */}
+                                <Grid item xs={12} sm={6}>
+                                    <Box display="flex" gap={1} mb={1.5}>
+                                        <Autocomplete
+                                            freeSolo
+                                            size="small"
+                                            fullWidth
+                                            options={availableSpecificSources}
+                                            value={sourceIncludeInput}
+                                            onInputChange={(e, newVal) => setSourceIncludeInput(newVal)}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    placeholder="Include author / book name..."
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            handleAddIncludeSpecificSource();
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            color="success"
+                                            size="small"
+                                            onClick={() => handleAddIncludeSpecificSource()}
+                                            sx={{ textTransform: 'none', fontWeight: 700, px: 2 }}
+                                        >
+                                            Add
+                                        </Button>
+                                    </Box>
+
+                                    {includeSources.length > 0 && (
+                                        <Box display="flex" flexWrap="wrap" gap={0.8}>
+                                            {includeSources.map(src => (
+                                                <Chip
+                                                    key={`inc-src-${src}`}
+                                                    label={`+ "${src}"`}
+                                                    size="small"
+                                                    color="success"
+                                                    onDelete={() => setIncludeSources && setIncludeSources(prev => prev.filter(s => s !== src))}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))}
+                                        </Box>
+                                    )}
+                                </Grid>
+
+                                {/* Exclude Specific Source */}
+                                <Grid item xs={12} sm={6}>
+                                    <Box display="flex" gap={1} mb={1.5}>
+                                        <Autocomplete
+                                            freeSolo
+                                            size="small"
+                                            fullWidth
+                                            options={availableSpecificSources}
+                                            value={sourceExcludeInput}
+                                            onInputChange={(e, newVal) => setSourceExcludeInput(newVal)}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    placeholder="Exclude author / book name..."
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            handleAddExcludeSpecificSource();
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            color="error"
+                                            size="small"
+                                            onClick={() => handleAddExcludeSpecificSource()}
+                                            sx={{ textTransform: 'none', fontWeight: 700, px: 2 }}
+                                        >
+                                            Add
+                                        </Button>
+                                    </Box>
+
+                                    {excludeSources.length > 0 && (
+                                        <Box display="flex" flexWrap="wrap" gap={0.8}>
+                                            {excludeSources.map(src => (
+                                                <Chip
+                                                    key={`exc-src-${src}`}
+                                                    label={`− "${src}"`}
+                                                    size="small"
+                                                    color="error"
+                                                    onDelete={() => setExcludeSources && setExcludeSources(prev => prev.filter(s => s !== src))}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))}
+                                        </Box>
+                                    )}
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </Box>
+                )}
+
+                {/* TAB 3: INGREDIENTS */}
+                {currentTab === 3 && (
                     <Box>
                         <Box mb={2}>
                             <Typography variant="body2" color="text.secondary">
@@ -959,8 +1472,8 @@ function Filter({
                     </Box>
                 )}
 
-                {/* TAB 3: RECIPE NAME / TITLE */}
-                {currentTab === 3 && (
+                {/* TAB 4: RECIPE NAME / TITLE */}
+                {currentTab === 4 && (
                     <Box>
                         <Box mb={2}>
                             <Typography variant="body2" color="text.secondary">
@@ -1156,8 +1669,8 @@ function Filter({
                     </Box>
                 )}
 
-                {/* TAB 4: ALL ACTIVE FILTERS OVERVIEW */}
-                {currentTab === 4 && (
+                {/* TAB 5: ALL ACTIVE FILTERS OVERVIEW */}
+                {currentTab === 5 && (
                     <Box>
                         {totalFilterCount === 0 ? (
                             <Box textAlign="center" py={5} color="#94a3b8">
@@ -1166,11 +1679,63 @@ function Filter({
                                     No Active Filters
                                 </Typography>
                                 <Typography variant="body2" color="#94a3b8" mt={0.5}>
-                                    Use the tabs above to select tags, ingredients, or recipe name keywords to include and exclude.
+                                    Use the tabs above to select tags, sources (Instagram vs Life), ingredients, or recipe names to include and exclude.
                                 </Typography>
                             </Box>
                         ) : (
                             <Box display="flex" flexDirection="column" gap={2}>
+                                {totalSourceCount > 0 && (
+                                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, bgcolor: '#ffffff' }}>
+                                        <Typography variant="subtitle2" fontWeight={800} color="#0f172a" mb={1}>
+                                            Source & Origin Filters ({totalSourceCount})
+                                        </Typography>
+                                        <Box display="flex" flexWrap="wrap" gap={0.8}>
+                                            {includeSourceCategories.map(cat => (
+                                                <Chip
+                                                    key={`sum-inc-sc-${cat}`}
+                                                    icon={renderCategoryIcon(cat)}
+                                                    label={`+ Source: ${cat}`}
+                                                    size="small"
+                                                    color="success"
+                                                    onDelete={() => toggleIncludeSourceCategory(cat)}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))}
+                                            {excludeSourceCategories.map(cat => (
+                                                <Chip
+                                                    key={`sum-exc-sc-${cat}`}
+                                                    icon={renderCategoryIcon(cat)}
+                                                    label={`− Source: ${cat}`}
+                                                    size="small"
+                                                    color="error"
+                                                    onDelete={() => toggleExcludeSourceCategory(cat)}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))}
+                                            {includeSources.map(src => (
+                                                <Chip
+                                                    key={`sum-inc-src-${src}`}
+                                                    label={`+ Book/Author: "${src}"`}
+                                                    size="small"
+                                                    color="success"
+                                                    onDelete={() => setIncludeSources && setIncludeSources(prev => prev.filter(s => s !== src))}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))}
+                                            {excludeSources.map(src => (
+                                                <Chip
+                                                    key={`sum-exc-src-${src}`}
+                                                    label={`− Book/Author: "${src}"`}
+                                                    size="small"
+                                                    color="error"
+                                                    onDelete={() => setExcludeSources && setExcludeSources(prev => prev.filter(s => s !== src))}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            ))}
+                                        </Box>
+                                    </Paper>
+                                )}
+
                                 {userTagCount > 0 && (
                                     <Paper variant="outlined" sx={{ p: 2, borderRadius: 2.5, bgcolor: '#ffffff' }}>
                                         <Typography variant="subtitle2" fontWeight={800} color="#0f172a" mb={1}>
@@ -1297,7 +1862,7 @@ function Filter({
             </DialogContent>
 
             {/* Persistent Active Filter Chips Strip (Shows across all tabs) */}
-            {totalFilterCount > 0 && currentTab !== 4 && (
+            {totalFilterCount > 0 && currentTab !== 5 && (
                 <Box
                     sx={{
                         px: 2.5,
@@ -1315,6 +1880,48 @@ function Filter({
                         Active ({totalFilterCount}):
                     </Typography>
                     <Box display="flex" alignItems="center" gap={0.6} sx={{ flex: 1, overflowX: 'auto' }}>
+                        {includeSourceCategories.map(cat => (
+                            <Chip
+                                key={`strip-inc-sc-${cat}`}
+                                icon={renderCategoryIcon(cat)}
+                                label={`+ Source: ${cat}`}
+                                size="small"
+                                color="success"
+                                onDelete={() => toggleIncludeSourceCategory(cat)}
+                                sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600 }}
+                            />
+                        ))}
+                        {excludeSourceCategories.map(cat => (
+                            <Chip
+                                key={`strip-exc-sc-${cat}`}
+                                icon={renderCategoryIcon(cat)}
+                                label={`− Source: ${cat}`}
+                                size="small"
+                                color="error"
+                                onDelete={() => toggleExcludeSourceCategory(cat)}
+                                sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600 }}
+                            />
+                        ))}
+                        {includeSources.map(src => (
+                            <Chip
+                                key={`strip-inc-src-${src}`}
+                                label={`+ From: "${src}"`}
+                                size="small"
+                                color="success"
+                                onDelete={() => setIncludeSources && setIncludeSources(prev => prev.filter(s => s !== src))}
+                                sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600 }}
+                            />
+                        ))}
+                        {excludeSources.map(src => (
+                            <Chip
+                                key={`strip-exc-src-${src}`}
+                                label={`− From: "${src}"`}
+                                size="small"
+                                color="error"
+                                onDelete={() => setExcludeSources && setExcludeSources(prev => prev.filter(s => s !== src))}
+                                sx={{ height: 22, fontSize: '0.75rem', fontWeight: 600 }}
+                            />
+                        ))}
                         {includeUserTags.map(tag => (
                             <Chip
                                 key={`strip-inc-ut-${tag}`}

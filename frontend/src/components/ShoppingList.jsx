@@ -2,14 +2,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
     Box, Typography, Switch, FormControlLabel, Checkbox, 
     Button, IconButton, Tooltip, Snackbar, Alert, LinearProgress,
-    Divider, Chip
+    Divider, Chip, TextField, Select, MenuItem, FormControl, 
+    InputLabel, InputAdornment
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { useOutletContext } from "react-router-dom";
+import { consolidateUnits, formatQuantity } from '../utils/unitConverter';
 
 function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
     const { backendUrl } = useOutletContext();
@@ -17,6 +22,11 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
     const [shoppingList, setShoppingList] = useState([]);
     const [consolidate, setConsolidate] = useState(true);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+    // Search and filter states
+    const [searchQuery, setSearchQuery] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [recipeFilter, setRecipeFilter] = useState('all');
 
     const fetchShoppingList = () => {
         const url = user?.id ? `${backendUrl}/api/user_shopping_list?user_id=${user.id}` : `${backendUrl}/api/user_shopping_list`;
@@ -106,6 +116,26 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
         return new Map((mealPrep || []).map(p => [p.id, p]));
     }, [mealPrep]);
 
+    // Available categories and recipes for filters
+    const availableCategories = useMemo(() => {
+        const cats = new Set();
+        filteredShoppingList.forEach(item => {
+            const cat = item.recipe_ingredient?.ingredient?.category?.name || 'Other';
+            if (cat) cats.add(cat);
+        });
+        return Array.from(cats).sort();
+    }, [filteredShoppingList]);
+
+    const availableRecipes = useMemo(() => {
+        const recs = new Set();
+        filteredShoppingList.forEach(item => {
+            const prep = item.mealprep_id ? mealPrepMap.get(item.mealprep_id) : null;
+            const rName = item.recipe_ingredient?.recipe?.name || prep?.recipe_name;
+            if (rName) recs.add(rName);
+        });
+        return Array.from(recs).sort();
+    }, [filteredShoppingList, mealPrepMap]);
+
     const getConsolidatedList = () => {
         const groups = {};
         
@@ -115,13 +145,20 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
             const originalName = ingredient?.ingredient_name || prep?.recipe_name;
             if (!originalName) return;
 
-            const cleanName = getCleanName(originalName);
+            const canonicalName = ingredient?.ingredient?.name;
+            const cleanName = canonicalName ? canonicalName.toLowerCase() : getCleanName(originalName);
+            const displayName = canonicalName || originalName;
+            const categoryName = ingredient?.ingredient?.category?.name || 'Other';
+            const categoryOrder = ingredient?.ingredient?.category?.sort_order ?? 99;
+
             const unit = (ingredient?.ingredient_unit || "").trim().toLowerCase();
             const quantity = ingredient?.ingredient_quantity || 0;
 
             if (!groups[cleanName]) {
                 groups[cleanName] = {
-                    displayName: originalName,
+                    displayName: displayName,
+                    categoryName: categoryName,
+                    categoryOrder: categoryOrder,
                     units: {},
                     itemIds: [],
                     allChecked: true,
@@ -141,8 +178,11 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
             if (ingredient?.ingredient_note) {
                 groups[cleanName].notes.add(ingredient.ingredient_note);
             }
+            if (ingredient?.preparation) {
+                groups[cleanName].notes.add(ingredient.preparation);
+            }
             const rName = ingredient?.recipe?.name || prep?.recipe_name;
-            if (rName && rName.toLowerCase() !== originalName.toLowerCase()) {
+            if (rName && rName.toLowerCase() !== displayName.toLowerCase()) {
                 groups[cleanName].recipeNames.add(rName);
             }
         });
@@ -152,9 +192,34 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
             if (a.allChecked !== b.allChecked) {
                 return a.allChecked ? 1 : -1;
             }
+            // Sort by supermarket aisle order
+            if (a.categoryOrder !== b.categoryOrder) {
+                return a.categoryOrder - b.categoryOrder;
+            }
             return a.displayName.localeCompare(b.displayName);
         });
     };
+
+    // Filtered consolidated items based on search and dropdown filters
+    const displayedConsolidatedList = useMemo(() => {
+        let list = getConsolidatedList();
+        if (categoryFilter && categoryFilter !== 'all') {
+            list = list.filter(g => g.categoryName.toLowerCase() === categoryFilter.toLowerCase());
+        }
+        if (recipeFilter && recipeFilter !== 'all') {
+            list = list.filter(g => g.recipeNames.has(recipeFilter));
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase().trim();
+            list = list.filter(g => 
+                g.displayName.toLowerCase().includes(q) ||
+                g.categoryName.toLowerCase().includes(q) ||
+                Array.from(g.notes).some(n => n.toLowerCase().includes(q)) ||
+                Array.from(g.recipeNames).some(r => r.toLowerCase().includes(q))
+            );
+        }
+        return list;
+    }, [filteredShoppingList, mealPrepMap, categoryFilter, recipeFilter, searchQuery]);
 
     // Calculate progress and sort items (unchecked first, checked at bottom)
     const sortedUserItems = useMemo(() => {
@@ -170,32 +235,76 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
         });
     }, [filteredShoppingList, mealPrepMap]);
 
+    // Filtered unconsolidated items based on search and dropdown filters
+    const displayedUserItems = useMemo(() => {
+        let items = sortedUserItems;
+        if (categoryFilter && categoryFilter !== 'all') {
+            items = items.filter(item => {
+                const cat = item.recipe_ingredient?.ingredient?.category?.name || 'Other';
+                return cat.toLowerCase() === categoryFilter.toLowerCase();
+            });
+        }
+        if (recipeFilter && recipeFilter !== 'all') {
+            items = items.filter(item => {
+                const prep = item.mealprep_id ? mealPrepMap.get(item.mealprep_id) : null;
+                const rName = item.recipe_ingredient?.recipe?.name || prep?.recipe_name;
+                return rName === recipeFilter;
+            });
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase().trim();
+            items = items.filter(item => {
+                const ing = item.recipe_ingredient;
+                const prep = item.mealprep_id ? mealPrepMap.get(item.mealprep_id) : null;
+                const name = ing?.ingredient_name || prep?.recipe_name || '';
+                const canonical = ing?.ingredient?.name || '';
+                const cat = ing?.ingredient?.category?.name || '';
+                const note = ing?.ingredient_note || '';
+                const prepText = ing?.preparation || '';
+                const rName = ing?.recipe?.name || prep?.recipe_name || '';
+                return name.toLowerCase().includes(q) ||
+                       canonical.toLowerCase().includes(q) ||
+                       cat.toLowerCase().includes(q) ||
+                       note.toLowerCase().includes(q) ||
+                       prepText.toLowerCase().includes(q) ||
+                       rName.toLowerCase().includes(q);
+            });
+        }
+        return items;
+    }, [sortedUserItems, mealPrepMap, categoryFilter, recipeFilter, searchQuery]);
+
     const totalItems = filteredShoppingList.length;
     const checkedItems = filteredShoppingList.filter(item => item.checked).length;
     const progressPercent = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
 
+    const hasActiveFilters = Boolean(searchQuery.trim() || categoryFilter !== 'all' || recipeFilter !== 'all');
+
+    const handleClearFilters = () => {
+        setSearchQuery('');
+        setCategoryFilter('all');
+        setRecipeFilter('all');
+    };
+
     const handleCopyList = () => {
         let text = '';
         if (consolidate) {
-            const list = getConsolidatedList();
+            const list = displayedConsolidatedList;
             text = list
                 .map(g => {
                     const status = g.allChecked ? '[x]' : '[ ]';
-                    const unitStrings = Object.entries(g.units)
-                        .map(([unit, qty]) => `${qty > 0 ? qty : ""} ${unit}`.trim())
-                        .filter(Boolean);
-                    const qtyStr = unitStrings.join(', ');
-                    return `${status} ${qtyStr ? qtyStr + ' ' : ''}${g.displayName}`;
+                    const qtyStr = consolidateUnits(g.units);
+                    const categoryTag = g.categoryName && g.categoryName !== 'Other' ? ` (${g.categoryName})` : '';
+                    return `${status} ${qtyStr ? qtyStr + ' ' : ''}${g.displayName}${categoryTag}`;
                 })
                 .join('\n');
         } else {
-            text = sortedUserItems
+            text = displayedUserItems
                 .map(item => {
                     const status = item.checked ? '[x]' : '[ ]';
                     const ing = item.recipe_ingredient;
                     const prep = item.mealprep_id ? mealPrepMap.get(item.mealprep_id) : null;
                     if (!ing) return `${status} ${prep?.recipe_name || `Item #${item.id}`}`;
-                    const qty = ing.ingredient_quantity ? `${ing.ingredient_quantity} ` : '';
+                    const qty = ing.ingredient_quantity ? `${formatQuantity(ing.ingredient_quantity)} ` : '';
                     const unit = ing.ingredient_unit ? `${ing.ingredient_unit} ` : '';
                     const name = ing.ingredient_name || prep?.recipe_name || '';
                     return `${status} ${qty}${unit}${name}`.trim();
@@ -320,6 +429,84 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
                 </Box>
             )}
 
+            {/* Search and Filters Bar */}
+            {totalItems > 0 && (
+                <Box sx={{ mb: 1.5, p: 1.25, bgcolor: 'var(--mp-surface-alt)', borderRadius: 2, border: '1px solid var(--mp-border)' }}>
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 1 }}>
+                        <TextField
+                            size="small"
+                            placeholder="Search ingredients, recipes, or notes..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            sx={{ 
+                                flex: { xs: '1 1 100%', md: '2 1 auto' }, 
+                                bgcolor: 'var(--mp-surface-subtle, #ffffff)', 
+                                borderRadius: 1 
+                            }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon fontSize="small" sx={{ color: 'var(--mp-text-muted)' }} />
+                                    </InputAdornment>
+                                ),
+                                endAdornment: searchQuery ? (
+                                    <InputAdornment position="end">
+                                        <IconButton size="small" onClick={() => setSearchQuery('')} edge="end">
+                                            <CloseIcon fontSize="small" />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ) : null
+                            }}
+                        />
+
+                        <FormControl size="small" sx={{ flex: { xs: '1 1 100%', md: '1 1 auto' }, minWidth: 140, bgcolor: 'var(--mp-surface-subtle, #ffffff)', borderRadius: 1 }}>
+                            <InputLabel id="category-filter-select-label">Aisle / Category</InputLabel>
+                            <Select
+                                labelId="category-filter-select-label"
+                                label="Aisle / Category"
+                                value={categoryFilter}
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                            >
+                                <MenuItem value="all">All Aisles ({availableCategories.length})</MenuItem>
+                                {availableCategories.map(cat => (
+                                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl size="small" sx={{ flex: { xs: '1 1 100%', md: '1 1 auto' }, minWidth: 150, bgcolor: 'var(--mp-surface-subtle, #ffffff)', borderRadius: 1 }}>
+                            <InputLabel id="recipe-filter-select-label">Filter by Recipe</InputLabel>
+                            <Select
+                                labelId="recipe-filter-select-label"
+                                label="Filter by Recipe"
+                                value={recipeFilter}
+                                onChange={(e) => setRecipeFilter(e.target.value)}
+                            >
+                                <MenuItem value="all">All Recipes ({availableRecipes.length})</MenuItem>
+                                {availableRecipes.map(r => (
+                                    <MenuItem key={r} value={r}>{r}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+
+                    {hasActiveFilters && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1, pt: 0.75, borderTop: '1px dashed var(--mp-border)' }}>
+                            <Typography variant="caption" sx={{ color: 'var(--mp-text-muted)', fontWeight: 600 }}>
+                                Showing {consolidate ? displayedConsolidatedList.length : displayedUserItems.length} matching item{((consolidate ? displayedConsolidatedList.length : displayedUserItems.length) === 1 ? '' : 's')}
+                            </Typography>
+                            <Button
+                                size="small"
+                                onClick={handleClearFilters}
+                                sx={{ textTransform: 'none', py: 0, px: 1, fontSize: '0.75rem', fontWeight: 600, color: 'var(--mp-primary-dark)' }}
+                            >
+                                Clear search & filters
+                            </Button>
+                        </Box>
+                    )}
+                </Box>
+            )}
+
             {/* Options Bar */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
                 <FormControlLabel
@@ -334,7 +521,7 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
                     label={<Typography variant="body2" sx={{ fontWeight: 600 }}>Consolidate Matching Ingredients</Typography>}
                 />
                 <Chip 
-                    label={`${totalItems} ${isFilteredByDay ? dayFilter.toLowerCase() : 'total'} items`} 
+                    label={`${hasActiveFilters ? (consolidate ? displayedConsolidatedList.length : displayedUserItems.length) + ' filtered / ' : ''}${totalItems} ${isFilteredByDay ? dayFilter.toLowerCase() : 'total'} items`} 
                     size="small" 
                     variant="outlined" 
                     sx={{ fontWeight: 600, color: 'var(--mp-text-muted)' }} 
@@ -368,14 +555,29 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
                         </Button>
                     )}
                 </Box>
+            ) : ((consolidate ? displayedConsolidatedList.length : displayedUserItems.length) === 0) ? (
+                <Box sx={{ py: 5, textAlign: 'center', color: 'var(--mp-text-muted)' }}>
+                    <SearchIcon sx={{ fontSize: 38, opacity: 0.3, mb: 1 }} />
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        No ingredients match your search or filter criteria
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 0.5 }}>
+                        Try clearing or modifying your search keyword, category, or recipe filter.
+                    </Typography>
+                    <Button 
+                        variant="outlined" 
+                        size="small" 
+                        onClick={handleClearFilters}
+                        sx={{ mt: 1.5, borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+                    >
+                        Reset All Filters
+                    </Button>
+                </Box>
             ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, maxHeight: 600, overflowY: 'auto', pr: 0.5 }}>
                     {consolidate ? (
-                        getConsolidatedList().map(group => {
-                            const unitStrings = Object.entries(group.units)
-                                .map(([unit, qty]) => `${qty > 0 ? qty : ""} ${unit}`.trim())
-                                .filter(s => s !== "");
-                            const quantityStr = unitStrings.join(", ");
+                        displayedConsolidatedList.map(group => {
+                            const quantityStr = consolidateUnits(group.units);
                             const notesStr = Array.from(group.notes).join("; ");
                             const recipeSource = Array.from(group.recipeNames).join(", ");
 
@@ -406,6 +608,19 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
                                             <Typography variant="body2" className="item-name" sx={{ fontWeight: 600 }}>
                                                 {quantityStr ? <span style={{ color: 'var(--mp-secondary-dark)', fontWeight: 700 }}>{quantityStr} </span> : null}
                                                 {group.displayName}
+                                                {group.categoryName && group.categoryName !== 'Other' && (
+                                                    <span style={{ 
+                                                        marginLeft: '0.4rem', 
+                                                        fontSize: '0.72rem', 
+                                                        padding: '0.1rem 0.4rem', 
+                                                        borderRadius: '6px', 
+                                                        background: 'rgba(63, 255, 194, 0.12)', 
+                                                        color: 'var(--mp-primary-dark)',
+                                                        fontWeight: 600 
+                                                    }}>
+                                                        {group.categoryName}
+                                                    </span>
+                                                )}
                                                 {notesStr ? <span style={{ color: 'var(--mp-text-muted)', fontSize: '0.8rem' }}> ({notesStr})</span> : null}
                                             </Typography>
                                             {recipeSource && (
@@ -419,11 +634,13 @@ function ShoppingList({ mealPrep = [], user, dayFilter = 'all', onSelectDay }) {
                             );
                         })
                     ) : (
-                        sortedUserItems.map(item => {
+                        displayedUserItems.map(item => {
                             const ing = item.recipe_ingredient;
                             const prep = item.mealprep_id ? mealPrepMap.get(item.mealprep_id) : null;
+                            const formattedQty = ing?.ingredient_quantity ? `${formatQuantity(ing.ingredient_quantity)} ` : '';
+                            const unitStr = ing?.ingredient_unit ? `${ing.ingredient_unit} ` : '';
                             const label = ing 
-                                ? `${ing.ingredient_quantity || ""} ${ing.ingredient_unit || ""} ${ing.ingredient_name || ""}${ing.ingredient_note ? " (" + ing.ingredient_note + ")" : ""}`.trim()
+                                ? `${formattedQty}${unitStr}${ing.ingredient_name || ""}${ing.ingredient_note ? " (" + ing.ingredient_note + ")" : ""}`.trim()
                                 : (prep?.recipe_name || `Custom item #${item.id}`);
                             const recipeName = ing?.recipe?.name || prep?.recipe_name;
                             const showRecipeSubtitle = recipeName && recipeName.toLowerCase() !== label.toLowerCase();

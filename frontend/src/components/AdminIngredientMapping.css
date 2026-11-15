@@ -1,0 +1,261 @@
+/* Admin Ingredient Mapping Studio Styling */
+
+.aim-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem 1.5rem;
+    font-family: inherit;
+    color: var(--text-color, #1e293b);
+}
+
+.aim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.aim-header-title {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.aim-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+.aim-header-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    max-width: 650px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Card Containers */
+.aim-card {
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+    transition: all 0.2s ease;
+}
+
+.aim-card:hover {
+    border-color: rgba(203, 213, 225, 0.9);
+}
+
+/* Recipe Selector Bar */
+.aim-selector-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.aim-quick-chips {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.aim-quick-chip-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: 0.25rem;
+}
+
+.aim-quick-pill {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.aim-quick-pill:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: translateY(-1px);
+}
+
+.aim-quick-pill.is-active {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+    color: #059669;
+}
+
+/* Recipe Summary Banner */
+.aim-recipe-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.aim-recipe-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.aim-recipe-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+}
+
+.aim-recipe-thumb-fallback {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+/* Table Styles */
+.aim-table-wrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.aim-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    text-align: left;
+}
+
+.aim-table th {
+    background: #f8fafc;
+    padding: 0.85rem 1rem;
+    font-weight: 700;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+.aim-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.aim-table tr:hover {
+    background-color: #f8fafc;
+}
+
+.aim-table tr.is-dirty {
+    background-color: #fffbeb;
+}
+
+.aim-table tr.is-dirty:hover {
+    background-color: #fef3c7;
+}
+
+/* Row Input Fields */
+.aim-input-sm {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.aim-input-sm:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Category Badge */
+.aim-cat-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    white-space: nowrap;
+}
+
+.aim-cat-badge.cat-unmapped {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+}
+
+/* Unsaved Changes Banner */
+.aim-unsaved-banner {
+    position: sticky;
+    bottom: 1.5rem;
+    background: #1e293b;
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);
+    z-index: 100;
+    margin-top: 1.5rem;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

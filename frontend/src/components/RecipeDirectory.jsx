@@ -24,6 +24,8 @@ import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
 import PersonIcon from '@mui/icons-material/Person';
 import ClearIcon from '@mui/icons-material/Clear';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 import AddRecipe from "./AddRecipe";
 import UserRecipeTagsMenu from "./UserRecipeTagsMenu";
@@ -31,6 +33,7 @@ import AddToMealPrep from "./AddToMealPrep";
 import Filter from "./Filter";
 import { useOutletContext } from "react-router-dom";
 import { getRecipeSlug } from "../utils/slugify";
+import { getRecipeSourceCategory, SOURCE_CATEGORIES, getSourceCategoryMeta } from "../utils/sourceCategory";
 import "./RecipeDirectory.css";
 
 // Category options with modern emoji identifiers
@@ -79,6 +82,11 @@ function RecipeDirectory() {
     const [excludeUserTags, setExcludeUserTags] = useState([]);
     const [includeTags, setIncludeTags] = useState([]);
     const [excludeTags, setExcludeTags] = useState([]);
+    const [includeSourceCategories, setIncludeSourceCategories] = useState([]);
+    const [excludeSourceCategories, setExcludeSourceCategories] = useState([]);
+    const [includeSources, setIncludeSources] = useState([]);
+    const [excludeSources, setExcludeSources] = useState([]);
+    const [sourceCategories, setSourceCategories] = useState([]);
     const [includeIngredients, setIncludeIngredients] = useState([]);
     const [excludeIngredients, setExcludeIngredients] = useState([]);
     const [includeRecipeNames, setIncludeRecipeNames] = useState([]);
@@ -89,6 +97,10 @@ function RecipeDirectory() {
         excludeUserTags.length + 
         includeTags.length + 
         excludeTags.length + 
+        includeSourceCategories.length +
+        excludeSourceCategories.length +
+        includeSources.length +
+        excludeSources.length +
         includeIngredients.length + 
         excludeIngredients.length +
         includeRecipeNames.length +
@@ -157,6 +169,38 @@ function RecipeDirectory() {
             })
             .catch(() => setUserTags([]));
     }, [backendUrl]);
+
+    // Load source categories
+    useEffect(() => {
+        fetch(`${backendUrl}/api/sourcecategories`)
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setSourceCategories(data);
+            })
+            .catch(() => setSourceCategories([]));
+    }, [backendUrl]);
+
+    // Unique source category names and counts
+    const availableSourceCategoryNames = useMemo(() => {
+        const set = new Set(SOURCE_CATEGORIES.map(c => c.name));
+        (sourceCategories || []).forEach(sc => {
+            if (sc?.name) set.add(sc.name);
+        });
+        (recipes || []).forEach(r => {
+            const cat = getRecipeSourceCategory(r);
+            if (cat && cat !== 'Other') set.add(cat);
+        });
+        return Array.from(set);
+    }, [sourceCategories, recipes]);
+
+    const sourceCategoryCounts = useMemo(() => {
+        const counts = {};
+        (recipes || []).forEach(r => {
+            const cat = getRecipeSourceCategory(r);
+            counts[cat] = (counts[cat] || 0) + 1;
+        });
+        return counts;
+    }, [recipes]);
 
     // Load user favorites map
     const fetchUserFavorites = () => {
@@ -391,6 +435,36 @@ function RecipeDirectory() {
             });
         }
 
+        // 4.5. Source Category filtering (Instagram, Life, Cookbook, Website, Restaurant)
+        if (includeSourceCategories.length > 0) {
+            list = list.filter(recipe => {
+                const cat = getRecipeSourceCategory(recipe).toLowerCase();
+                return includeSourceCategories.some(c => c.toLowerCase() === cat);
+            });
+        }
+
+        if (excludeSourceCategories.length > 0) {
+            list = list.filter(recipe => {
+                const cat = getRecipeSourceCategory(recipe).toLowerCase();
+                return !excludeSourceCategories.some(c => c.toLowerCase() === cat);
+            });
+        }
+
+        // 4.6. Specific Source (Book/Author/Creator) filtering
+        if (includeSources.length > 0) {
+            list = list.filter(recipe => {
+                const rSrc = (recipe.source || '').toLowerCase();
+                return includeSources.some(s => rSrc.includes(s.toLowerCase()));
+            });
+        }
+
+        if (excludeSources.length > 0) {
+            list = list.filter(recipe => {
+                const rSrc = (recipe.source || '').toLowerCase();
+                return !excludeSources.some(s => rSrc.includes(s.toLowerCase()));
+            });
+        }
+
         // 5. Ingredients filtering
         if (includeIngredients.length > 0) {
             list = list.filter(recipe => {
@@ -473,6 +547,10 @@ function RecipeDirectory() {
         excludeUserTags, 
         includeTags, 
         excludeTags, 
+        includeSourceCategories,
+        excludeSourceCategories,
+        includeSources,
+        excludeSources,
         includeIngredients, 
         excludeIngredients, 
         includeRecipeNames,
@@ -497,6 +575,10 @@ function RecipeDirectory() {
         excludeUserTags, 
         includeTags, 
         excludeTags, 
+        includeSourceCategories,
+        excludeSourceCategories,
+        includeSources,
+        excludeSources,
         includeIngredients, 
         excludeIngredients, 
         includeRecipeNames,
@@ -531,6 +613,10 @@ function RecipeDirectory() {
         setExcludeUserTags([]);
         setIncludeTags([]);
         setExcludeTags([]);
+        setIncludeSourceCategories([]);
+        setExcludeSourceCategories([]);
+        setIncludeSources([]);
+        setExcludeSources([]);
         setIncludeIngredients([]);
         setExcludeIngredients([]);
         setIncludeRecipeNames([]);
@@ -656,6 +742,47 @@ function RecipeDirectory() {
 
                     {/* Controls on Right */}
                     <div className="rd-toolbar-controls">
+                        {/* Source Origin Filter Dropdown (All, Instagram, Life, Cookbook, Website, Restaurant) */}
+                        <FormControl size="small" sx={{ minWidth: { xs: 135, sm: 160 } }}>
+                            <Select
+                                value={includeSourceCategories.length === 1 ? includeSourceCategories[0] : (includeSourceCategories.length > 1 ? 'multiple' : 'all')}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === 'all') {
+                                        setIncludeSourceCategories([]);
+                                    } else if (val !== 'multiple') {
+                                        setIncludeSourceCategories([val]);
+                                        setExcludeSourceCategories(prev => prev.filter(c => c !== val));
+                                    }
+                                }}
+                                displayEmpty
+                                sx={{ borderRadius: 2.5 }}
+                                MenuProps={{ disableScrollLock: true }}
+                            >
+                                <MenuItem value="all">All Sources</MenuItem>
+                                {availableSourceCategoryNames.map(cat => {
+                                    const meta = getSourceCategoryMeta(cat);
+                                    const count = sourceCategoryCounts[cat] || 0;
+                                    return (
+                                        <MenuItem key={cat} value={cat}>
+                                            <Box display="flex" alignItems="center" gap={0.8} sx={{ width: '100%' }}>
+                                                <span>{meta?.emoji || '📄'}</span>
+                                                <span style={{ fontWeight: 600 }}>{cat}</span>
+                                                <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: 'auto' }}>
+                                                    ({count})
+                                                </span>
+                                            </Box>
+                                        </MenuItem>
+                                    );
+                                })}
+                                {includeSourceCategories.length > 1 && (
+                                    <MenuItem value="multiple" disabled>
+                                        {includeSourceCategories.length} Sources Selected
+                                    </MenuItem>
+                                )}
+                            </Select>
+                        </FormControl>
+
                         {/* Cookbook Filter Dropdown */}
                         <Autocomplete
                             size="small"
@@ -666,7 +793,7 @@ function RecipeDirectory() {
                                 <TextField 
                                     {...params} 
                                     placeholder="All Cookbooks" 
-                                    sx={{ width: { xs: 150, sm: 190 } }}
+                                    sx={{ width: { xs: 140, sm: 170 } }}
                                 />
                             )}
                             clearOnBlur={false}
@@ -793,6 +920,53 @@ function RecipeDirectory() {
                         >
                             Active Filters ({activeFiltersCount}):
                         </Typography>
+
+                        {includeSourceCategories.map(cat => {
+                            const meta = getSourceCategoryMeta(cat);
+                            return (
+                                <Chip
+                                    key={`inc-sc-${cat}`}
+                                    label={`+ Source: ${meta?.emoji ? `${meta.emoji} ` : ''}${cat}`}
+                                    size="small"
+                                    color="success"
+                                    onDelete={() => setIncludeSourceCategories(prev => prev.filter(c => c !== cat))}
+                                    sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                                />
+                            );
+                        })}
+                        {excludeSourceCategories.map(cat => {
+                            const meta = getSourceCategoryMeta(cat);
+                            return (
+                                <Chip
+                                    key={`exc-sc-${cat}`}
+                                    label={`− Source: ${meta?.emoji ? `${meta.emoji} ` : ''}${cat}`}
+                                    size="small"
+                                    color="error"
+                                    onDelete={() => setExcludeSourceCategories(prev => prev.filter(c => c !== cat))}
+                                    sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                                />
+                            );
+                        })}
+                        {includeSources.map(src => (
+                            <Chip
+                                key={`inc-src-${src}`}
+                                label={`+ From: "${src}"`}
+                                size="small"
+                                color="success"
+                                onDelete={() => setIncludeSources(prev => prev.filter(s => s !== src))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
+                        {excludeSources.map(src => (
+                            <Chip
+                                key={`exc-src-${src}`}
+                                label={`− From: "${src}"`}
+                                size="small"
+                                color="error"
+                                onDelete={() => setExcludeSources(prev => prev.filter(s => s !== src))}
+                                sx={{ fontWeight: 600, fontSize: '0.8rem', borderRadius: 2 }}
+                            />
+                        ))}
 
                         {includeUserTags.map(tag => (
                             <Chip
@@ -952,9 +1126,18 @@ function RecipeDirectory() {
                         const userRecipeTags = (recipe.user_recipe_tags || []).filter(
                             urt => user && user.id && urt.user_id === user.id
                         );
-                        const imgUrl = recipe.picture && recipe.picture.trim() !== "" 
-                            ? recipe.picture 
-                            : "/favicon3.jpeg";
+                        const isInstagram = Boolean(
+                            (recipe.source_category?.name && recipe.source_category.name.toLowerCase() === 'instagram') ||
+                            (recipe.source && recipe.source.toLowerCase().includes('instagram')) ||
+                            (recipe.reference && (recipe.reference.includes('instagram.com') || recipe.reference.includes('instagr.am')))
+                        );
+                        const hasValidPicture = recipe.picture && 
+                            recipe.picture.trim() !== "" && 
+                            !recipe.picture.includes('instagram.com/p/') && 
+                            !recipe.picture.includes('instagram.com/reel/') &&
+                            !recipe.picture.includes('instagr.am/');
+
+                        const imgUrl = hasValidPicture ? recipe.picture : "/favicon3.jpeg";
 
                         return (
                             <div key={recipe.id} className="rd-card">
@@ -966,13 +1149,49 @@ function RecipeDirectory() {
                                             alt={recipe.name} 
                                             className="rd-card-img" 
                                             loading="lazy" 
+                                            onError={(e) => {
+                                                e.currentTarget.onerror = null;
+                                                e.currentTarget.src = "/favicon3.jpeg";
+                                            }}
                                         />
                                     </Link>
 
                                     {/* Source Badge */}
-                                    {recipe.source && (
-                                        <div className="rd-card-badge" title={recipe.source}>
-                                            {recipe.source}
+                                    {(() => {
+                                        const cat = getRecipeSourceCategory(recipe);
+                                        const meta = getSourceCategoryMeta(cat);
+                                        const label = recipe.source || cat;
+                                        if (!label) return null;
+                                        const isInsta = isInstagram || cat === 'Instagram';
+                                        const isLife = cat === 'Life';
+                                        return (
+                                            <div 
+                                                className={`rd-card-badge ${isInsta ? 'rd-card-badge-instagram' : isLife ? 'rd-card-badge-life' : ''}`}
+                                                title={`${cat}: ${label}`}
+                                                style={isInsta ? {
+                                                    background: 'linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                                                    color: '#ffffff',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px'
+                                                } : isLife ? {
+                                                    background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                                                    color: '#ffffff',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px'
+                                                } : undefined}
+                                            >
+                                                {isInsta ? <InstagramIcon sx={{ fontSize: 13, mr: 0.3 }} /> : meta?.emoji ? <span style={{ marginRight: 2 }}>{meta.emoji}</span> : null}
+                                                <span>{label}</span>
+                                            </div>
+                                        );
+                                    })()}
+
+                                    {/* Video / Play Overlay indicator for Instagram recipes */}
+                                    {isInstagram && (
+                                        <div className="rd-card-play-overlay" title="Watch Instagram Reel">
+                                            <PlayArrowIcon sx={{ fontSize: 18 }} />
                                         </div>
                                     )}
 
@@ -1060,14 +1279,37 @@ function RecipeDirectory() {
                     {visibleRecipes.map((recipe) => {
                         const slug = getRecipeSlug(recipe);
                         const isFav = Boolean(userRecipes[recipe.id]);
-                        const imgUrl = recipe.picture && recipe.picture.trim() !== "" 
-                            ? recipe.picture 
-                            : "/favicon3.jpeg";
+                        const isInstagram = Boolean(
+                            (recipe.source_category?.name && recipe.source_category.name.toLowerCase() === 'instagram') ||
+                            (recipe.source && recipe.source.toLowerCase().includes('instagram')) ||
+                            (recipe.reference && (recipe.reference.includes('instagram.com') || recipe.reference.includes('instagr.am')))
+                        );
+                        const hasValidPicture = recipe.picture && 
+                            recipe.picture.trim() !== "" && 
+                            !recipe.picture.includes('instagram.com/p/') && 
+                            !recipe.picture.includes('instagram.com/reel/') &&
+                            !recipe.picture.includes('instagr.am/');
+
+                        const imgUrl = hasValidPicture ? recipe.picture : "/favicon3.jpeg";
 
                         return (
                             <div key={recipe.id} className="rd-list-card">
                                 <Link to={`/recipes/${slug}`} className="rd-list-img-wrapper">
-                                    <img src={imgUrl} alt={recipe.name} className="rd-list-img" loading="lazy" />
+                                    <img 
+                                        src={imgUrl} 
+                                        alt={recipe.name} 
+                                        className="rd-list-img" 
+                                        loading="lazy" 
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.src = "/favicon3.jpeg";
+                                        }}
+                                    />
+                                    {isInstagram && (
+                                        <div className="rd-list-play-overlay" title="Instagram Video">
+                                            <PlayArrowIcon sx={{ fontSize: 13 }} />
+                                        </div>
+                                    )}
                                 </Link>
 
                                 <div className="rd-list-content">
@@ -1077,7 +1319,13 @@ function RecipeDirectory() {
                                         </h3>
                                     </Link>
                                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', fontSize: '0.8rem', color: 'var(--rd-text-muted)' }}>
-                                        {recipe.source && <span>📚 {recipe.source}</span>}
+                                        {(() => {
+                                            const cat = getRecipeSourceCategory(recipe);
+                                            const meta = getSourceCategoryMeta(cat);
+                                            const label = recipe.source || cat;
+                                            if (!label) return null;
+                                            return <span>{meta?.emoji || '📚'} {label}</span>;
+                                        })()}
                                         {recipe.recipe_ingredients && (
                                             <span>🥘 {recipe.recipe_ingredients.length} ingredients</span>
                                         )}
@@ -1140,6 +1388,14 @@ function RecipeDirectory() {
                 setIncludeTags={setIncludeTags}
                 excludeTags={excludeTags}
                 setExcludeTags={setExcludeTags}
+                includeSourceCategories={includeSourceCategories}
+                setIncludeSourceCategories={setIncludeSourceCategories}
+                excludeSourceCategories={excludeSourceCategories}
+                setExcludeSourceCategories={setExcludeSourceCategories}
+                includeSources={includeSources}
+                setIncludeSources={setIncludeSources}
+                excludeSources={excludeSources}
+                setExcludeSources={setExcludeSources}
                 includeIngredients={includeIngredients}
                 setIncludeIngredients={setIncludeIngredients}
                 excludeIngredients={excludeIngredients}
@@ -1150,6 +1406,7 @@ function RecipeDirectory() {
                 setExcludeRecipeNames={setExcludeRecipeNames}
                 tags={tags}
                 userTags={userTags}
+                sourceCategories={sourceCategories}
                 recipes={recipes}
                 user={user}
             />

@@ -96,8 +96,9 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
     const [userRecipeTags, setUserRecipeTags] = useState(recipe?.user_recipe_tags || []);
     const [userTags, setUserTags] = useState([]);
 
-    // Categories
+    // Categories & Ingredients
     const [availableCategories, setAvailableCategories] = useState([]);
+    const [availableIngredients, setAvailableIngredients] = useState([]);
 
     // User Recipe Comments
     const getUserComments = () => {
@@ -115,7 +116,7 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [imgError, setImgError] = useState(false);
 
-    // Fetch tags and categories
+    // Fetch tags, categories, and canonical ingredients
     useEffect(() => {
         if (backendUrl) {
             fetch(`${backendUrl}/api/tag_names`)
@@ -138,6 +139,13 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
                     if (Array.isArray(data)) setAvailableCategories(data);
                 })
                 .catch(err => console.warn('Could not fetch categories:', err));
+
+            fetch(`${backendUrl}/api/ingredients`)
+                .then(r => r.json())
+                .then(data => {
+                    if (Array.isArray(data)) setAvailableIngredients(data);
+                })
+                .catch(err => console.warn('Could not fetch ingredients:', err));
         }
     }, [backendUrl]);
 
@@ -309,9 +317,10 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
             ingredients.forEach(ing => {
                 const ingData = {
                     ingredient_name: ing.ingredient_name.trim(),
+                    ingredient_id: ing.ingredient_id || null,
                     ingredient_quantity: parseFloat(ing.ingredient_quantity) || 0,
-                    ingredient_unit: ing.ingredient_unit.trim(),
-                    ingredient_note: ing.ingredient_note.trim()
+                    ingredient_unit: (ing.ingredient_unit || '').trim(),
+                    ingredient_note: (ing.ingredient_note || '').trim()
                 };
 
                 // Skip completely blank rows
@@ -855,13 +864,70 @@ function RecipeEditPage({ recipe, user, editRecipe, setEditRecipe, setRecipe }) 
                                     </FormControl>
 
                                     {/* Ingredient Name */}
-                                    <TextField
-                                        size="small"
-                                        placeholder="e.g. Sirloin steak"
-                                        value={ing.ingredient_name}
-                                        onChange={(e) => handleIngredientChange(index, 'ingredient_name', e.target.value)}
-                                        required
-                                        sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
+                                    <Autocomplete
+                                        freeSolo
+                                        options={availableIngredients}
+                                        getOptionLabel={(option) => {
+                                            if (typeof option === 'string') return option;
+                                            return option?.name || '';
+                                        }}
+                                        value={ing.ingredient_name || ''}
+                                        onChange={(event, newValue) => {
+                                            if (typeof newValue === 'string') {
+                                                handleIngredientChange(index, 'ingredient_name', newValue);
+                                                handleIngredientChange(index, 'ingredient_id', null);
+                                            } else if (newValue && newValue.name) {
+                                                handleIngredientChange(index, 'ingredient_name', newValue.name);
+                                                handleIngredientChange(index, 'ingredient_id', newValue.id);
+                                                if (newValue.default_unit && !ing.ingredient_unit) {
+                                                    handleIngredientChange(index, 'ingredient_unit', newValue.default_unit);
+                                                }
+                                            } else {
+                                                handleIngredientChange(index, 'ingredient_name', '');
+                                                handleIngredientChange(index, 'ingredient_id', null);
+                                            }
+                                        }}
+                                        onInputChange={(event, newInputValue, reason) => {
+                                            if (reason === 'input') {
+                                                handleIngredientChange(index, 'ingredient_name', newInputValue);
+                                                const match = availableIngredients.find(
+                                                    ai => ai.name && ai.name.toLowerCase() === newInputValue.trim().toLowerCase()
+                                                );
+                                                handleIngredientChange(index, 'ingredient_id', match ? match.id : null);
+                                                if (match && match.default_unit && !ing.ingredient_unit) {
+                                                    handleIngredientChange(index, 'ingredient_unit', match.default_unit);
+                                                }
+                                            }
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                size="small"
+                                                placeholder="e.g. Sirloin steak, Garlic"
+                                                required
+                                                sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
+                                            />
+                                        )}
+                                        renderOption={(props, option) => (
+                                            <li {...props} key={option.id || option.name}>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                                    <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{option.name}</span>
+                                                    {option.category && (
+                                                        <span style={{ 
+                                                            fontSize: '0.72rem', 
+                                                            padding: '2px 8px', 
+                                                            borderRadius: '6px', 
+                                                            backgroundColor: 'rgba(63, 255, 194, 0.12)', 
+                                                            color: '#059669',
+                                                            fontWeight: 600 
+                                                        }}>
+                                                            {option.category.name}
+                                                        </span>
+                                                    )}
+                                                </Box>
+                                            </li>
+                                        )}
+                                        sx={{ flex: 2, minWidth: 160 }}
                                     />
 
                                     {/* Ingredient Note */}

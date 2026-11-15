@@ -336,6 +336,24 @@
   background: rgba(63, 255, 194, 0.15);
 }
 
+.mealprep-day-split-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mp-text-muted);
+  opacity: 0.6;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.mealprep-day-header.clickable:hover .mealprep-day-split-hint {
+  opacity: 1;
+  color: var(--mp-primary-dark);
+  background: var(--mp-primary-subtle);
+  transform: scale(1.08);
+}
+
 .mealprep-day-title {
   font-size: 0.95rem;
   font-weight: 700;

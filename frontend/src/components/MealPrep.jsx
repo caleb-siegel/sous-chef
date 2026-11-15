@@ -286,6 +286,16 @@ function MealPrep() {
         }
     };
 
+    // Handle clicking a day (from header or filter chip) - automatically enters split view
+    const handleDayClick = (weekday) => {
+        if (dayFilter === weekday && viewMode === 'split') {
+            setDayFilter('all');
+        } else {
+            setDayFilter(weekday);
+            setViewMode('split');
+        }
+    };
+
     // Quick Add from slot button
     const handleOpenQuickAdd = (weekday, meal) => {
         setDialogWeekday(weekday);
@@ -404,7 +414,10 @@ function MealPrep() {
                             <button 
                                 type="button" 
                                 className={`mealprep-view-btn ${viewMode === 'board' ? 'active' : ''}`}
-                                onClick={() => setViewMode('board')}
+                                onClick={() => {
+                                    setViewMode('board');
+                                    setDayFilter('all');
+                                }}
                             >
                                 <ViewWeekIcon fontSize="small" />
                                 <span>Weekly Board</span>
@@ -463,7 +476,7 @@ function MealPrep() {
                                 key={day}
                                 type="button"
                                 className={`mealprep-day-filter-chip ${dayFilter === day ? 'active' : ''} ${isCurrentDay ? 'is-today' : ''}`}
-                                onClick={() => setDayFilter(day)}
+                                onClick={() => handleDayClick(day)}
                             >
                                 <span>{isMobile ? day.slice(0, 3) : day}</span>
                                 {isCurrentDay && <span style={{ color: 'var(--mp-secondary)', fontSize: '0.7rem' }}>•</span>}
@@ -493,13 +506,18 @@ function MealPrep() {
                                         >
                                             <div 
                                                 className="mealprep-day-header clickable"
-                                                onClick={() => setDayFilter(dayFilter === weekday ? 'all' : weekday)}
-                                                title={dayFilter === weekday ? "Click to view all days" : `Click to filter recipes and groceries to ${weekday}`}
+                                                onClick={() => handleDayClick(weekday)}
+                                                title={`Click to open Split View for ${weekday}`}
                                             >
                                                 <h3 className="mealprep-day-title">
                                                     <span>{weekday}</span>
                                                     {isToday && <span className="today-badge">Today</span>}
                                                 </h3>
+                                                <Tooltip title={`Split View for ${weekday}`}>
+                                                    <span className="mealprep-day-split-hint">
+                                                        <ViewSidebarIcon sx={{ fontSize: 16 }} />
+                                                    </span>
+                                                </Tooltip>
                                             </div>
 
                                             <div className="mealprep-day-body">
@@ -541,13 +559,18 @@ function MealPrep() {
                                             >
                                                 <div 
                                                     className="mealprep-day-header clickable"
-                                                    onClick={() => setDayFilter(dayFilter === weekday ? 'all' : weekday)}
-                                                    title={dayFilter === weekday ? "Click to view all days" : `Click to filter recipes and groceries to ${weekday}`}
+                                                    onClick={() => handleDayClick(weekday)}
+                                                    title={dayFilter === weekday ? "Click to view all days" : `Click to focus ${weekday}`}
                                                 >
                                                     <h3 className="mealprep-day-title">
                                                         <span>{weekday}</span>
                                                         {isToday && <span className="today-badge">Today</span>}
                                                     </h3>
+                                                    <Tooltip title={dayFilter === weekday ? "Show all days" : `Focus ${weekday}`}>
+                                                        <span className="mealprep-day-split-hint">
+                                                            <ViewSidebarIcon sx={{ fontSize: 16 }} />
+                                                        </span>
+                                                    </Tooltip>
                                                 </div>
 
                                                 <div className="mealprep-day-body">

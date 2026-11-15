@@ -17,6 +17,8 @@ import ProfilePage from './components/ProfilePage';
 import NewTag from './components/NewTag';
 import RestaurantDirectory from './components/RestaurantDirectory';
 import RestaurantPage from './components/RestaurantPage';
+import IngredientsDirectory from './components/IngredientsDirectory';
+import AdminIngredientMapping from './components/AdminIngredientMapping';
 import CommentFeed from './components/CommentFeed';
 import { Analytics } from "@vercel/analytics/react"
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -66,6 +68,18 @@ const router = createBrowserRouter([
       {
         path: "restaurants/:id",
         element: <RestaurantPage />,
+      },
+      {
+        path: "ingredients",
+        element: <IngredientsDirectory />,
+      },
+      {
+        path: "ingredient-mapping",
+        element: <AdminIngredientMapping />,
+      },
+      {
+        path: "admin/ingredient-mapping",
+        element: <AdminIngredientMapping />,
       },
       {
         path: "feed",

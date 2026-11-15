@@ -16,6 +16,7 @@ import LoginRounded from "@mui/icons-material/LoginRounded";
 import LogoutRounded from "@mui/icons-material/LogoutRounded";
 import MenuRounded from "@mui/icons-material/MenuRounded";
 import CloseRounded from "@mui/icons-material/CloseRounded";
+import KitchenRounded from "@mui/icons-material/KitchenRounded";
 import "./Navbar.css";
 
 function Navbar({ user, logout, darkMode, toggleDarkMode }) {
@@ -30,12 +31,16 @@ function Navbar({ user, logout, darkMode, toggleDarkMode }) {
   const navLinks = [
     { name: "Home", path: "/", icon: <HomeRounded className="sc-header-nav-icon" />, end: true },
     { name: "Recipes", path: "/recipes", icon: <MenuBookRounded className="sc-header-nav-icon" /> },
+    { name: "Ingredients", path: "/ingredients", icon: <KitchenRounded className="sc-header-nav-icon" /> },
     ...(isSuperUser
       ? [{ name: "Restaurants", path: "/restaurants", icon: <StorefrontRounded className="sc-header-nav-icon" /> }]
       : []),
     { name: "Meal Prep", path: "/mealprep", icon: <CalendarMonthRounded className="sc-header-nav-icon" /> },
     ...(isSuperUser
       ? [{ name: "Feed", path: "/feed", icon: <DynamicFeedRounded className="sc-header-nav-icon" /> }]
+      : []),
+    ...(isSuperUser
+      ? [{ name: "Mapping Studio", path: "/ingredient-mapping", icon: <KitchenRounded className="sc-header-nav-icon" /> }]
       : []),
     { name: "Spice It Up", path: "/random", icon: <AutoAwesomeRounded className="sc-header-nav-icon" /> },
     ...(isSuperUser
