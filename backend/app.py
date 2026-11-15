@@ -1199,6 +1199,59 @@ def handle_ingredient_id(id):
         db.session.commit()
         return {}, 204
 
+@app.route('/api/ingredients/merge', methods=['POST'])
+def merge_ingredients():
+    data = request.json or {}
+    source_id = data.get('source_id')
+    target_id = data.get('target_id')
+    delete_source = data.get('delete_source', False)
+
+    if not source_id or not target_id:
+        return {"error": "Both source_id and target_id are required"}, 400
+
+    try:
+        source_id = int(source_id)
+        target_id = int(target_id)
+    except (ValueError, TypeError):
+        return {"error": "Invalid source_id or target_id"}, 400
+
+    if source_id == target_id:
+        return {"error": "Source and target ingredients cannot be the same"}, 400
+
+    source_ing = db.session.get(Ingredient, source_id)
+    target_ing = db.session.get(Ingredient, target_id)
+
+    if not source_ing:
+        return {"error": f"Source ingredient #{source_id} not found"}, 404
+    if not target_ing:
+        return {"error": f"Target ingredient #{target_id} not found"}, 404
+
+    # Re-map all Recipe_Ingredient rows from source to target
+    affected_rows = Recipe_Ingredient.query.filter_by(ingredient_id=source_ing.id).all()
+    count = len(affected_rows)
+
+    for ri in affected_rows:
+        ri.ingredient_id = target_ing.id
+        db.session.add(ri)
+
+    source_deleted = False
+    source_name = source_ing.name
+    if delete_source:
+        db.session.delete(source_ing)
+        source_deleted = True
+
+    db.session.commit()
+
+    return jsonify({
+        "message": f"Successfully remapped {count} recipe{'s' if count != 1 else ''} from '{source_name}' to '{target_ing.name}'.",
+        "remapped_count": count,
+        "source_deleted": source_deleted,
+        "source_id": source_id,
+        "source_name": source_name,
+        "target_id": target_id,
+        "target_name": target_ing.name
+    }), 200
+
 # --- Admin Ingredient Mapping APIs ---
 
 @app.route('/api/admin/recipe_ingredients', methods=['GET'])
