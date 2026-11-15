@@ -1,6 +1,7 @@
 from flask import Flask, make_response, jsonify, request, session, g
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, func
+from sqlalchemy.orm import joinedload
 from flask_migrate import Migrate
 from flask_cors import CORS
 from dotenv import dotenv_values, load_dotenv
@@ -95,7 +96,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
-from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category, Cooked_Instance, Shopping_List, Restaurant, Restaurant_Menu_Item, User_Restaurant_Note
+from models import User, User_Tag, User_Recipe, User_Recipe_Tag, Meal_Prep, Recipe, Recipe_Ingredient, Tag, Recipe_Tag, Source_Category, Cooked_Instance, Shopping_List, Restaurant, Restaurant_Menu_Item, User_Restaurant_Note, Ingredient, Ingredient_Category
+from ingredient_parser import clean_and_parse_ingredient, determine_category
 
 @app.route("/")
 def root():
@@ -470,35 +472,76 @@ def get_category_filter(cat_name):
     if not cat:
         return None
     if cat == "chicken":
-        return Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))
-    elif cat == "fish":
-        fish_terms = ["salmon", "tilapia", "crab", "flounder", "sea bass", "tuna", "snapper", "fish", "cod", "halibut", "shrimp", "trout"]
-        return Recipe.recipe_ingredients.any(or_(*[Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in fish_terms]))
-    elif cat == "meat":
-        meat_tag = Tag.query.filter_by(name="meat").first()
-        if meat_tag:
-            return and_(
-                Recipe.recipe_tags.any(Recipe_Tag.tag_id == meat_tag.id),
-                ~Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))
+        meat_cat = Ingredient_Category.query.filter_by(name="Meat & Poultry").first()
+        chicken_tags = Tag.query.filter(Tag.name.in_(["chicken", "poultry"])).all()
+        tag_ids = [t.id for t in chicken_tags]
+        conds = []
+        if meat_cat:
+            conds.append(
+                Recipe.recipe_ingredients.any(
+                    Recipe_Ingredient.ingredient.has(
+                        and_(Ingredient.category_id == meat_cat.id, Ingredient.name.ilike("%chicken%"))
+                    )
+                )
             )
-        return Recipe.recipe_ingredients.any(or_(
-            Recipe_Ingredient.ingredient_name.ilike("%beef%"),
-            Recipe_Ingredient.ingredient_name.ilike("%steak%"),
-            Recipe_Ingredient.ingredient_name.ilike("%pork%"),
-            Recipe_Ingredient.ingredient_name.ilike("%lamb%")
-        ))
+        if tag_ids:
+            conds.append(Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(tag_ids)))
+        return or_(*conds) if conds else None
+    elif cat == "fish":
+        seafood_cat = Ingredient_Category.query.filter_by(name="Seafood").first()
+        fish_tags = Tag.query.filter(Tag.name.in_(["fish", "seafood"])).all()
+        tag_ids = [t.id for t in fish_tags]
+        conds = []
+        if seafood_cat:
+            conds.append(
+                Recipe.recipe_ingredients.any(
+                    Recipe_Ingredient.ingredient.has(Ingredient.category_id == seafood_cat.id)
+                )
+            )
+        if tag_ids:
+            conds.append(Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(tag_ids)))
+        return or_(*conds) if conds else None
+    elif cat == "meat":
+        meat_cat = Ingredient_Category.query.filter_by(name="Meat & Poultry").first()
+        meat_tag = Tag.query.filter_by(name="meat").first()
+        meat_tag_id = meat_tag.id if meat_tag else None
+        conds = []
+        if meat_cat:
+            conds.append(
+                Recipe.recipe_ingredients.any(
+                    Recipe_Ingredient.ingredient.has(
+                        and_(Ingredient.category_id == meat_cat.id, ~Ingredient.name.ilike("%chicken%"))
+                    )
+                )
+            )
+        if meat_tag_id:
+            conds.append(Recipe.recipe_tags.any(Recipe_Tag.tag_id == meat_tag_id))
+        meat_cond = or_(*conds) if conds else None
+        exclude_chicken = ~Recipe.recipe_ingredients.any(
+            Recipe_Ingredient.ingredient.has(
+                and_(Ingredient.category_id == meat_cat.id, Ingredient.name.ilike("%chicken%"))
+            )
+        ) if meat_cat else None
+        if meat_cond and exclude_chicken:
+            return and_(meat_cond, exclude_chicken)
+        return meat_cond
     elif cat == "other":
         excluded_tags = ["breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "meat"]
         tag_ids = [t.id for t in Tag.query.filter(Tag.name.in_(excluded_tags)).all()]
-        excluded_ingredients = [
-            "chicken", "salmon", "tilapia", "crab", "flounder", 
-            "sea bass", "tuna", "snapper", "fish"
-        ]
+        seafood_cat = Ingredient_Category.query.filter_by(name="Seafood").first()
+        meat_cat = Ingredient_Category.query.filter_by(name="Meat & Poultry").first()
         conds = []
         if tag_ids:
             conds.append(~Recipe.recipe_tags.any(Recipe_Tag.tag_id.in_(tag_ids)))
-        conds.append(~Recipe.recipe_ingredients.any(or_(*[Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in excluded_ingredients])))
-        return and_(*conds)
+        if seafood_cat:
+            conds.append(~Recipe.recipe_ingredients.any(
+                Recipe_Ingredient.ingredient.has(Ingredient.category_id == seafood_cat.id)
+            ))
+        if meat_cat:
+            conds.append(~Recipe.recipe_ingredients.any(
+                Recipe_Ingredient.ingredient.has(Ingredient.category_id == meat_cat.id)
+            ))
+        return and_(*conds) if conds else None
     else:
         tag = Tag.query.filter_by(name=cat).first()
         if tag:
@@ -944,12 +987,41 @@ def recipe_ingredients():
         return response
 
     elif request.method == 'POST':
+        ing_name = (request.json.get("ingredient_name") or "").strip()
+        ing_id = request.json.get("ingredient_id")
+        prep = request.json.get("preparation")
+
+        if not ing_id and ing_name:
+            clean_name, detected_prep, detected_unit = clean_and_parse_ingredient(ing_name)
+            if not prep and detected_prep:
+                prep = detected_prep
+            target_name = clean_name or ing_name
+            existing = Ingredient.query.filter(Ingredient.name.ilike(target_name)).first()
+            if not existing and ing_name.lower() != target_name.lower():
+                existing = Ingredient.query.filter(Ingredient.name.ilike(ing_name)).first()
+
+            if existing:
+                ing_id = existing.id
+            else:
+                cat_name = determine_category(target_name)
+                cat = Ingredient_Category.query.filter_by(name=cat_name).first()
+                new_ing = Ingredient(
+                    name=target_name,
+                    category_id=cat.id if cat else None,
+                    default_unit=detected_unit or request.json.get("ingredient_unit")
+                )
+                db.session.add(new_ing)
+                db.session.flush()
+                ing_id = new_ing.id
+
         new_ingredient = Recipe_Ingredient(
             recipe_id=request.json.get("recipe_id"),
-            ingredient_name=request.json.get("ingredient_name"),
-            ingredient_quantity= request.json.get("ingredient_quantity"),
-            ingredient_unit= request.json.get("ingredient_unit"),
-            ingredient_note= request.json.get("ingredient_note"),
+            ingredient_id=ing_id,
+            ingredient_name=ing_name,
+            ingredient_quantity=request.json.get("ingredient_quantity"),
+            ingredient_unit=request.json.get("ingredient_unit"),
+            preparation=prep,
+            ingredient_note=request.json.get("ingredient_note"),
         )
 
         db.session.add(new_ingredient)
@@ -980,6 +1052,28 @@ def recipe_ingredient(id):
             data = request.json
             for key in data:
                 setattr(ingredient, key, data[key])
+
+            # If name updated without explicit ingredient_id, map to canonical ingredient
+            if 'ingredient_name' in data and 'ingredient_id' not in data and data['ingredient_name']:
+                clean_name, detected_prep, detected_unit = clean_and_parse_ingredient(data['ingredient_name'])
+                target_name = clean_name or data['ingredient_name'].strip()
+                existing = Ingredient.query.filter(Ingredient.name.ilike(target_name)).first()
+                if not existing:
+                    cat_name = determine_category(target_name)
+                    cat = Ingredient_Category.query.filter_by(name=cat_name).first()
+                    new_ing = Ingredient(
+                        name=target_name,
+                        category_id=cat.id if cat else None,
+                        default_unit=detected_unit or ingredient.ingredient_unit
+                    )
+                    db.session.add(new_ing)
+                    db.session.flush()
+                    ingredient.ingredient_id = new_ing.id
+                else:
+                    ingredient.ingredient_id = existing.id
+                if detected_prep and not ingredient.preparation:
+                    ingredient.preparation = detected_prep
+
             db.session.add(ingredient)
             db.session.commit()
             return ingredient.to_dict(), 200
@@ -993,6 +1087,199 @@ def recipe_ingredient(id):
         db.session.delete(ingredient)
         db.session.commit()
         return {}, 202
+
+# --- Canonical Ingredient & Category APIs ---
+
+@app.route('/api/ingredient_categories', methods=['GET'])
+def get_ingredient_categories():
+    categories = Ingredient_Category.query.order_by(Ingredient_Category.sort_order.asc().nullslast(), Ingredient_Category.name.asc()).all()
+    return jsonify([c.to_dict() for c in categories]), 200
+
+@app.route('/api/ingredients', methods=['GET', 'POST'])
+def handle_ingredients():
+    if request.method == 'GET':
+        query = Ingredient.query.options(joinedload(Ingredient.category))
+        search = request.args.get('q', '').strip()
+        cat_id = request.args.get('category_id')
+        cat_name = request.args.get('category')
+
+        if search:
+            query = query.filter(Ingredient.name.ilike(f"%{search}%"))
+        if cat_id:
+            try:
+                query = query.filter(Ingredient.category_id == int(cat_id))
+            except ValueError:
+                pass
+        elif cat_name and cat_name.lower() != 'all':
+            query = query.join(Ingredient_Category).filter(Ingredient_Category.name.ilike(cat_name))
+
+        ingredients = query.order_by(Ingredient.name.asc()).all()
+        
+        # Aggregate recipe counts in one single query to avoid N+1 queries
+        counts_data = db.session.query(
+            Recipe_Ingredient.ingredient_id,
+            func.count(Recipe_Ingredient.id)
+        ).filter(Recipe_Ingredient.ingredient_id.isnot(None)).group_by(Recipe_Ingredient.ingredient_id).all()
+        recipe_counts = {cid: cnt for cid, cnt in counts_data}
+
+        result = []
+        for ing in ingredients:
+            d = ing.to_dict()
+            d['recipe_count'] = recipe_counts.get(ing.id, 0)
+            result.append(d)
+            
+        return jsonify(result), 200
+
+    elif request.method == 'POST':
+        data = request.json or {}
+        name = (data.get('name') or '').strip()
+        if not name:
+            return {"error": "Ingredient name is required"}, 400
+            
+        existing = Ingredient.query.filter(Ingredient.name.ilike(name)).first()
+        if existing:
+            return jsonify(existing.to_dict()), 200
+            
+        cat_id = data.get('category_id')
+        if not cat_id:
+            cat_name = determine_category(name)
+            cat = Ingredient_Category.query.filter_by(name=cat_name).first()
+            if cat:
+                cat_id = cat.id
+
+        new_ing = Ingredient(
+            name=name.title(),
+            category_id=cat_id,
+            default_unit=data.get('default_unit')
+        )
+        db.session.add(new_ing)
+        db.session.commit()
+        return jsonify(new_ing.to_dict()), 201
+
+@app.route('/api/ingredients/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
+def handle_ingredient_id(id):
+    ing = db.session.get(Ingredient, id)
+    if not ing:
+        return {"error": f"Ingredient with id {id} not found"}, 404
+
+    if request.method == 'GET':
+        d = ing.to_dict()
+        recipes = []
+        for ri in ing.recipe_ingredients:
+            if ri.recipe and ri.recipe.id not in [r['id'] for r in recipes]:
+                recipes.append({
+                    "id": ri.recipe.id,
+                    "name": ri.recipe.name,
+                    "picture": ri.recipe.picture,
+                    "quantity": ri.ingredient_quantity,
+                    "unit": ri.ingredient_unit,
+                    "preparation": ri.preparation
+                })
+        d['recipes'] = recipes
+        d['recipe_count'] = len(recipes)
+        return jsonify(d), 200
+
+    elif request.method == 'PATCH':
+        data = request.json or {}
+        if 'name' in data and data['name'].strip():
+            ing.name = data['name'].strip().title()
+        if 'category_id' in data:
+            ing.category_id = data['category_id']
+        if 'default_unit' in data:
+            ing.default_unit = data['default_unit']
+            
+        db.session.add(ing)
+        db.session.commit()
+        return jsonify(ing.to_dict()), 200
+
+    elif request.method == 'DELETE':
+        for ri in ing.recipe_ingredients:
+            ri.ingredient_id = None
+        db.session.delete(ing)
+        db.session.commit()
+        return {}, 204
+
+# --- Admin Ingredient Mapping APIs ---
+
+@app.route('/api/admin/recipe_ingredients', methods=['GET'])
+def get_admin_recipe_ingredients():
+    recipe_id = request.args.get('recipe_id')
+    ingredient_id = request.args.get('ingredient_id')
+    unmapped = request.args.get('unmapped') == 'true'
+    q = request.args.get('q', '').strip()
+
+    query = Recipe_Ingredient.query.options(
+        joinedload(Recipe_Ingredient.ingredient).joinedload(Ingredient.category),
+        joinedload(Recipe_Ingredient.recipe)
+    )
+
+    if recipe_id:
+        try:
+            query = query.filter(Recipe_Ingredient.recipe_id == int(recipe_id))
+        except ValueError:
+            return jsonify([]), 200
+    elif ingredient_id:
+        try:
+            query = query.filter(Recipe_Ingredient.ingredient_id == int(ingredient_id))
+        except ValueError:
+            return jsonify([]), 200
+    elif unmapped:
+        query = query.filter(Recipe_Ingredient.ingredient_id.is_(None))
+    elif q:
+        query = query.join(Recipe).filter(
+            or_(
+                Recipe_Ingredient.ingredient_name.ilike(f"%{q}%"),
+                Recipe.name.ilike(f"%{q}%")
+            )
+        ).limit(150)
+    else:
+        query = query.limit(100)
+
+    rows = query.order_by(Recipe_Ingredient.id.asc()).all()
+
+    result = []
+    for r in rows:
+        d = r.to_dict()
+        d['recipe_name'] = r.recipe.name if r.recipe else None
+        d['recipe_picture'] = r.recipe.picture if r.recipe else None
+        result.append(d)
+
+    return jsonify(result), 200
+
+@app.route('/api/admin/recipe_ingredients/bulk_update', methods=['POST'])
+def bulk_update_recipe_ingredients():
+    updates = request.json or []
+    if not isinstance(updates, list):
+        return {"error": "Expected a list of updates"}, 400
+
+    updated_count = 0
+    for item in updates:
+        row_id = item.get('id')
+        if not row_id:
+            continue
+        ri = db.session.get(Recipe_Ingredient, row_id)
+        if not ri:
+            continue
+        if 'ingredient_id' in item:
+            ri.ingredient_id = item['ingredient_id']
+        if 'ingredient_quantity' in item:
+            try:
+                ri.ingredient_quantity = float(item['ingredient_quantity']) if item['ingredient_quantity'] is not None else 0.0
+            except (ValueError, TypeError):
+                pass
+        if 'ingredient_unit' in item:
+            ri.ingredient_unit = (item['ingredient_unit'] or '').strip()
+        if 'preparation' in item:
+            ri.preparation = (item['preparation'] or '').strip() or None
+        if 'ingredient_note' in item:
+            ri.ingredient_note = (item['ingredient_note'] or '').strip() or None
+        if 'ingredient_name' in item and item['ingredient_name']:
+            ri.ingredient_name = item['ingredient_name'].strip()
+        updated_count += 1
+
+    db.session.commit()
+    return jsonify({"message": f"Successfully updated {updated_count} ingredients", "updated_count": updated_count}), 200
+
 
 
 @app.route('/api/mealprep', methods=['GET', 'POST'])
@@ -1236,44 +1523,15 @@ def recipe_info():
 
 @app.route('/api/category_button/<string:category>')
 def category_button(category):
-    if category == "all":
+    cat = (category or "").strip()
+    if not cat or cat == "all":
         recipes = Recipe.query.order_by(Recipe.id.desc()).all()
-    elif category in ["breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks"]:
-        tag = Tag.query.filter_by(name=category).first().id
-        recipes = Recipe.query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag)).order_by(Recipe.id.desc()).all()
-    elif category == "fish":
-        fish_terms = ["salmon", "tilapia", "crab", "flounder", "sea bass", "tuna", "snapper", "fish"]
-        fish_conditions = or_(Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in fish_terms)
-        exclude_fish_free = ~Recipe_Ingredient.ingredient_name.ilike("%fish-free%")
-        recipes = Recipe.query.filter(Recipe.recipe_ingredients.any(and_(fish_conditions, exclude_fish_free))).order_by(Recipe.id.desc()).all()
-    elif category == "meat":
-        tag = Tag.query.filter_by(name="meat").first().id
-        recipes = Recipe.query.filter(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag), ~Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))).order_by(Recipe.id.desc()).all()
-    elif category == "chicken":
-        recipes = Recipe.query.filter(Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))).order_by(Recipe.id.desc()).all()
-    else:  # If no category matches, return all recipes that do not belong to the above categories.
-        recipes = Recipe.query.filter(
-            ~or_(
-                Recipe.recipe_tags.any(
-                    Recipe_Tag.tag_id == Tag.query.filter_by(name=tag).first().id
-                ) for tag in [
-                    "breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "meat"
-                ]
-            ),
-            ~Recipe.recipe_ingredients.any(
-                or_(
-                    Recipe_Ingredient.ingredient_name.ilike("%chicken%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%salmon%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%tilapia%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%crab%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%flounder%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%sea bass%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%tuna%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%snapper%"),
-                    Recipe_Ingredient.ingredient_name.ilike("%fish%")
-                )
-            )
-        ).order_by(Recipe.id.desc()).all()
+    else:
+        filter_cond = get_category_filter(cat)
+        if filter_cond is not None:
+            recipes = Recipe.query.filter(filter_cond).order_by(Recipe.id.desc()).all()
+        else:
+            recipes = Recipe.query.order_by(Recipe.id.desc()).all()
         
     recipes_dict = get_recipe_dict(recipes)
     response = make_response(recipes_dict, 200)
@@ -1309,42 +1567,9 @@ def filter_recipes():
     
     # Add category filter if specified
     if category and category != 'all':
-        if category == "chicken":
-            filters.append(Recipe.recipe_ingredients.any(
-                Recipe_Ingredient.ingredient_name.ilike("%chicken%")
-            ))
-        elif category == "fish":
-            fish_terms = ["salmon", "tilapia", "crab", "flounder", "sea bass", "tuna", "snapper", "fish"]
-            fish_conditions = or_(*[Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in fish_terms])
-            filters.append(Recipe.recipe_ingredients.any(fish_conditions))
-        elif category == "meat":
-            tag = Tag.query.filter_by(name="meat").first()
-            if tag:
-                filters.extend([
-                    Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag.id),
-                    ~Recipe.recipe_ingredients.any(Recipe_Ingredient.ingredient_name.ilike("%chicken%"))
-                ])
-        elif category == "other":
-            excluded_tags = ["breakfast", "dairy", "salad", "soup", "side", "condiment", "dessert", "drinks", "meat"]
-            excluded_tag_filters = [
-                ~Recipe.recipe_tags.any(
-                    Recipe_Tag.tag_id == Tag.query.filter_by(name=tag).first().id
-                ) for tag in excluded_tags
-            ]
-            excluded_ingredients = [
-                "chicken", "salmon", "tilapia", "crab", "flounder", 
-                "sea bass", "tuna", "snapper", "fish"
-            ]
-            excluded_ingredient_filters = [
-                ~Recipe.recipe_ingredients.any(
-                    or_(*[Recipe_Ingredient.ingredient_name.ilike(f"%{term}%") for term in excluded_ingredients])
-                )
-            ]
-            filters.extend(excluded_tag_filters + excluded_ingredient_filters)
-        else:
-            tag = Tag.query.filter_by(name=category).first()
-            if tag:
-                filters.append(Recipe.recipe_tags.any(Recipe_Tag.tag_id == tag.id))
+        filter_cond = get_category_filter(category)
+        if filter_cond is not None:
+            filters.append(filter_cond)
 
     # Add cookbook filter if specified
     if cookbook:

@@ -18,7 +18,8 @@ def get_eager_recipe_query(base_query=None):
         selectinload(Recipe.recipe_tags).selectinload(Recipe_Tag.tag),
         selectinload(Recipe.user_recipe_tags).selectinload(User_Recipe_Tag.user_tag),
         selectinload(Recipe.recipe_ingredients),
-        selectinload(Recipe.user_recipes)
+        selectinload(Recipe.user_recipes),
+        selectinload(Recipe.source_category)
     )
 
 def get_recipe_dict(recipe_list):
@@ -83,6 +84,19 @@ def get_recipe_dict(recipe_list):
         # make ingredients
         ingredients = [ingredient.ingredient_name for ingredient in recipe.recipe_ingredients]
         
+        # make source category dict
+        source_category_dict = None
+        if recipe.source_category:
+            source_category_dict = {
+                "id": recipe.source_category.id,
+                "name": recipe.source_category.name
+            }
+        elif recipe.source_category_id:
+            source_category_dict = {
+                "id": recipe.source_category_id,
+                "name": ""
+            }
+
         recipe_dict = {
             "id": recipe.id,
             "name": recipe.name,
@@ -92,6 +106,9 @@ def get_recipe_dict(recipe_list):
             "user_recipe_tags": user_recipe_tags,
             "user_recipes": user_recipes,
             "source": recipe.source,
+            "source_category_id": recipe.source_category_id,
+            "source_category": source_category_dict,
+            "reference": recipe.reference,
             "recipe_ingredients": ingredients,
             "created_at": recipe.created_at.isoformat() if recipe.created_at else None,
             "updated_at": recipe.updated_at.isoformat() if recipe.updated_at else None,

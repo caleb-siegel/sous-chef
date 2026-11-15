@@ -93,13 +93,62 @@ def extract_instagram_caption(instagram_url):
                     if isinstance(value, str) and len(value) > 0:
                         logger.debug(f"  {key}: {value[:100]}...")
             
-            return caption, uploader
+            # Extract thumbnail
+            thumbnail = info.get('thumbnail')
+            if not thumbnail and info.get('thumbnails'):
+                thumbnail = info.get('thumbnails')[-1].get('url')
+            
+            return caption, uploader, thumbnail
     except yt_dlp.utils.DownloadError as e:
         logger.error(f"yt-dlp DownloadError: {str(e)}")
         raise Exception(f"Failed to access Instagram video. The video may be private or the URL may be invalid: {str(e)}")
     except Exception as e:
         logger.error(f"Unexpected error extracting caption: {str(e)}", exc_info=True)
         raise Exception(f"Failed to extract Instagram caption: {str(e)}")
+
+def save_instagram_thumbnail(thumbnail_url, recipe_name=""):
+    """
+    Downloads thumbnail image from Instagram and saves it locally to frontend/public/recipes.
+    Returns the public path '/recipes/{filename}', or base64 data URI if file write fails, or thumbnail_url as fallback.
+    """
+    if not thumbnail_url:
+        return None
+    try:
+        import requests
+        import base64
+        import uuid
+        
+        resp = requests.get(thumbnail_url, timeout=15)
+        if resp.status_code == 200 and resp.content:
+            clean_name = re.sub(r'[^\w\s-]', '', recipe_name or '').strip()
+            if not clean_name:
+                clean_name = f"instagram_{uuid.uuid4().hex[:8]}"
+            
+            # Determine save path
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            save_dir = os.path.join(base_dir, '..', 'frontend', 'public', 'recipes')
+            os.makedirs(save_dir, exist_ok=True)
+            
+            filename = f"{clean_name}.jpg"
+            save_path = os.path.join(save_dir, filename)
+            
+            # If a file with the same name already exists, append a unique suffix
+            if os.path.exists(save_path):
+                filename = f"{clean_name}_{uuid.uuid4().hex[:6]}.jpg"
+                save_path = os.path.join(save_dir, filename)
+                
+            try:
+                with open(save_path, "wb") as f:
+                    f.write(resp.content)
+                logger.info(f"Saved Instagram thumbnail to {save_path}")
+                return f"/recipes/{filename}"
+            except Exception as write_err:
+                logger.warning(f"Failed to write thumbnail locally, using base64: {write_err}")
+                b64 = base64.b64encode(resp.content).decode('utf-8')
+                return f"data:image/jpeg;base64,{b64}"
+    except Exception as fetch_err:
+        logger.error(f"Failed to download Instagram thumbnail: {fetch_err}")
+    return thumbnail_url
 
 def parse_recipe_from_caption(caption):
     """
@@ -322,9 +371,9 @@ def parse_instagram_recipe(instagram_url):
     logger.info(f"=== Starting Instagram recipe parsing for: {instagram_url} ===")
     
     try:
-        # Step 1: Extract caption and uploader from Instagram video metadata
-        logger.info("Step 1: Extracting caption and uploader from Instagram video...")
-        caption, uploader = extract_instagram_caption(instagram_url)
+        # Step 1: Extract caption, uploader, and thumbnail from Instagram video metadata
+        logger.info("Step 1: Extracting caption, uploader, and thumbnail from Instagram video...")
+        caption, uploader, thumbnail = extract_instagram_caption(instagram_url)
         
         if not caption:
             logger.error("No caption extracted from video")
@@ -337,7 +386,15 @@ def parse_instagram_recipe(instagram_url):
         # Add uploader (account name) as the recipe source
         recipe_data["source"] = uploader if uploader else "Instagram"
         
-        logger.info(f"=== Successfully parsed recipe: {recipe_data['name']} ===")
+        # Step 3: Save video thumbnail locally and attach picture URL
+        if thumbnail:
+            logger.info("Step 3: Downloading and saving Instagram video thumbnail...")
+            saved_picture = save_instagram_thumbnail(thumbnail, recipe_data.get("name", "Instagram Recipe"))
+            recipe_data["picture"] = saved_picture
+        else:
+            recipe_data["picture"] = None
+        
+        logger.info(f"=== Successfully parsed recipe: {recipe_data['name']} (Picture: {recipe_data.get('picture')}) ===")
         return recipe_data
     except Exception as e:
         logger.error(f"=== Error parsing Instagram recipe: {str(e)} ===", exc_info=True)

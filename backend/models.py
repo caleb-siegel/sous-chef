@@ -128,21 +128,52 @@ class Recipe(db.Model, SerializerMixin):
     recipe_tags = db.relationship("Recipe_Tag", back_populates="recipe")
     user = db.relationship("User", back_populates="recipes")
 
+class Ingredient_Category(db.Model, SerializerMixin):
+    __tablename__ = "ingredient_category"
+    
+    serialize_rules = ["-ingredients.category"]
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True, nullable=False)
+    sort_order = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    ingredients = db.relationship("Ingredient", back_populates="category")
+
+class Ingredient(db.Model, SerializerMixin):
+    __tablename__ = "ingredient"
+    
+    serialize_rules = ["-recipe_ingredients.ingredient", "-category.ingredients"]
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True, nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey("ingredient_category.id"), nullable=True)
+    default_unit = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    category = db.relationship("Ingredient_Category", back_populates="ingredients")
+    recipe_ingredients = db.relationship("Recipe_Ingredient", back_populates="ingredient")
+
 class Recipe_Ingredient(db.Model, SerializerMixin):
     __tablename__ = "recipe_ingredient"
     
-    serialize_rules = ["-recipe.recipe_ingredients", "-shopping_list.recipe_ingredient"]
+    serialize_rules = ["-recipe.recipe_ingredients", "-shopping_list.recipe_ingredient", "-ingredient.recipe_ingredients"]
     
     id = db.Column(db.Integer, primary_key=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipe.id"))
+    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredient.id"), nullable=True)
     ingredient_name = db.Column(db.String)
     ingredient_quantity = db.Column(db.Float)
     ingredient_unit = db.Column(db.String)
+    preparation = db.Column(db.String)
     ingredient_note = db.Column(db.String)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
 
     recipe = db.relationship("Recipe", back_populates="recipe_ingredients")
+    ingredient = db.relationship("Ingredient", back_populates="recipe_ingredients")
     shopping_list = db.relationship("Shopping_List", back_populates="recipe_ingredient")
 
 class Tag(db.Model, SerializerMixin):
