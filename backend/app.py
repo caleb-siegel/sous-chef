@@ -1246,6 +1246,14 @@ def get_admin_recipe_ingredients():
 
     return jsonify(result), 200
 
+@app.route('/api/recipes/dropdown', methods=['GET'])
+def get_recipes_dropdown():
+    rows = Recipe.query.with_entities(
+        Recipe.id, Recipe.name, Recipe.picture, Recipe.source
+    ).order_by(Recipe.name.asc()).all()
+    result = [{'id': r[0], 'name': r[1], 'picture': r[2], 'source': r[3]} for r in rows]
+    return jsonify(result), 200
+
 @app.route('/api/admin/recipe_ingredients/bulk_update', methods=['POST'])
 def bulk_update_recipe_ingredients():
     updates = request.json or []

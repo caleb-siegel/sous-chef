@@ -131,7 +131,7 @@ class Recipe(db.Model, SerializerMixin):
 class Ingredient_Category(db.Model, SerializerMixin):
     __tablename__ = "ingredient_category"
     
-    serialize_rules = ["-ingredients.category"]
+    serialize_rules = ["-ingredients"]
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
@@ -144,7 +144,7 @@ class Ingredient_Category(db.Model, SerializerMixin):
 class Ingredient(db.Model, SerializerMixin):
     __tablename__ = "ingredient"
     
-    serialize_rules = ["-recipe_ingredients.ingredient", "-category.ingredients"]
+    serialize_rules = ["-recipe_ingredients", "-category.ingredients"]
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
