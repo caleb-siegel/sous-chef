@@ -47,6 +47,15 @@ function IngredientsDirectory() {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [sortBy, setSortBy] = useState('popular-desc'); // popular-desc | name-asc | name-desc | popular-asc
 
+    // Incremental DOM rendering for high performance
+    const BATCH_SIZE = 48;
+    const [displayLimit, setDisplayLimit] = useState(BATCH_SIZE);
+
+    // Reset displayLimit on filter change
+    useEffect(() => {
+        setDisplayLimit(BATCH_SIZE);
+    }, [searchQuery, selectedCategory, sortBy]);
+
     // Recipe Inspector Modal
     const [activeIngredient, setActiveIngredient] = useState(null);
     const [activeRecipes, setActiveRecipes] = useState([]);
@@ -223,6 +232,24 @@ function IngredientsDirectory() {
         return list;
     }, [ingredients, searchQuery, selectedCategory, sortBy]);
 
+    // Progressive loading listener (auto-loads next batch as user scrolls near bottom)
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 600) {
+                setDisplayLimit(prev => {
+                    if (prev < filteredIngredients.length) {
+                        return Math.min(prev + BATCH_SIZE, filteredIngredients.length);
+                    }
+                    return prev;
+                });
+            }
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [filteredIngredients.length]);
+
+    const visibleIngredients = filteredIngredients.slice(0, displayLimit);
+
     return (
         <div className="ing-dir-container">
             {/* Header */}
@@ -360,54 +387,78 @@ function IngredientsDirectory() {
                 </Box>
             ) : (
                 /* Cards Grid */
-                <div className="ing-cards-grid">
-                    {filteredIngredients.map(ing => {
-                        const catName = ing.category?.name || 'Other';
-                        const badgeClass = getCategoryBadgeClass(catName);
+                <>
+                    <div className="ing-cards-grid">
+                        {visibleIngredients.map(ing => {
+                            const catName = ing.category?.name || 'Other';
+                            const badgeClass = getCategoryBadgeClass(catName);
 
-                        return (
-                            <div key={ing.id} className="ing-card">
-                                <div>
-                                    <div className="ing-card-header">
-                                        <h3 className="ing-card-name">{ing.name}</h3>
-                                        <span className={`ing-cat-badge ${badgeClass}`}>
-                                            {catName}
-                                        </span>
+                            return (
+                                <div key={ing.id} className="ing-card">
+                                    <div>
+                                        <div className="ing-card-header">
+                                            <h3 className="ing-card-name">{ing.name}</h3>
+                                            <span className={`ing-cat-badge ${badgeClass}`}>
+                                                {catName}
+                                            </span>
+                                        </div>
+
+                                        <div className="ing-card-meta">
+                                            <span>
+                                                🍳 Used in <strong>{ing.recipe_count || 0}</strong> {ing.recipe_count === 1 ? 'recipe' : 'recipes'}
+                                            </span>
+                                            {ing.default_unit && (
+                                                <span>• Unit: {ing.default_unit}</span>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    <div className="ing-card-meta">
-                                        <span>
-                                            🍳 Used in <strong>{ing.recipe_count || 0}</strong> {ing.recipe_count === 1 ? 'recipe' : 'recipes'}
-                                        </span>
-                                        {ing.default_unit && (
-                                            <span>• Unit: {ing.default_unit}</span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="ing-card-actions">
-                                    <button
-                                        type="button"
-                                        className="ing-recipes-btn"
-                                        onClick={() => handleViewRecipes(ing)}
-                                    >
-                                        View Recipes ({ing.recipe_count || 0})
-                                    </button>
-
-                                    <Tooltip title="Edit Ingredient">
-                                        <IconButton
-                                            size="small"
-                                            onClick={(e) => handleOpenEdit(ing, e)}
-                                            sx={{ color: '#94a3b8', '&:hover': { color: '#0f172a' } }}
+                                    <div className="ing-card-actions">
+                                        <button
+                                            type="button"
+                                            className="ing-recipes-btn"
+                                            onClick={() => handleViewRecipes(ing)}
                                         >
-                                            <EditIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
+                                            View Recipes ({ing.recipe_count || 0})
+                                        </button>
+
+                                        <Tooltip title="Edit Ingredient">
+                                            <IconButton
+                                                size="small"
+                                                onClick={(e) => handleOpenEdit(ing, e)}
+                                                sx={{ color: '#94a3b8', '&:hover': { color: '#0f172a' } }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })}
-                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Progressive Load More Button */}
+                    {displayLimit < filteredIngredients.length && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+                            <Button
+                                variant="outlined"
+                                onClick={() => setDisplayLimit(prev => Math.min(prev + BATCH_SIZE, filteredIngredients.length))}
+                                sx={{
+                                    borderRadius: 3,
+                                    textTransform: 'none',
+                                    fontWeight: 700,
+                                    px: 4,
+                                    py: 1.2,
+                                    borderColor: '#cbd5e1',
+                                    color: '#334155',
+                                    '&:hover': { bgcolor: '#f8fafc', borderColor: '#94a3b8' }
+                                }}
+                            >
+                                Showing {visibleIngredients.length} of {filteredIngredients.length} ingredients • Load More
+                            </Button>
+                        </Box>
+                    )}
+                </>
             )}
 
             {/* Recipes Dialog */}

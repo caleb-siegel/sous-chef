@@ -4,7 +4,8 @@ import {
     Box, Typography, Button, IconButton, TextField, Autocomplete,
     Select, MenuItem, FormControl, InputLabel, Chip, Tooltip,
     CircularProgress, Alert, Snackbar, Tabs, Tab, Dialog,
-    DialogTitle, DialogContent, DialogActions, InputAdornment
+    DialogTitle, DialogContent, DialogActions, InputAdornment,
+    createFilterOptions
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -26,6 +27,8 @@ const COMMON_UNITS = [
     'grams', 'kg', 'ml', 'liters', 'slices', 'cans', 'bunches',
     'stalks', 'sprigs', 'pieces', 'pinch', 'dash'
 ];
+
+const filterOptions60 = createFilterOptions({ limit: 60 });
 
 function AdminIngredientMapping() {
     const { backendUrl } = useOutletContext();
@@ -62,7 +65,9 @@ function AdminIngredientMapping() {
         try {
             setLoadingInit(true);
             const [recRes, ingRes, catRes] = await Promise.all([
-                fetch(`${backendUrl}/api/recipe_info`, { credentials: 'include' }),
+                fetch(`${backendUrl}/api/recipes/dropdown`, { credentials: 'include' })
+                    .then(r => r.ok ? r : fetch(`${backendUrl}/api/recipe_info`, { credentials: 'include' }))
+                    .catch(() => fetch(`${backendUrl}/api/recipe_info`, { credentials: 'include' })),
                 fetch(`${backendUrl}/api/ingredients`, { credentials: 'include' }),
                 fetch(`${backendUrl}/api/ingredient_categories`, { credentials: 'include' })
             ]);
@@ -336,6 +341,7 @@ function AdminIngredientMapping() {
                     <div className="aim-selector-bar">
                         <Autocomplete
                             options={recipes}
+                            filterOptions={filterOptions60}
                             getOptionLabel={(option) => option.name || ''}
                             value={selectedRecipe}
                             onChange={(e, val) => setSelectedRecipe(val)}
@@ -404,6 +410,7 @@ function AdminIngredientMapping() {
                     <div className="aim-selector-bar">
                         <Autocomplete
                             options={canonicalIngredients}
+                            filterOptions={filterOptions60}
                             getOptionLabel={(option) => option.name || ''}
                             value={selectedCanonical}
                             onChange={(e, val) => setSelectedCanonical(val)}
@@ -484,7 +491,7 @@ function AdminIngredientMapping() {
                         <Button
                             variant="text"
                             component={Link}
-                            to={`/recipe/${getRecipeSlug(selectedRecipe.name, selectedRecipe.id)}`}
+                            to={`/recipes/${getRecipeSlug(selectedRecipe)}`}
                             target="_blank"
                             endIcon={<ArrowForwardIcon fontSize="small" />}
                             size="small"
@@ -630,6 +637,7 @@ function AdminIngredientMapping() {
                                                 <Autocomplete
                                                     size="small"
                                                     options={canonicalIngredients}
+                                                    filterOptions={filterOptions60}
                                                     getOptionLabel={(option) => {
                                                         if (typeof option === 'string') return option;
                                                         return option?.name || '';
