@@ -3,7 +3,8 @@ import { useOutletContext, Link } from 'react-router-dom';
 import {
     Box, Typography, Button, IconButton, TextField, Dialog, DialogTitle,
     DialogContent, DialogActions, Select, MenuItem, FormControl, InputLabel,
-    Chip, Tooltip, CircularProgress, Alert, Snackbar
+    Chip, Tooltip, CircularProgress, Alert, Snackbar, Autocomplete,
+    Checkbox, FormControlLabel, createFilterOptions
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
@@ -13,7 +14,13 @@ import KitchenIcon from '@mui/icons-material/Kitchen';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import SortIcon from '@mui/icons-material/Sort';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CallMergeIcon from '@mui/icons-material/CallMerge';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import './IngredientsDirectory.css';
+
+const filterOptions60 = createFilterOptions({ limit: 60 });
 
 // Helper to get category style class
 function getCategoryBadgeClass(categoryName) {
@@ -67,6 +74,18 @@ function IngredientsDirectory() {
     const [editingIngredient, setEditingIngredient] = useState(null);
     const [formData, setFormData] = useState({ name: '', category_id: '', default_unit: '' });
     const [submitting, setSubmitting] = useState(false);
+
+    // Merge / Reassign Modal
+    const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+    const [sourceIngredient, setSourceIngredient] = useState(null);
+    const [targetIngredient, setTargetIngredient] = useState(null);
+    const [deleteSourceAfterMerge, setDeleteSourceAfterMerge] = useState(true);
+    const [merging, setMerging] = useState(false);
+
+    // Delete Confirmation Modal
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [ingredientToDelete, setIngredientToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
     // Notifications
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -184,6 +203,107 @@ function IngredientsDirectory() {
             setSnackbar({ open: true, message: err.message, severity: 'error' });
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    // 5. Merge / Remap All Recipes from One Ingredient to Another
+    const handleOpenMerge = (ing, e) => {
+        if (e) e.stopPropagation();
+        setSourceIngredient(ing);
+        setTargetIngredient(null);
+        setDeleteSourceAfterMerge(true);
+        setMergeDialogOpen(true);
+    };
+
+    const handleMergeSubmit = async () => {
+        if (!sourceIngredient || !targetIngredient) return;
+        setMerging(true);
+        try {
+            const res = await fetch(`${backendUrl}/api/ingredients/merge`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    source_id: sourceIngredient.id,
+                    target_id: targetIngredient.id,
+                    delete_source: deleteSourceAfterMerge
+                })
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || 'Failed to merge ingredients');
+            }
+
+            const data = await res.json();
+
+            // Update local ingredients list
+            setIngredients(prev => {
+                let next = [...prev];
+                if (data.source_deleted) {
+                    next = next.filter(i => i.id !== sourceIngredient.id);
+                } else {
+                    next = next.map(i => i.id === sourceIngredient.id ? { ...i, recipe_count: 0 } : i);
+                }
+                next = next.map(i => i.id === targetIngredient.id ? { ...i, recipe_count: (i.recipe_count || 0) + (data.remapped_count || 0) } : i);
+                return next;
+            });
+
+            setSnackbar({
+                open: true,
+                message: data.message || `Successfully remapped recipes from "${sourceIngredient.name}" to "${targetIngredient.name}"!`,
+                severity: 'success'
+            });
+
+            setMergeDialogOpen(false);
+            setSourceIngredient(null);
+            setTargetIngredient(null);
+            if (recipesDialogOpen) {
+                setRecipesDialogOpen(false);
+            }
+        } catch (err) {
+            console.error('Merge error:', err);
+            setSnackbar({ open: true, message: err.message, severity: 'error' });
+        } finally {
+            setMerging(false);
+        }
+    };
+
+    // 6. Delete Ingredient
+    const handleOpenDelete = (ing, e) => {
+        if (e) e.stopPropagation();
+        setIngredientToDelete(ing);
+        setDeleteConfirmOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!ingredientToDelete) return;
+        setDeleting(true);
+        try {
+            const res = await fetch(`${backendUrl}/api/ingredients/${ingredientToDelete.id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || 'Failed to delete ingredient');
+            }
+
+            setIngredients(prev => prev.filter(i => i.id !== ingredientToDelete.id));
+
+            setSnackbar({
+                open: true,
+                message: `Deleted "${ingredientToDelete.name}" from catalog`,
+                severity: 'success'
+            });
+            setDeleteConfirmOpen(false);
+            setIngredientToDelete(null);
+        } catch (err) {
+            console.error('Delete error:', err);
+            setSnackbar({ open: true, message: err.message, severity: 'error' });
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -422,15 +542,41 @@ function IngredientsDirectory() {
                                             View Recipes ({ing.recipe_count || 0})
                                         </button>
 
-                                        <Tooltip title="Edit Ingredient">
-                                            <IconButton
-                                                size="small"
-                                                onClick={(e) => handleOpenEdit(ing, e)}
-                                                sx={{ color: '#94a3b8', '&:hover': { color: '#0f172a' } }}
-                                            >
-                                                <EditIcon fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <Tooltip title="Consolidate / Remap recipes to another ingredient">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={(e) => handleOpenMerge(ing, e)}
+                                                    sx={{ 
+                                                        color: '#059669', 
+                                                        bgcolor: 'rgba(5, 150, 105, 0.08)',
+                                                        '&:hover': { bgcolor: 'rgba(5, 150, 105, 0.18)' } 
+                                                    }}
+                                                >
+                                                    <CallMergeIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+
+                                            <Tooltip title="Edit Ingredient">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={(e) => handleOpenEdit(ing, e)}
+                                                    sx={{ color: '#64748b', '&:hover': { color: '#0f172a' } }}
+                                                >
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+
+                                            <Tooltip title="Delete Ingredient">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={(e) => handleOpenDelete(ing, e)}
+                                                    sx={{ color: '#94a3b8', '&:hover': { color: '#ef4444' } }}
+                                                >
+                                                    <DeleteOutlineIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Box>
                                     </div>
                                 </div>
                             );
@@ -483,6 +629,37 @@ function IngredientsDirectory() {
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers sx={{ maxHeight: 420 }}>
+                    {activeRecipes.length > 0 && (
+                        <Box sx={{ mb: 2, p: 1.5, bgcolor: '#f0fdf4', borderRadius: 2.5, border: '1px solid #bbf7d0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 700, color: '#166534' }}>
+                                    Consolidate this ingredient?
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: '#15803d' }}>
+                                    Remap all {activeRecipes.length} recipe{activeRecipes.length === 1 ? '' : 's'} to another ingredient
+                                </Typography>
+                            </Box>
+                            <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<CallMergeIcon />}
+                                onClick={() => {
+                                    const cur = activeIngredient;
+                                    setRecipesDialogOpen(false);
+                                    handleOpenMerge(cur);
+                                }}
+                                sx={{
+                                    borderRadius: 2,
+                                    textTransform: 'none',
+                                    fontWeight: 700,
+                                    bgcolor: '#059669',
+                                    '&:hover': { bgcolor: '#047857' }
+                                }}
+                            >
+                                Remap Recipes
+                            </Button>
+                        </Box>
+                    )}
                     {loadingRecipes ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                             <CircularProgress size={32} sx={{ color: '#3FFFC2' }} />
@@ -619,6 +796,193 @@ function IngredientsDirectory() {
                         </Button>
                     </DialogActions>
                 </form>
+            </Dialog>
+
+            {/* Merge / Consolidate Dialog */}
+            <Dialog
+                open={mergeDialogOpen}
+                onClose={() => !merging && setMergeDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{ sx: { borderRadius: 3.5, p: 1 } }}
+            >
+                <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CallMergeIcon sx={{ color: '#059669' }} />
+                    <span>Consolidate & Remap Ingredient</span>
+                </DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
+                    {sourceIngredient && (
+                        <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: 2.5, border: '1px solid #e2e8f0' }}>
+                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                Source Ingredient (To Reassign)
+                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a' }}>
+                                    {sourceIngredient.name}
+                                </Typography>
+                                <Chip 
+                                    label={`Used in ${sourceIngredient.recipe_count || 0} recipe${sourceIngredient.recipe_count === 1 ? '' : 's'}`}
+                                    size="small"
+                                    sx={{ fontWeight: 700, bgcolor: 'rgba(5, 150, 105, 0.1)', color: '#059669' }}
+                                />
+                            </Box>
+                            {sourceIngredient.category && (
+                                <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.25 }}>
+                                    Category: {sourceIngredient.category.name} {sourceIngredient.default_unit ? `• Default unit: ${sourceIngredient.default_unit}` : ''}
+                                </Typography>
+                            )}
+                        </Box>
+                    )}
+
+                    <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
+                            Select Target Master Ingredient:
+                        </Typography>
+                        <Autocomplete
+                            options={ingredients.filter(i => i.id !== sourceIngredient?.id)}
+                            filterOptions={filterOptions60}
+                            getOptionLabel={(option) => option.name || ''}
+                            value={targetIngredient}
+                            onChange={(e, newVal) => setTargetIngredient(newVal)}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    placeholder="Search for target ingredient (e.g. Garlic Powder, Kosher Salt...)"
+                                    size="small"
+                                    autoFocus
+                                />
+                            )}
+                            renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', py: 0.5 }}>
+                                        <div>
+                                            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                                {option.name}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: '#64748b' }}>
+                                                {option.category?.name || 'Pantry'} {option.default_unit ? `• ${option.default_unit}` : ''}
+                                            </Typography>
+                                        </div>
+                                        <Chip
+                                            label={`${option.recipe_count || 0} recipes`}
+                                            size="small"
+                                            sx={{ fontSize: '0.72rem', height: 22, fontWeight: 700 }}
+                                        />
+                                    </Box>
+                                </li>
+                            )}
+                        />
+                    </Box>
+
+                    {targetIngredient && (
+                        <Box sx={{ p: 2, bgcolor: '#f0fdf4', borderRadius: 2.5, border: '1px solid #bbf7d0' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 700, color: '#166534', display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CheckCircleOutlineIcon fontSize="small" />
+                                Preview of Consolidation:
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#15803d', mt: 0.75, lineHeight: 1.6 }}>
+                                All <strong>{sourceIngredient?.recipe_count || 0} recipe(s)</strong> currently mapped to <strong>"{sourceIngredient?.name}"</strong> will be remapped to <strong>"{targetIngredient.name}"</strong>.
+                                <br />
+                                <strong>"{targetIngredient.name}"</strong> will now be used across <strong>{(targetIngredient.recipe_count || 0) + (sourceIngredient?.recipe_count || 0)} recipes</strong>.
+                            </Typography>
+                        </Box>
+                    )}
+
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={deleteSourceAfterMerge}
+                                onChange={(e) => setDeleteSourceAfterMerge(e.target.checked)}
+                                color="primary"
+                            />
+                        }
+                        label={
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                    Delete "{sourceIngredient?.name}" after remapping
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                                    Removes this duplicate/redundant ingredient from the master catalog so it no longer appears in filters or searches.
+                                </Typography>
+                            </Box>
+                        }
+                        sx={{ alignItems: 'flex-start', mt: 0.5 }}
+                    />
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button
+                        onClick={() => setMergeDialogOpen(false)}
+                        disabled={merging}
+                        sx={{ textTransform: 'none', fontWeight: 600 }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleMergeSubmit}
+                        variant="contained"
+                        disabled={merging || !targetIngredient}
+                        sx={{
+                            bgcolor: '#059669',
+                            color: '#ffffff',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            borderRadius: 2,
+                            px: 2.5,
+                            '&:hover': { bgcolor: '#047857' }
+                        }}
+                    >
+                        {merging ? 'Remapping Recipes...' : `Confirm & Remap ${sourceIngredient?.recipe_count || 0} Recipes`}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={deleteConfirmOpen}
+                onClose={() => !deleting && setDeleteConfirmOpen(false)}
+                maxWidth="xs"
+                fullWidth
+                PaperProps={{ sx: { borderRadius: 3.5, p: 1 } }}
+            >
+                <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1, color: '#ef4444' }}>
+                    <WarningAmberIcon />
+                    <span>Delete Ingredient?</span>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1" sx={{ fontWeight: 700, color: '#0f172a' }}>
+                        Are you sure you want to delete "{ingredientToDelete?.name}"?
+                    </Typography>
+                    {ingredientToDelete?.recipe_count > 0 ? (
+                        <Alert severity="warning" sx={{ mt: 1.5, borderRadius: 2 }}>
+                            This ingredient is currently linked to <strong>{ingredientToDelete.recipe_count} recipe(s)</strong>.
+                            Deleting it will leave those recipe ingredients unmapped.
+                            <br /><br />
+                            <strong>Tip:</strong> If you want to merge these recipes into another ingredient instead of leaving them unmapped, use the <strong>Consolidate / Remap</strong> button!
+                        </Alert>
+                    ) : (
+                        <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
+                            This ingredient is not currently used by any recipes and will be permanently removed from the catalog.
+                        </Typography>
+                    )}
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button
+                        onClick={() => setDeleteConfirmOpen(false)}
+                        disabled={deleting}
+                        sx={{ textTransform: 'none', fontWeight: 600 }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleConfirmDelete}
+                        variant="contained"
+                        color="error"
+                        disabled={deleting}
+                        sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2 }}
+                    >
+                        {deleting ? 'Deleting...' : 'Delete Ingredient'}
+                    </Button>
+                </DialogActions>
             </Dialog>
 
             {/* Snackbar */}
